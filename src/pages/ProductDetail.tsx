@@ -27,6 +27,14 @@ export default function ProductDetail() {
     !!productId,
   );
 
+  // Fetch related products from the same category (live)
+  const { data: relatedData } = useProductsQuery(
+    dbProduct?.categoryId
+      ? { categoryId: dbProduct.categoryId, limit: 8 }
+      : undefined,
+    !!dbProduct?.categoryId,
+  );
+
   const mockProduct = products.find((p) => p.id === id);
 
   const processImageUrl = (url: string) => {
@@ -119,13 +127,7 @@ export default function ProductDetail() {
   const whatsappMessage = `Hi P&N, I'm interested in purchasing ${product.name} (Net Wt. ${product.netWeight || ""}). Can you please share the details?`;
   const whatsappUrl = `https://wa.me/919548300211?text=${encodeURIComponent(whatsappMessage)}`;
 
-  // Fetch related products from the same category (live)
-  const { data: relatedData } = useProductsQuery(
-    dbProduct?.categoryId
-      ? { categoryId: dbProduct.categoryId, limit: 8 }
-      : undefined,
-    !!dbProduct?.categoryId,
-  );
+
 
   const FALLBACK = "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
   function resolveImg(url: any) {

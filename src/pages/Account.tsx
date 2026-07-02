@@ -11,7 +11,7 @@ import AccountHeader from '@/components/account/AccountHeader';
 import AccountCard from '@/components/account/AccountCard';
 import OrdersPreview from '@/components/account/OrdersPreview';
 import AddressPreview from '@/components/account/AddressPreview';
-import SecuritySettings from '@/components/account/SecuritySettings';
+// import SecuritySettings from '@/components/account/SecuritySettings';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
 import { useUserQuery } from '@/api/hooks/user.hooks';
@@ -33,7 +33,7 @@ const accountSections = [
     items: [
       { icon: User, title: 'Personal Information', subtitle: 'Name, email, phone', href: '/account/personal-information' },
       { icon: MapPin, title: 'Saved Addresses', subtitle: 'Manage delivery addresses', href: '/account/addresses' },
-      { icon: FileText, title: 'PAN & Legal Info', subtitle: 'Tax & legal documents', href: '/account/legal' },
+      // { icon: FileText, title: 'PAN & Legal Info', subtitle: 'Tax & legal documents', href: '/account/legal' },
       { icon: Lock, title: 'Login & Security', subtitle: 'Password & 2FA', href: '/account/security' },
     ],
   },
@@ -42,7 +42,7 @@ const accountSections = [
     items: [
       { icon: Heart, title: 'Wishlist', subtitle: 'Items you love', href: '/wishlist', badge: '12' },
       { icon: Bookmark, title: 'Saved Items', subtitle: 'Bookmarked for later', href: '/account/saved' },
-      { icon: Store, title: 'Followed Stores', subtitle: 'Favorite brands', href: '/account/stores' },
+      // { icon: Store, title: 'Followed Stores', subtitle: 'Favorite brands', href: '/account/stores' },
       { icon: Clock, title: 'Recently Viewed', subtitle: 'Browsing history', href: '/account/history' },
     ],
   },
@@ -51,7 +51,7 @@ const accountSections = [
     items: [
       { icon: Gift, title: 'Reward Points', subtitle: '2,450 points available', href: '/account/rewards', variant: 'highlight' as const },
       { icon: Ticket, title: 'Coupons', subtitle: '5 coupons available', href: '/account/coupons', badge: '5' },
-      { icon: HelpCircle, title: 'Help Center', subtitle: 'FAQs & guides', href: '/help' },
+      // { icon: HelpCircle, title: 'Help Center', subtitle: 'FAQs & guides', href: '/help' },
       { icon: MessageCircle, title: 'Chat Support', subtitle: '24/7 assistance', href: '/support' },
     ],
   },
@@ -182,7 +182,7 @@ export default function AccountPage() {
               <div className="space-y-6">
                 <OrdersPreview />
                 <AddressPreview />
-                <SecuritySettings />
+                {/* <SecuritySettings /> */}
               </div>
             </div>
           </div>

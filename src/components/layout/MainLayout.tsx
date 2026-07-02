@@ -3,6 +3,7 @@ import Header from './Header';
 import Footer from './Footer';
 import MobileNav from './MobileNav';
 import CartDrawer from '@/components/cart/CartDrawer';
+import WhatsAppButton from '@/components/home/WhatsAppButton';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -18,6 +19,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Footer />
       <MobileNav />
       <CartDrawer />
+      <WhatsAppButton />
     </div>
   );
 }

@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, CreditCard, Truck, MapPin, ChevronRight } from 'lucide-react';
+import { Check, CreditCard, Truck, MapPin, ChevronRight, Loader2 } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
+import { useCreateOrderMutation } from '@/api/hooks/order.hooks';
+import { toast } from 'sonner';
 
 const steps = [
   { id: 'shipping', title: 'Shipping', icon: MapPin },
@@ -14,17 +16,56 @@ const steps = [
 ];
 
 export default function CheckoutPage() {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
   const { items, subtotal, clearCart } = useCart();
+  
+  const createOrderMutation = useCreateOrderMutation();
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    paymentMethod: 'Credit Card',
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const shipping = subtotal >= 500 ? 0 : 25;
   const tax = Math.round(subtotal * 0.08);
   const total = subtotal + shipping + tax;
 
   const handleComplete = () => {
-    setIsComplete(true);
-    clearCart();
+    createOrderMutation.mutate(
+      {
+        shippingName: `${formData.firstName} ${formData.lastName}`.trim(),
+        shippingPhone: formData.phone || "0000000000",
+        shippingAddress: formData.address,
+        shippingCity: formData.city,
+        shippingState: formData.state,
+        shippingPincode: formData.pincode,
+        paymentMethod: formData.paymentMethod === 'Credit Card' ? 'CARD' : 'COD',
+      },
+      {
+        onSuccess: (data) => {
+          setOrderNumber(data.orderNumber || Date.now().toString().slice(-8));
+          setIsComplete(true);
+          clearCart();
+        },
+        onError: (err: any) => {
+          toast.error(err.response?.data?.message || "Failed to place order");
+        },
+      }
+    );
   };
 
   if (isComplete) {
@@ -51,10 +92,10 @@ export default function CheckoutPage() {
               </p>
               <div className="bg-secondary/30 rounded-lg p-6 mb-8">
                 <p className="text-sm text-muted-foreground mb-2">Order Number</p>
-                <p className="font-display text-xl">#LX{Date.now().toString().slice(-8)}</p>
+                <p className="font-display text-xl">#{orderNumber}</p>
               </div>
               <Button variant="hero" size="lg" asChild>
-                <Link to="/products">Continue Shopping</Link>
+                <Link to="/account/orders">View My Orders</Link>
               </Button>
             </motion.div>
           </div>
@@ -124,6 +165,9 @@ export default function CheckoutPage() {
                       <label className="text-sm font-medium block mb-2">First Name</label>
                       <input
                         type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
                       />
                     </div>
@@ -131,23 +175,44 @@ export default function CheckoutPage() {
                       <label className="text-sm font-medium block mb-2">Last Name</label>
                       <input
                         type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Phone</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium block mb-2">Email</label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                    />
-                  </div>
-
-                  <div>
                     <label className="text-sm font-medium block mb-2">Address</label>
                     <input
                       type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
                     />
                   </div>
@@ -157,6 +222,9 @@ export default function CheckoutPage() {
                       <label className="text-sm font-medium block mb-2">City</label>
                       <input
                         type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
                       />
                     </div>
@@ -164,6 +232,9 @@ export default function CheckoutPage() {
                       <label className="text-sm font-medium block mb-2">State</label>
                       <input
                         type="text"
+                        name="state"
+                        value={formData.state}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
                       />
                     </div>
@@ -171,6 +242,9 @@ export default function CheckoutPage() {
                       <label className="text-sm font-medium block mb-2">ZIP Code</label>
                       <input
                         type="text"
+                        name="pincode"
+                        value={formData.pincode}
+                        onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
                       />
                     </div>
@@ -180,7 +254,13 @@ export default function CheckoutPage() {
                     variant="hero"
                     size="lg"
                     className="w-full mt-8"
-                    onClick={() => setCurrentStep(1)}
+                    onClick={() => {
+                      if (!formData.firstName || !formData.address || !formData.city || !formData.state || !formData.pincode) {
+                        toast.error("Please fill in all shipping details");
+                        return;
+                      }
+                      setCurrentStep(1);
+                    }}
                   >
                     Continue to Payment
                   </Button>
@@ -197,40 +277,49 @@ export default function CheckoutPage() {
                   <h2 className="font-display text-xl mb-6">Payment Method</h2>
 
                   <div className="space-y-4">
-                    <label className="flex items-center gap-4 p-4 border border-border rounded-lg cursor-pointer hover:border-foreground transition-colors">
-                      <input type="radio" name="payment" defaultChecked className="w-4 h-4" />
+                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'Credit Card' ? "border-foreground" : "border-border hover:border-foreground/50")}>
+                      <input type="radio" name="paymentMethod" value="Credit Card" checked={formData.paymentMethod === 'Credit Card'} onChange={handleInputChange} className="w-4 h-4" />
                       <CreditCard className="h-5 w-5" />
                       <span>Credit Card</span>
                     </label>
+                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'COD' ? "border-foreground" : "border-border hover:border-foreground/50")}>
+                      <input type="radio" name="paymentMethod" value="COD" checked={formData.paymentMethod === 'COD'} onChange={handleInputChange} className="w-4 h-4" />
+                      <Truck className="h-5 w-5" />
+                      <span>Cash on Delivery</span>
+                    </label>
                   </div>
 
-                  <div>
-                    <label className="text-sm font-medium block mb-2">Card Number</label>
-                    <input
-                      type="text"
-                      placeholder="1234 5678 9012 3456"
-                      className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                    />
-                  </div>
+                  {formData.paymentMethod === 'Credit Card' && (
+                    <>
+                      <div className="mt-6">
+                        <label className="text-sm font-medium block mb-2">Card Number</label>
+                        <input
+                          type="text"
+                          placeholder="1234 5678 9012 3456"
+                          className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
+                        />
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium block mb-2">Expiry</label>
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium block mb-2">CVV</label>
-                      <input
-                        type="text"
-                        placeholder="123"
-                        className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                      />
-                    </div>
-                  </div>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <label className="text-sm font-medium block mb-2">Expiry</label>
+                          <input
+                            type="text"
+                            placeholder="MM/YY"
+                            className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium block mb-2">CVV</label>
+                          <input
+                            type="text"
+                            placeholder="123"
+                            className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex gap-4 mt-8">
                     <Button variant="outline" size="lg" onClick={() => setCurrentStep(0)}>
@@ -287,8 +376,16 @@ export default function CheckoutPage() {
                       size="lg"
                       className="flex-1"
                       onClick={handleComplete}
+                      disabled={createOrderMutation.isPending}
                     >
-                      Place Order
+                      {createOrderMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Placing Order...
+                        </>
+                      ) : (
+                        "Place Order"
+                      )}
                     </Button>
                   </div>
                 </motion.div>

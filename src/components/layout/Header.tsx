@@ -30,7 +30,7 @@ export default function Header() {
   return (
     <>
       <header className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white border-b border-[#E5D5B5]/60 shadow-sm"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white border-b border-gray-100 shadow-sm"
       )}>
         {/* Main header */}
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3 lg:py-4">
@@ -40,7 +40,7 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setIsMenuOpen(true)}
-                className="lg:hidden p-2 -ml-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                className="lg:hidden p-2 -ml-2 text-black hover:text-[#5BBF3D]"
                 aria-label="Open menu"
               >
                 <Menu className="h-6 w-6" />
@@ -48,7 +48,7 @@ export default function Header() {
 
               {/* Logo */}
               <Link to="/" className="flex items-center gap-2 group">
-                <span className="font-display text-xl lg:text-2xl font-bold tracking-wider text-primary group-hover:text-accent transition-colors">
+                <span className="font-display text-lg lg:text-xl font-black tracking-wider text-black group-hover:text-[#5BBF3D] transition-colors uppercase">
                   PROTEIN & NUTRIENTS
                 </span>
               </Link>
@@ -58,15 +58,15 @@ export default function Header() {
             <nav className="hidden lg:flex items-center gap-8">
               <Link 
                 to="/" 
-                className="text-xs uppercase font-semibold tracking-wider text-[#2C2C2C] hover:text-[#8A1B28] transition-colors"
+                className="text-xs uppercase font-bold tracking-wider text-black hover:text-[#5BBF3D] transition-colors"
               >
                 Home
               </Link>
               <Link 
                 to="/about" 
-                className="text-xs uppercase font-semibold tracking-wider text-[#2C2C2C] hover:text-[#8A1B28] transition-colors"
+                className="text-xs uppercase font-bold tracking-wider text-black hover:text-[#5BBF3D] transition-colors"
               >
-                OUR STORY
+                Our Story
               </Link>
 
               {/* Supplements Megamenu */}
@@ -77,10 +77,10 @@ export default function Header() {
               >
                 <Link
                   to="/products"
-                  className="flex items-center gap-1 py-2 text-xs uppercase font-semibold tracking-wider text-foreground hover:text-primary transition-colors"
+                  className="flex items-center gap-1 py-2 text-xs uppercase font-bold tracking-wider text-black hover:text-[#5BBF3D] transition-colors"
                 >
                   Supplements
-                  <ChevronDown className="h-3.5 w-3.5 text-primary" />
+                  <ChevronDown className="h-3.5 w-3.5 text-[#8CFF64]" />
                 </Link>
 
                 <AnimatePresence>
@@ -92,13 +92,13 @@ export default function Header() {
                       transition={{ duration: 0.2 }}
                       className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50"
                     >
-                      <div className="bg-white border border-[#E5D5B5] rounded shadow-strong p-5 min-w-[240px]">
-                        <ul className="space-y-2.5">
+                      <div className="bg-white border border-gray-100 rounded-xl shadow-xl p-5 min-w-[260px]">
+                        <ul className="space-y-2">
                           {categoriesList.map((cat) => (
                             <li key={cat.name}>
                               <Link
                                 to={`/products?category=${cat.name}`}
-                                className="text-xs uppercase font-medium text-[#2C2C2C] hover:text-[#8A1B28] flex justify-between items-center transition-colors"
+                                className="text-xs uppercase font-semibold text-gray-700 hover:text-[#5BBF3D] flex justify-between items-center transition-colors py-1"
                               >
                                 {cat.name}
                               </Link>
@@ -117,9 +117,9 @@ export default function Header() {
                 onMouseEnter={() => setActiveCategory('more')}
                 onMouseLeave={() => setActiveCategory(null)}
               >
-                <span className="flex items-center gap-1 py-2 text-xs uppercase font-semibold tracking-wider text-[#2C2C2C] hover:text-[#8A1B28] cursor-pointer transition-colors">
+                <span className="flex items-center gap-1 py-2 text-xs uppercase font-bold tracking-wider text-black hover:text-[#5BBF3D] cursor-pointer transition-colors">
                   More
-                  <ChevronDown className="h-3.5 w-3.5 text-[#8A1B28]" />
+                  <ChevronDown className="h-3.5 w-3.5 text-[#8CFF64]" />
                 </span>
 
                 <AnimatePresence>
@@ -131,14 +131,14 @@ export default function Header() {
                       transition={{ duration: 0.2 }}
                       className="absolute top-full left-0 pt-2 z-50"
                     >
-                      <div className="bg-white border border-[#E5D5B5] rounded shadow-strong p-4 min-w-[180px] space-y-2">
-                        <Link to="/reviews" className="block text-xs uppercase font-medium text-[#2C2C2C] hover:text-[#8A1B28] transition-colors">
+                      <div className="bg-white border border-gray-100 rounded-xl shadow-xl p-4 min-w-[200px] space-y-2">
+                        <Link to="/reviews" className="block text-xs uppercase font-semibold text-gray-700 hover:text-[#5BBF3D] transition-colors py-1">
                           Customer Reviews
                         </Link>
-                        <Link to="/stores" className="block text-xs uppercase font-medium text-[#2C2C2C] hover:text-[#8A1B28] transition-colors">
+                        <Link to="/stores" className="block text-xs uppercase font-semibold text-gray-700 hover:text-[#5BBF3D] transition-colors py-1">
                           Store Locator
                         </Link>
-                        <Link to="/support" className="block text-xs uppercase font-medium text-[#2C2C2C] hover:text-[#8A1B28] transition-colors">
+                        <Link to="/support" className="block text-xs uppercase font-semibold text-gray-700 hover:text-[#5BBF3D] transition-colors py-1">
                           Customer Support
                         </Link>
                       </div>
@@ -149,11 +149,11 @@ export default function Header() {
             </nav>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-2 lg:gap-4 text-[#2C2C2C]">
+            <div className="flex items-center gap-2 lg:gap-4 text-black">
               {/* Search Toggle */}
               <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 hover:text-primary transition-colors"
+                className="p-2 hover:text-[#5BBF3D] transition-colors"
                 aria-label="Search"
               >
                 <Search className="h-5 w-5 stroke-[2]" />
@@ -162,12 +162,12 @@ export default function Header() {
               {/* Wishlist */}
               <Link 
                 to="/wishlist"
-                className="p-2 hover:text-[#8A1B28] transition-colors relative"
+                className="p-2 hover:text-[#5BBF3D] transition-colors relative"
                 aria-label="Wishlist"
               >
                 <Heart className="h-5 w-5 stroke-[2]" />
                 {items && items.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-[#8A1B28] text-white text-[8px] flex items-center justify-center border border-white">
+                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-[#8CFF64] text-black text-[8px] font-bold flex items-center justify-center border border-white">
                     {items.length}
                   </span>
                 )}
@@ -176,23 +176,21 @@ export default function Header() {
               {/* Cart */}
               <button 
                 onClick={openCart}
-                className="p-2 hover:text-[#8A1B28] transition-colors relative"
+                className="p-2 hover:text-[#5BBF3D] transition-colors relative"
                 aria-label="Cart"
               >
                 <ShoppingBag className="h-5 w-5 stroke-[2]" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-[#8A1B28] text-white text-[8px] flex items-center justify-center border border-white">
+                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-[#8CFF64] text-black text-[8px] font-bold flex items-center justify-center border border-white">
                     {itemCount}
                   </span>
                 )}
               </button>
 
-
-
               {/* Login/Account */}
               <Link 
                 to="/account"
-                className="p-2 hover:text-[#8A1B28] transition-colors hidden sm:inline-block"
+                className="p-2 hover:text-[#5BBF3D] transition-colors hidden sm:inline-block"
                 aria-label="Account"
               >
                 <User className="h-5 w-5 stroke-[2]" />
@@ -224,39 +222,39 @@ export default function Header() {
               className="fixed top-0 left-0 bottom-0 w-full max-w-xs bg-white z-50 lg:hidden overflow-y-auto"
             >
               <div className="p-5">
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#E5E5E5]">
-                  <span className="font-display text-lg font-bold text-primary">PROTEIN & NUTRIENTS</span>
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                  <span className="font-display text-lg font-black text-black uppercase">P&N</span>
                   <button onClick={() => setIsMenuOpen(false)} className="p-2">
-                    <X className="h-6 w-6 text-[#2C2C2C]" />
+                    <X className="h-6 w-6 text-black" />
                   </button>
                 </div>
 
                 <nav className="space-y-4">
                   <Link
                     to="/"
-                    className="text-sm font-semibold uppercase block py-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                    className="text-sm font-bold uppercase block py-2 text-black hover:text-[#5BBF3D]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Home
                   </Link>
                   <Link
                     to="/about"
-                    className="text-sm font-semibold uppercase block py-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                    className="text-sm font-bold uppercase block py-2 text-black hover:text-[#5BBF3D]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Our Story
                   </Link>
 
                   <div className="py-2">
-                    <span className="text-sm font-semibold uppercase block mb-2 text-[#2C2C2C]">
-                      Supplements Categories
+                    <span className="text-sm font-bold uppercase block mb-3 text-black">
+                      Categories
                     </span>
-                    <ul className="space-y-2 pl-3 border-l-2 border-[#D4AF37]">
+                    <ul className="space-y-2 pl-3 border-l-2 border-[#8CFF64]">
                       {categoriesList.map((cat) => (
                         <li key={cat.name}>
                           <Link
                             to={`/products?category=${cat.name}`}
-                            className="text-xs uppercase font-medium text-[#555] hover:text-[#8A1B28] block py-1"
+                            className="text-xs uppercase font-semibold text-gray-500 hover:text-[#5BBF3D] block py-1"
                             onClick={() => setIsMenuOpen(false)}
                           >
                             {cat.name}
@@ -268,25 +266,25 @@ export default function Header() {
 
                   <Link
                     to="/stores"
-                    className="text-sm font-semibold uppercase block py-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                    className="text-sm font-bold uppercase block py-2 text-black hover:text-[#5BBF3D]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Store Locator
                   </Link>
                   <Link
                     to="/support"
-                    className="text-sm font-semibold uppercase block py-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                    className="text-sm font-bold uppercase block py-2 text-black hover:text-[#5BBF3D]"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Support
                   </Link>
                 </nav>
 
-                <div className="mt-8 pt-6 border-t border-[#E5E5E5] space-y-3">
-                  <Link to="/account" className="flex items-center gap-3 text-sm font-medium text-[#2C2C2C]" onClick={() => setIsMenuOpen(false)}>
+                <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
+                  <Link to="/account" className="flex items-center gap-3 text-sm font-medium text-black" onClick={() => setIsMenuOpen(false)}>
                     <User className="h-5 w-5" /> Account Profile
                   </Link>
-                  <Link to="/wishlist" className="flex items-center gap-3 text-sm font-medium text-[#2C2C2C]" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/wishlist" className="flex items-center gap-3 text-sm font-medium text-black" onClick={() => setIsMenuOpen(false)}>
                     <Heart className="h-5 w-5" /> My Wishlist
                   </Link>
                 </div>
@@ -295,8 +293,6 @@ export default function Header() {
           </>
         )}
       </AnimatePresence>
-
-
 
       {/* Search Overlay */}
       <AnimatePresence>
@@ -310,12 +306,12 @@ export default function Header() {
             <div className="w-full max-w-2xl px-6 relative">
               <button 
                 onClick={() => setIsSearchOpen(false)}
-                className="absolute top-0 right-6 p-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                className="absolute top-0 right-6 p-2 text-black hover:text-[#5BBF3D]"
               >
                 <X className="h-6 w-6" />
               </button>
-              <div className="relative border-b-2 border-[#8A1B28] py-2">
-                <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-6 text-[#8A1B28]" />
+              <div className="relative border-b-2 border-black py-2">
+                <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-6 text-black" />
                 <input
                   type="text"
                   placeholder="Search Supplements..."
@@ -326,11 +322,11 @@ export default function Header() {
               <div className="mt-6">
                 <h4 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-3">Popular Searches</h4>
                 <div className="flex flex-wrap gap-2">
-                  {['Whey Protein', 'Creatine', 'Pre Workout', 'Vitamins', 'Mass Gainer'].map((term) => (
+                  {['Whey Protein', 'Creatine', 'Pre Workout', 'Multivitamins', 'BCAA', 'Peanut Butter', 'Fish Oil'].map((term) => (
                     <Link
                       key={term}
                       to={`/products?search=${term}`}
-                      className="px-4.5 py-2 bg-[#FAF9F6] border border-[#E5D5B5] hover:border-[#8A1B28] hover:text-[#8A1B28] rounded-full text-xs font-medium transition-colors"
+                      className="px-4 py-2 bg-gray-50 border border-gray-200 hover:border-[#8CFF64] hover:bg-[#8CFF64]/10 hover:text-black rounded-full text-xs font-semibold transition-colors"
                       onClick={() => setIsSearchOpen(false)}
                     >
                       {term}

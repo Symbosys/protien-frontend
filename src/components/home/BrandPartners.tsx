@@ -1,116 +1,131 @@
-import { motion } from 'framer-motion';
-import { Instagram, ArrowLeft, ArrowRight } from 'lucide-react';
+"use client";
 
-const instagramCards = [
+import { motion } from 'framer-motion';
+import { ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { brands } from '@/data/products';
+
+const brandData = [
   {
-    id: 1,
-    type: 'logo',
-    title: '@protein_nutrients',
-    bg: 'bg-[#1A1A1A]',
+    name: 'Optimum Nutrition',
+    shortName: 'ON',
+    tagline: 'Gold Standard Quality',
+    color: '#D4163C',
+    bgGradient: 'from-red-900 to-red-700',
   },
   {
-    id: 2,
-    type: 'image',
-    image: 'https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800',
-    title: 'Premium Whey Protein',
+    name: 'Muscletech',
+    shortName: 'MT',
+    tagline: 'Science-Based Performance',
+    color: '#1E3A5F',
+    bgGradient: 'from-blue-900 to-blue-700',
   },
   {
-    id: 3,
-    type: 'coming-soon',
-    title: 'NEW ARRIVALS',
-    description: "The hardest hitting pre-workout is dropping next week. Prepare to break your PRs and push past your limits.",
-    bg: 'bg-primary',
+    name: 'Muscle Blaze',
+    shortName: 'MB',
+    tagline: "India's #1 Sports Nutrition",
+    color: '#FF6B00',
+    bgGradient: 'from-orange-700 to-orange-500',
   },
   {
-    id: 4,
-    type: 'image',
-    image: 'https://images.unsplash.com/photo-1594882645126-14020914d58d?w=800',
-    title: 'Essential Amino Acids',
+    name: 'Pintola',
+    shortName: 'PI',
+    tagline: 'All Natural Goodness',
+    color: '#8B4513',
+    bgGradient: 'from-amber-800 to-amber-600',
+  },
+  {
+    name: 'Wellversed',
+    shortName: 'WV',
+    tagline: 'Clean Nutrition',
+    color: '#2D7D46',
+    bgGradient: 'from-green-800 to-green-600',
+  },
+  {
+    name: 'HK Vitals',
+    shortName: 'HK',
+    tagline: 'Trusted by Millions',
+    color: '#6B21A8',
+    bgGradient: 'from-purple-800 to-purple-600',
+  },
+  {
+    name: 'Avvatar',
+    shortName: 'AV',
+    tagline: 'Premium Indian Whey',
+    color: '#0E7490',
+    bgGradient: 'from-cyan-800 to-cyan-600',
   },
 ];
 
 export default function BrandPartners() {
   return (
-    <section className="py-16 bg-[#FAF9F6] border-b border-[#E5D5B5]/60">
+    <section className="py-14 bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         
-        {/* Section Header with Dividers */}
-        <div className="flex items-center justify-center gap-4 mb-10">
-          <div className="h-px bg-border w-16 lg:w-36 relative flex items-center justify-end">
-            <div className="w-2 h-2 bg-primary rounded-full border border-white absolute" />
+        {/* Section Header */}
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <h2 className="heading-bold text-3xl sm:text-4xl lg:text-5xl text-black">
+              SHOP BY <span className="text-[#8CFF64]">BRANDS</span>
+            </h2>
+            <p className="text-sm text-gray-500 mt-2 font-medium">
+              Top trusted brands in sports nutrition
+            </p>
           </div>
-          <h2 className="font-display text-2xl lg:text-3xl font-bold text-[#2C2C2C] text-center tracking-wide whitespace-nowrap uppercase">
-            Join the community
-          </h2>
-          <div className="h-px bg-border w-16 lg:w-36 relative flex items-center justify-start">
-            <div className="w-2 h-2 bg-primary rounded-full border border-white absolute" />
-          </div>
+          <Link
+            to="/products"
+            className="hidden sm:inline-flex items-center gap-2 text-xs uppercase font-bold tracking-wider text-black hover:text-[#5BBF3D] transition-colors group"
+          >
+            View All Brands
+            <span className="w-8 h-8 rounded-full border-2 border-black group-hover:border-[#8CFF64] flex items-center justify-center transition-colors">
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          </Link>
         </div>
 
-        {/* Carousel / Grid Wrapper */}
-        <div className="relative">
-          
-          {/* Grid Layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {instagramCards.map((card, index) => (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08, duration: 0.4 }}
-                className="relative aspect-square overflow-hidden border border-[#E5D5B5]/60 rounded group hover:shadow-medium transition-shadow flex flex-col justify-between"
+        {/* Brand Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+          {brandData.map((brand, index) => (
+            <motion.div
+              key={brand.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.06, duration: 0.4 }}
+            >
+              <Link
+                to={`/products?brand=${brand.name}`}
+                className="group block relative overflow-hidden rounded-2xl bg-gradient-to-br border border-gray-100 hover:shadow-xl transition-all duration-500"
+                style={{ background: `linear-gradient(135deg, ${brand.color}15, ${brand.color}08)` }}
               >
-                {/* 1. Logo Card */}
-                {card.type === 'logo' && (
-                  <div className={`w-full h-full ${card.bg} flex flex-col items-center justify-center p-6 text-white text-center`}>
-                    <Instagram className="h-10 w-10 text-primary mb-3 stroke-[1.5]" />
-                    <span className="text-xs uppercase font-bold tracking-widest text-primary mb-1">Follow Us</span>
-                    <span className="font-display text-lg font-semibold tracking-wide text-white">{card.title}</span>
+                <div className="p-5 sm:p-6 min-h-[160px] sm:min-h-[180px] flex flex-col justify-between relative">
+                  {/* Brand Initial Circle */}
+                  <div
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white font-black text-xl sm:text-2xl shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300"
+                    style={{ backgroundColor: brand.color }}
+                  >
+                    {brand.shortName}
                   </div>
-                )}
 
-                {/* 2. Image Card */}
-                {card.type === 'image' && (
-                  <div className="w-full h-full relative">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    {/* Hover Link Overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                      <a 
-                        href="https://instagram.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-black bg-primary p-3 rounded-full hover:scale-110 transition-transform"
-                      >
-                        <Instagram className="h-5 w-5" />
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. Coming Soon Text Card */}
-                {card.type === 'coming-soon' && (
-                  <div className={`w-full h-full ${card.bg} flex flex-col justify-center p-6 lg:p-8 text-black text-center`}>
-                    <Instagram className="h-6 w-6 text-black mx-auto mb-2" />
-                    <h3 className="font-display text-lg font-extrabold text-black tracking-wider mb-3">
-                      {card.title}
+                  {/* Brand Info */}
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base text-black group-hover:text-[#2D7D46] transition-colors uppercase tracking-wide">
+                      {brand.name}
                     </h3>
-                    <p className="text-[10px] lg:text-xs text-[#111] leading-relaxed font-semibold">
-                      {card.description}
+                    <p className="text-[11px] text-gray-500 mt-1 font-medium">
+                      {brand.tagline}
                     </p>
                   </div>
-                )}
 
-              </motion.div>
-            ))}
-          </div>
-
+                  {/* Arrow */}
+                  <div className="absolute top-5 right-5 w-8 h-8 rounded-full bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:bg-[#8CFF64]">
+                    <ChevronRight className="h-4 w-4 text-black" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
         </div>
-
       </div>
     </section>
   );

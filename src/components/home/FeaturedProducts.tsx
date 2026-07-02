@@ -1,8 +1,11 @@
+"use client";
+
 import ProductCard, { ProductCardItem } from "@/components/product/ProductCard";
 import { useProductsQuery } from "@/api/hooks/product.hooks";
 import { products as mockProducts } from "@/data/products";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useRef } from "react";
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
 
@@ -19,11 +22,12 @@ function processImageUrl(url: any): string {
 
 export default function FeaturedProducts() {
   const { data: productsData, isLoading } = useProductsQuery({ limit: 8, sort: "newest" });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Map backend products → ProductCardItem, fallback to mock data while loading or if empty
   const featured: ProductCardItem[] =
     productsData?.products && productsData.products.length > 0
-      ? productsData.products.slice(0, 4).map((p) => ({
+      ? productsData.products.slice(0, 8).map((p) => ({
           id: p.id,
           name: p.name,
           price: Number(p.price),
@@ -42,39 +46,49 @@ export default function FeaturedProducts() {
               )
             : [],
         }))
-      : mockProducts.slice(0, 4);
+      : mockProducts.slice(0, 8);
 
   return (
-    <section className="section-padding bg-[#FAF9F6]">
-      <div className="container-luxe">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-[#E5E5E5] pb-6">
+    <section className="py-14 bg-white">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        
+        {/* Header */}
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37] mb-2 font-light">
-              Trending Now
-            </p>
-            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl text-[#2C2C2C] font-normal tracking-wide">
-              Bestsellers
+            <h2 className="heading-bold text-3xl sm:text-4xl lg:text-5xl text-black">
+              TOP PICKS <span className="text-[#8CFF64]">FOR</span>
+            </h2>
+            <h2 className="heading-bold text-3xl sm:text-4xl lg:text-5xl text-[#8CFF64]">
+              YOU
             </h2>
           </div>
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#2C2C2C] hover:text-[#d4af37] transition-colors group pb-2"
+            className="inline-flex items-center gap-2 text-xs uppercase font-bold tracking-wider text-black hover:text-[#5BBF3D] transition-colors group"
           >
-            View All
-            <ArrowRight className="h-4 w-4 stroke-[1.5] transition-transform group-hover:translate-x-1" />
+            Shop All Products
+            <span className="w-8 h-8 rounded-full border-2 border-black group-hover:border-[#8CFF64] flex items-center justify-center transition-colors">
+              <ChevronRight className="h-4 w-4" />
+            </span>
           </Link>
         </div>
 
+        {/* Product Cards - Horizontal Scrollable */}
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-square bg-[#E5D5B5]/30 animate-pulse rounded" />
+              <div key={i} className="min-w-[260px] aspect-[3/4] bg-gray-100 animate-pulse rounded-xl" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto hide-scrollbar pb-4"
+          >
             {featured.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
+              <div key={product.id} className="min-w-[220px] sm:min-w-[260px] max-w-[280px] flex-shrink-0">
+                <ProductCard product={product} index={index} />
+              </div>
             ))}
           </div>
         )}

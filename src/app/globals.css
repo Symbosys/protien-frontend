@@ -2,25 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LUXE Premium Design System */
+/* PROTEIN & NUTRIENTS — Bold Athletic Design System */
 
 @layer base {
   :root {
     /* Core backgrounds */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 9%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
     
     /* Card surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 0 0% 5%;
     
     /* Popover/dropdown */
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 0 0% 5%;
     
-    /* Primary - Energetic Cyan/Blue */
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Neon Green (matching protein-and-nutrients.com) */
+    --primary: 105 100% 70%;
+    --primary-foreground: 0 0% 0%;
     
     /* Secondary - Light Gray */
     --secondary: 0 0% 96%;
@@ -30,7 +30,7 @@
     --muted: 0 0% 92%;
     --muted-foreground: 0 0% 45%;
     
-    /* Accent - Neon Green */
+    /* Accent - Deep Green */
     --accent: 142 70% 45%;
     --accent-foreground: 0 0% 100%;
     
@@ -39,10 +39,10 @@
     --destructive-foreground: 0 0% 100%;
     
     /* UI Elements */
-    --border: 40 10% 88%;
-    --input: 40 10% 88%;
-    --ring: 353 67% 32%;
-    --radius: 0.25rem;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 105 100% 70%;
+    --radius: 0.5rem;
     
     /* Success */
     --success: 142 70% 35%;
@@ -60,40 +60,40 @@
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 25%;
-    --sidebar-primary: 353 67% 32%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 40 10% 95%;
+    --sidebar-primary: 105 100% 70%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 95%;
     --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 40 10% 92%;
-    --sidebar-ring: 353 67% 32%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 105 100% 70%;
   }
 
   .dark {
     /* Core backgrounds - Deep athletic dark */
-    --background: 240 10% 4%;
+    --background: 0 0% 4%;
     --foreground: 0 0% 98%;
     
     /* Card surfaces */
-    --card: 240 10% 6%;
+    --card: 0 0% 7%;
     --card-foreground: 0 0% 98%;
     
     /* Popover */
-    --popover: 240 10% 6%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 98%;
     
-    /* Primary - Energetic Cyan/Blue */
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Neon Green */
+    --primary: 105 100% 70%;
+    --primary-foreground: 0 0% 0%;
     
     /* Secondary */
-    --secondary: 240 10% 10%;
+    --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 98%;
     
     /* Muted */
-    --muted: 240 10% 10%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
     
-    /* Accent - Neon Green */
+    /* Accent - Green */
     --accent: 142 70% 45%;
     --accent-foreground: 0 0% 100%;
     
@@ -104,7 +104,7 @@
     /* UI Elements */
     --border: 0 0% 16%;
     --input: 0 0% 16%;
-    --ring: 38 45% 55%;
+    --ring: 105 100% 70%;
     
     /* Success */
     --success: 142 60% 45%;
@@ -116,13 +116,13 @@
     
     /* Sidebar */
     --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 40 10% 90%;
-    --sidebar-primary: 38 45% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 105 100% 70%;
+    --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 40 10% 90%;
+    --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 38 45% 55%;
+    --sidebar-ring: 105 100% 70%;
   }
 }
 
@@ -228,6 +228,29 @@
 
   .link-underline:hover::after {
     @apply scale-x-100 origin-left;
+  }
+
+  /* Hide scrollbar for horizontal scroll sections */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Bold condensed heading style (matching reference) */
+  .heading-bold {
+    font-family: var(--font-display), 'Arial Black', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+
+  /* Green pill button (matching reference category buttons) */
+  .pill-green {
+    @apply inline-flex items-center justify-between gap-2 bg-[#8CFF64] text-black font-bold text-sm uppercase tracking-wide px-5 py-3 rounded-full transition-all duration-300 hover:bg-[#7EE55A] hover:shadow-md cursor-pointer;
   }
 }
 

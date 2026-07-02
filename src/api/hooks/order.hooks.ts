@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../apiclient/apiClient";
 
 export interface DBOrderItem {
@@ -75,5 +75,36 @@ export const useMyOrdersQuery = () => {
     },
     retry: 1,
     refetchOnWindowFocus: false,
+  });
+};
+
+export interface CreateOrderInput {
+  shippingName: string;
+  shippingPhone: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingPincode: string;
+  paymentMethod?: string;
+  note?: string;
+}
+
+export const useCreateOrderMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DBOrder, Error, CreateOrderInput>({
+    mutationFn: async (data) => {
+      const response = await apiClient.post<{ success: boolean; data: DBOrder }>(
+        "/order/checkout",
+        data
+      );
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.list() });
+      // Invalidate cart as well because backend creates order from cart,
+      // and we probably want cart to refresh (it's empty now).
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
   });
 };

@@ -37,6 +37,7 @@ type Order = {
   items: { name: string; qty: number; price: number }[];
 };
 
+/* 
 const MOCK_ORDERS: Order[] = [
   {
     id: 'FK-5001',
@@ -120,6 +121,7 @@ const MOCK_ORDERS: Order[] = [
     items: [{ name: 'Cushion Cover Set', qty: 2, price: 499 }],
   },
 ];
+*/
 
 export default function MyOrder(): JSX.Element {
   const [query, setQuery] = useState('');
@@ -140,7 +142,7 @@ export default function MyOrder(): JSX.Element {
   const { data: dbOrders, isLoading } = useMyOrdersQuery();
 
   const mappedOrders = useMemo(() => {
-    if (!dbOrders) return MOCK_ORDERS;
+    if (!dbOrders) return [];
     return dbOrders.map((dbO) => ({
       id: dbO.orderNumber,
       date: dbO.placedAt || dbO.createdAt,
@@ -227,6 +229,7 @@ export default function MyOrder(): JSX.Element {
     dateTo,
     minRating,
     sortBy,
+    mappedOrders
   ]);
 
   const clearFilters = () => {
@@ -430,7 +433,12 @@ export default function MyOrder(): JSX.Element {
               </div>
 
               <div className="space-y-5">
-                {filtered.length === 0 ? (
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center py-24 bg-card border border-dashed border-border rounded-2xl">
+                    <RefreshCcw className="h-8 w-8 text-primary animate-spin mb-4" />
+                    <h3 className="text-lg font-medium text-foreground">Loading orders...</h3>
+                  </div>
+                ) : filtered.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-24 bg-card border border-dashed border-border rounded-2xl">
                     <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
                       <Search className="h-8 w-8 text-muted-foreground" />
