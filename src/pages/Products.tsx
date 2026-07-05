@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCategoriesQuery } from "@/api/hooks/category.hooks";
 import { useProductsQuery } from "@/api/hooks/product.hooks";
+import { useBrandsQuery } from "@/api/hooks/brand.hooks";
 
 const sortOptions = [
   { value: "newest", label: "Newest" },
@@ -28,6 +29,7 @@ export default function ProductsPage() {
   const [openSection, setOpenSection] = useState<Record<string, boolean>>({
     sort: true,
     category: true,
+    brand: true,
     karat: false,
     weight: false,
     price: false,
@@ -43,10 +45,15 @@ export default function ProductsPage() {
   const selectedWeight = searchParams.get("weight");
   const selectedPriceRange = searchParams.get("priceRange");
   const selectedStock = searchParams.get("stock");
+  const selectedBrandId = searchParams.get("brandId");
 
   // Fetch from backend
   const { data: categoriesData } = useCategoriesQuery({ limit: 100 });
-  const { data: productsData, isLoading } = useProductsQuery({ limit: 100 });
+  const { data: brandsData } = useBrandsQuery({ limit: 100 });
+  const { data: productsData, isLoading } = useProductsQuery({
+    limit: 100,
+    brandId: selectedBrandId || undefined,
+  });
 
   const processImageUrl = (url: any) => {
     if (!url) return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
@@ -85,6 +92,7 @@ export default function ProductsPage() {
           ...(Array.isArray(dbP.images) ? dbP.images.map(processImageUrl) : []),
         ],
         category: dbP.category?.name || "Uncategorized",
+        brandId: dbP.brandId,
         rating: dbP.rating || 5,
         inStock: dbP.quantity > 0,
         netWeight: undefined,
@@ -98,6 +106,9 @@ export default function ProductsPage() {
     // Apply front-end filters to display exactly what the user clicks
     if (selectedCategory) {
       list = list.filter(p => p.category.toLowerCase() === selectedCategory.toLowerCase());
+    }
+    if (selectedBrandId) {
+      list = list.filter(p => p.brandId === selectedBrandId);
     }
     if (selectedKarat) {
       list = list.filter(p => p.karat?.includes(selectedKarat));
@@ -334,6 +345,40 @@ export default function ProductsPage() {
                             )}
                           >
                             {cat.name}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Brand Accordion */}
+                <div className="py-4">
+                  <button 
+                    onClick={() => toggleSection("brand")}
+                    className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
+                  >
+                    <span>Brand</span>
+                    {openSection.brand ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                  </button>
+                  <AnimatePresence>
+                    {openSection.brand && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden mt-3 pl-2 space-y-2.5"
+                      >
+                        {brandsData?.brands?.map((brand) => (
+                          <button
+                            key={brand.id}
+                            onClick={() => updateFilter("brandId", selectedBrandId === brand.id ? null : brand.id)}
+                            className={cn(
+                              "block text-xs text-left py-1 w-full font-medium transition-colors",
+                              selectedBrandId === brand.id ? "text-[#8A1B28] font-bold" : "text-[#555] hover:text-[#8A1B28]"
+                            )}
+                          >
+                            {brand.name}
                           </button>
                         ))}
                       </motion.div>

@@ -28,7 +28,8 @@ export interface DBProduct {
   description: string | null;
   image: string;
   images: string[]; // JSON string[]
-  brand: string | null;
+  brandId: string | null;
+  brand: any;
   price: string | number;
   discountPrice: string | number | null;
   quantity: number;
@@ -70,6 +71,7 @@ export interface GetProductsParams {
   maxPrice?: number;
   search?: string;
   brand?: string;
+  brandId?: string;
   page?: number;
   limit?: number;
   sort?: "newest" | "price-asc" | "price-desc" | "rating" | "name-asc" | "name-desc";
@@ -93,6 +95,7 @@ export interface CreateProductInput {
   image: string; // base64 or URL
   images?: string[];
   brand?: string;
+  brandId?: string;
   price: number;
   discountPrice?: number;
   quantity: number;
