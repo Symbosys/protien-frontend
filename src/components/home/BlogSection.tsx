@@ -126,7 +126,7 @@ export default function BlogSection() {
               transition={{ delay: (index % blogPosts.length) * 0.08, duration: 0.4 }}
               className="min-w-[280px] sm:min-w-[320px] max-w-[360px] flex-shrink-0 group"
             >
-              <Link to="/blog" className="block">
+              <Link to={`/blog/${post.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} className="block">
                 {/* Image */}
                 <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3]">
                   <img
