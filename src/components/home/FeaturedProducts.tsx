@@ -5,7 +5,7 @@ import { useProductsQuery } from "@/api/hooks/product.hooks";
 import { products as mockProducts } from "@/data/products";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
 
@@ -48,6 +48,51 @@ export default function FeaturedProducts() {
         }))
       : mockProducts.slice(0, 8);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || isLoading || featured.length === 0) return;
+
+    let animationFrameId: number;
+    let isHovered = false;
+    const speed = 1.5; // Pixels per frame (adjust for scrolling speed)
+
+    const handleMouseEnter = () => {
+      isHovered = true;
+    };
+    const handleMouseLeave = () => {
+      isHovered = false;
+    };
+
+    el.addEventListener("mouseenter", handleMouseEnter);
+    el.addEventListener("mouseleave", handleMouseLeave);
+
+    // Calculate the width of one original set of items
+    const cardWidth = el.firstElementChild
+      ? (el.firstElementChild as HTMLElement).offsetWidth + 16 // card width + gap
+      : 280;
+    const firstSetWidth = cardWidth * featured.length;
+
+    const scroll = () => {
+      if (!isHovered) {
+        el.scrollLeft += speed;
+
+        // If we have scrolled past the first set, seamlessly wrap back
+        if (el.scrollLeft >= firstSetWidth) {
+          el.scrollLeft -= firstSetWidth;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    animationFrameId = requestAnimationFrame(scroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      el.removeEventListener("mouseenter", handleMouseEnter);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [featured, isLoading]);
+
   return (
     <section className="py-14 bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
@@ -85,8 +130,8 @@ export default function FeaturedProducts() {
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto hide-scrollbar pb-4"
           >
-            {featured.map((product, index) => (
-              <div key={product.id} className="min-w-[220px] sm:min-w-[260px] max-w-[280px] flex-shrink-0">
+            {[...featured, ...featured, ...featured].map((product, index) => (
+              <div key={`${product.id}-${index}`} className="min-w-[220px] sm:min-w-[260px] max-w-[280px] flex-shrink-0">
                 <ProductCard product={product} index={index} />
               </div>
             ))}
