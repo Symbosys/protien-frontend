@@ -3,7 +3,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 /**
@@ -33,8 +33,31 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
+
+  useEffect(() => {
+    if (!product.images || product.images.length <= 1) {
+      setCurrentImageIndex(0);
+      return;
+    }
+
+    // Stagger the initial start time based on index to make the animation organic and not synchronized all at once
+    const initialDelay = (index % 4) * 600;
+
+    let interval: NodeJS.Timeout;
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+      }, 3000); // Cycle every 3 seconds
+    }, initialDelay);
+
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
+  }, [product.images, index]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -90,22 +113,43 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       >
         {/* Product Image Frame */}
         <div className="relative aspect-square bg-[#8A1B28]/5 overflow-hidden border-b border-[#E5D5B5]/30">
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
+          <div
+            className="flex w-full h-full transition-transform duration-500 ease-in-out"
+            style={{
+              transform: `translateX(-${currentImageIndex * 100}%)`,
+            }}
+          >
+            {product.images && product.images.length > 0 ? (
+              product.images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`${product.name} - image ${idx + 1}`}
+                  className="w-full h-full object-cover flex-shrink-0 transition-transform duration-700 group-hover:scale-105"
+                />
+              ))
+            ) : (
+              <img
+                src="https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800"
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            )}
+          </div>
 
-          {/* Second Image Hover Switch */}
-          {product.images[1] && (
-            <img
-              src={product.images[1]}
-              alt={product.name}
-              className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-                isHovered ? "opacity-100" : "opacity-0",
-              )}
-            />
+          {/* Indicators at Top Right */}
+          {product.images && product.images.length > 1 && (
+            <div className="absolute top-2 right-2 flex gap-1 z-10 bg-black/30 px-1.5 py-1 rounded-full backdrop-blur-[2px]">
+              {product.images.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300",
+                    currentImageIndex === idx ? "w-3 bg-white" : "w-1.5 bg-white/50"
+                  )}
+                />
+              ))}
+            </div>
           )}
 
           {/* Discount/New Badges */}

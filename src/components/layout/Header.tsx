@@ -6,7 +6,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { categories as mockCategories } from '@/data/products';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, Heart, Menu, Search, ShoppingBag, User, X, Gift } from 'lucide-react';
+import { ChevronDown, Gift, Heart, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -45,12 +45,33 @@ export default function Header() {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#B5E12E] transition-all duration-300">
         {/* Top Promo Banner */}
-        <div className="w-full text-black text-xs md:text-sm font-bold py-3 px-4 flex items-center justify-center gap-6 lg:gap-12 flex-wrap text-center">
-          <span>Standard delivery on orders over ₹999</span>
-          <span className="flex items-center gap-1.5 justify-center">
-            <Gift className="h-4 w-4" />
-            5% off on all prepaid orders use code prepaid
-          </span>
+        <div className="w-[60%] mx-auto text-black text-xs md:text-sm font-bold py-2.5 overflow-hidden">
+          {/* @ts-ignore */}
+          <marquee scrollamount="4" className="block w-full">
+            <div className="flex items-center justify-center gap-16 md:gap-32">
+              <span className="flex items-center gap-1.5 flex-shrink-0">
+                <Gift className="h-4 w-4 flex-shrink-0" />
+                5% off on all prepaid orders use code prepaid5
+              </span>
+              <span className="flex items-center gap-1.5 flex-shrink-0">
+                All Payment Accepted
+              </span>
+              <span className="flex items-center gap-1.5 flex-shrink-0">
+                <Gift className="h-4 w-4 flex-shrink-0" />
+                5% off on all prepaid orders use code prepaid5
+              </span>
+              <span className="flex items-center gap-1.5 flex-shrink-0">
+                All Payment Accepted
+              </span>
+              <span className="flex items-center gap-1.5 flex-shrink-0">
+                <Gift className="h-4 w-4 flex-shrink-0" />
+                5% off on all prepaid orders use code prepaid5
+              </span>
+              <span className="flex items-center gap-1.5 flex-shrink-0">
+                All Payment Accepted
+              </span>
+            </div>
+          </marquee>
         </div>
 
         {/* Main Header Container with rounded-t corners */}

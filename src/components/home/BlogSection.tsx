@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 const blogPosts = [
@@ -43,6 +43,50 @@ const blogPosts = [
 export default function BlogSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || blogPosts.length === 0) return;
+
+    let animationFrameId: number;
+    let isHovered = false;
+    const speed = 1.5; // Pixels per frame (scrolling speed)
+
+    const handleMouseEnter = () => {
+      isHovered = true;
+    };
+    const handleMouseLeave = () => {
+      isHovered = false;
+    };
+
+    el.addEventListener("mouseenter", handleMouseEnter);
+    el.addEventListener("mouseleave", handleMouseLeave);
+
+    // Calculate the width of one set of blog posts (width + gap-5 (20px))
+    const cardWidth = el.firstElementChild
+      ? (el.firstElementChild as HTMLElement).offsetWidth + 20
+      : 340;
+    const firstSetWidth = cardWidth * blogPosts.length;
+
+    const scroll = () => {
+      if (!isHovered) {
+        el.scrollLeft += speed;
+
+        if (el.scrollLeft >= firstSetWidth) {
+          el.scrollLeft -= firstSetWidth;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    animationFrameId = requestAnimationFrame(scroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      el.removeEventListener("mouseenter", handleMouseEnter);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
   return (
     <section className="py-14 bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
@@ -73,13 +117,13 @@ export default function BlogSection() {
           ref={scrollRef}
           className="flex gap-5 overflow-x-auto hide-scrollbar pb-4"
         >
-          {blogPosts.map((post, index) => (
+          {[...blogPosts, ...blogPosts, ...blogPosts].map((post, index) => (
             <motion.div
-              key={post.id}
+              key={`${post.id}-${index}`}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.08, duration: 0.4 }}
+              transition={{ delay: (index % blogPosts.length) * 0.08, duration: 0.4 }}
               className="min-w-[280px] sm:min-w-[320px] max-w-[360px] flex-shrink-0 group"
             >
               <Link to="/blog" className="block">
