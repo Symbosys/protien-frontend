@@ -67,10 +67,17 @@ export default function CategoriesPage() {
           <div className="grid gap-8">
             {categories.map((category, index) => {
               const subcategories = category.subcategories;
-              
+
               const processImageUrl = (url: string | null) => {
-                if (!url) return "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop";
-                if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("blob:")) return url;
+                if (!url)
+                  return "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop";
+                if (
+                  url.startsWith("http://") ||
+                  url.startsWith("https://") ||
+                  url.startsWith("data:") ||
+                  url.startsWith("blob:")
+                )
+                  return url;
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL
                   ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
                   : "http://192.168.1.2:4000";
