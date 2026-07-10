@@ -89,22 +89,77 @@ export interface CreateOrderInput {
   note?: string;
 }
 
+export interface CreateOrderResponse {
+  order: DBOrder;
+  razorpayOrder?: {
+    id: string;
+    amount: number;
+    currency: string;
+    key?: string;
+  };
+}
+
+export interface VerifyPaymentInput {
+  orderId: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}
+
 export const useCreateOrderMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<DBOrder, Error, CreateOrderInput>({
+  return useMutation<CreateOrderResponse, Error, CreateOrderInput>({
+    mutationFn: async (data) => {
+      const response = await apiClient.post<{
+        success: boolean;
+        data: DBOrder | { order: DBOrder; razorpayOrder: { id: string; amount: number; currency: string; key?: string } };
+      }>("/order/checkout", data);
+      
+      const result = response.data.data;
+      if (result && "order" in result) {
+        return result as CreateOrderResponse;
+      }
+      return { order: result as DBOrder };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      // Invalidate cart as well because backend creates order from cart
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+};
+
+export const useVerifyPaymentMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DBOrder, Error, VerifyPaymentInput>({
     mutationFn: async (data) => {
       const response = await apiClient.post<{ success: boolean; data: DBOrder }>(
-        "/order/checkout",
+        "/order/verify-payment",
         data
       );
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orderKeys.list() });
-      // Invalidate cart as well because backend creates order from cart,
-      // and we probably want cart to refresh (it's empty now).
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
     },
   });
 };
+
+export const useCancelOrderMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DBOrder, Error, string>({
+    mutationFn: async (id) => {
+      const response = await apiClient.put<{ success: boolean; data: DBOrder }>(
+        `/order/${id}/cancel`
+      );
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+    },
+  });
+};
+

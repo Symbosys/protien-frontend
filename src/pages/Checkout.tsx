@@ -6,8 +6,19 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
-import { useCreateOrderMutation } from '@/api/hooks/order.hooks';
+import { useCreateOrderMutation, useVerifyPaymentMutation } from '@/api/hooks/order.hooks';
 import { toast } from 'sonner';
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 
 const steps = [
   { id: 'shipping', title: 'Shipping', icon: MapPin },
@@ -23,6 +34,7 @@ export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
   
   const createOrderMutation = useCreateOrderMutation();
+  const verifyPaymentMutation = useVerifyPaymentMutation();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -33,7 +45,7 @@ export default function CheckoutPage() {
     city: '',
     state: '',
     pincode: '',
-    paymentMethod: 'Credit Card',
+    paymentMethod: 'Razorpay',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +57,8 @@ export default function CheckoutPage() {
   const total = subtotal + shipping + tax;
 
   const handleComplete = () => {
+    const isRazorpay = formData.paymentMethod === 'Razorpay';
+    
     createOrderMutation.mutate(
       {
         shippingName: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -53,13 +67,68 @@ export default function CheckoutPage() {
         shippingCity: formData.city,
         shippingState: formData.state,
         shippingPincode: formData.pincode,
-        paymentMethod: formData.paymentMethod === 'Credit Card' ? 'CARD' : 'COD',
+        paymentMethod: isRazorpay ? 'RAZORPAY' : 'COD',
       },
       {
-        onSuccess: (data) => {
-          setOrderNumber(data.orderNumber || Date.now().toString().slice(-8));
-          setIsComplete(true);
-          clearCart();
+        onSuccess: async (data) => {
+          if (isRazorpay && data.razorpayOrder) {
+            const scriptLoaded = await loadRazorpayScript();
+            if (!scriptLoaded) {
+              toast.error("Failed to load Razorpay payment gateway. Please try again.");
+              return;
+            }
+
+            const options = {
+              key: data.razorpayOrder.key,
+              amount: data.razorpayOrder.amount,
+              currency: data.razorpayOrder.currency,
+              name: "Protein Luxe Store",
+              description: `Payment for Order ${data.order.orderNumber}`,
+              order_id: data.razorpayOrder.id,
+              handler: function (response: any) {
+                verifyPaymentMutation.mutate(
+                  {
+                    orderId: data.order.id,
+                    razorpayOrderId: response.razorpay_order_id,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature,
+                  },
+                  {
+                    onSuccess: (confirmedOrder) => {
+                      setOrderNumber(confirmedOrder.orderNumber);
+                      setIsComplete(true);
+                      clearCart();
+                      toast.success("Payment verified and order placed successfully!");
+                    },
+                    onError: (err: any) => {
+                      toast.error(err.response?.data?.message || "Payment verification failed.");
+                    },
+                  }
+                );
+              },
+              prefill: {
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
+                email: formData.email,
+                contact: formData.phone,
+              },
+              theme: {
+                color: "#000000",
+              },
+              modal: {
+                ondismiss: function () {
+                  toast.warning("Payment cancelled by user.");
+                },
+              },
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+          } else {
+            setOrderNumber(data.order.orderNumber);
+            setIsComplete(true);
+            clearCart();
+            toast.success("Order placed successfully!");
+          }
         },
         onError: (err: any) => {
           toast.error(err.response?.data?.message || "Failed to place order");
@@ -67,6 +136,7 @@ export default function CheckoutPage() {
       }
     );
   };
+
 
   if (isComplete) {
     return (
@@ -277,10 +347,10 @@ export default function CheckoutPage() {
                   <h2 className="font-display text-xl mb-6">Payment Method</h2>
 
                   <div className="space-y-4">
-                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'Credit Card' ? "border-foreground" : "border-border hover:border-foreground/50")}>
-                      <input type="radio" name="paymentMethod" value="Credit Card" checked={formData.paymentMethod === 'Credit Card'} onChange={handleInputChange} className="w-4 h-4" />
+                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'Razorpay' ? "border-foreground" : "border-border hover:border-foreground/50")}>
+                      <input type="radio" name="paymentMethod" value="Razorpay" checked={formData.paymentMethod === 'Razorpay'} onChange={handleInputChange} className="w-4 h-4" />
                       <CreditCard className="h-5 w-5" />
-                      <span>Credit Card</span>
+                      <span>Pay Online (UPI, Cards, Netbanking)</span>
                     </label>
                     <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'COD' ? "border-foreground" : "border-border hover:border-foreground/50")}>
                       <input type="radio" name="paymentMethod" value="COD" checked={formData.paymentMethod === 'COD'} onChange={handleInputChange} className="w-4 h-4" />
@@ -289,37 +359,7 @@ export default function CheckoutPage() {
                     </label>
                   </div>
 
-                  {formData.paymentMethod === 'Credit Card' && (
-                    <>
-                      <div className="mt-6">
-                        <label className="text-sm font-medium block mb-2">Card Number</label>
-                        <input
-                          type="text"
-                          placeholder="1234 5678 9012 3456"
-                          className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                        />
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                          <label className="text-sm font-medium block mb-2">Expiry</label>
-                          <input
-                            type="text"
-                            placeholder="MM/YY"
-                            className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium block mb-2">CVV</label>
-                          <input
-                            type="text"
-                            placeholder="123"
-                            className="w-full px-4 py-3 border border-border rounded-md bg-transparent focus:outline-none focus:border-foreground transition-colors"
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
 
                   <div className="flex gap-4 mt-8">
                     <Button variant="outline" size="lg" onClick={() => setCurrentStep(0)}>
@@ -361,7 +401,7 @@ export default function CheckoutPage() {
                           </p>
                         </div>
                         <span className="font-medium">
-                          ${(item.price * item.quantity).toLocaleString()}
+                          ₹{(item.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
                     ))}
@@ -376,12 +416,12 @@ export default function CheckoutPage() {
                       size="lg"
                       className="flex-1"
                       onClick={handleComplete}
-                      disabled={createOrderMutation.isPending}
+                      disabled={createOrderMutation.isPending || verifyPaymentMutation.isPending}
                     >
-                      {createOrderMutation.isPending ? (
+                      {createOrderMutation.isPending || verifyPaymentMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Placing Order...
+                          {verifyPaymentMutation.isPending ? "Verifying Payment..." : "Placing Order..."}
                         </>
                       ) : (
                         "Place Order"
@@ -400,21 +440,21 @@ export default function CheckoutPage() {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${subtotal.toLocaleString()}</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{shipping === 0 ? 'Free' : `$${shipping}`}</span>
+                    <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Tax</span>
-                    <span>${tax}</span>
+                    <span>₹{tax}</span>
                   </div>
                 </div>
 
                 <div className="flex justify-between font-medium text-lg py-4 border-t border-border">
                   <span>Total</span>
-                  <span>${total.toLocaleString()}</span>
+                  <span>₹{total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
