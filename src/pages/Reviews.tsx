@@ -12,6 +12,7 @@ const allReviews = [
     text: "One of the most reliable supplement stores online. The best part is the quality of their whey protein—mixes perfectly every time.",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120",
     rating: 5,
+    product: "Optimum Nutrition Whey Protein",
   },
   {
     id: 2,
@@ -21,6 +22,7 @@ const allReviews = [
     text: "Thank you P&N for the fast shipping. The pre-workout has given me exactly the boost I needed for my heavy lift days.",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120",
     rating: 5,
+    product: "C4 Pre-Workout",
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ const allReviews = [
     text: "Best and right place for authentic supplements at the best price. A completely convincing experience from product range to support. Extremely happy with my purchase.",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120",
     rating: 5,
+    product: "HK Vitals Multivitamin",
   },
   {
     id: 4,
@@ -39,6 +42,7 @@ const allReviews = [
     text: "I've always been particular about my BCAAs and this is my place to be. The flavor profiles are incredible. Highly recommended!",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120",
     rating: 5,
+    product: "Scivation Xtend BCAA",
   },
   {
     id: 5,
@@ -48,6 +52,7 @@ const allReviews = [
     text: "Very professional staff and transparent pricing. The subscription model is very straightforward and helps me save money. Recommending P&N to all my gym buddies.",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120",
     rating: 5,
+    product: "P&N Elite Membership",
   },
   {
     id: 6,
@@ -57,6 +62,7 @@ const allReviews = [
     text: "Purchased the mass gainer last month. The macros are perfect and it doesn't leave me feeling bloated. Customer service was excellent in assisting with shipping.",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120",
     rating: 5,
+    product: "GNC Pro Performance Mass Gainer",
   },
 ];
 
@@ -170,7 +176,10 @@ export default function Reviews() {
                   <div className="w-9 h-9 rounded-full border border-accent overflow-hidden bg-[#FAF9F6]">
                     <img src={review.avatar} alt="" className="w-full h-full object-cover" />
                   </div>
-                  <span className="text-[10px] uppercase tracking-widest text-[#888] font-bold">Reviewed Item</span>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase tracking-widest text-[#888] font-bold">Reviewed Item</span>
+                    <span className="text-xs font-bold text-primary mt-0.5">{review.product}</span>
+                  </div>
                 </div>
 
               </div>

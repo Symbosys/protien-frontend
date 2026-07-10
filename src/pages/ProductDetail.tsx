@@ -103,9 +103,10 @@ export default function ProductDetail() {
         netWeight: undefined,
       }
     : mockProduct;
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
 
+  const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isMainDetailOpen, setIsMainDetailOpen] = useState(true);
   const [zoomScale, setZoomScale] = useState(false);
@@ -367,13 +368,108 @@ export default function ProductDetail() {
                 </div>
               </div>
 
+              {/* Quantity Selector and Add to Cart Section */}
+              <div className="flex items-center gap-4 pt-4">
+                {/* Quantity Box */}
+                <div className="flex items-center border border-[#E5D5B5]/60 rounded bg-[#FAF9F6] h-12 px-3">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-1 text-[#555] hover:text-[#8A1B28] transition-colors"
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="w-12 text-center text-xs lg:text-sm font-bold text-[#2C2C2C]">
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-1 text-[#555] hover:text-[#8A1B28] transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => {
+                    const firstSize = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes[0] : undefined;
+                    const firstColor = Array.isArray(product.colors) && product.colors.length > 0 
+                      ? (typeof product.colors[0] === "string" ? product.colors[0] : (product.colors[0] as any).name)
+                      : undefined;
+                    addItem({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.images[0] ?? "",
+                      size: firstSize,
+                      color: firstColor,
+                      quantity: quantity,
+                    });
+                  }}
+                  className="flex-1 h-12 bg-black hover:bg-black/90 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded transition-colors shadow-sm"
+                >
+                  Add to Cart
+                </button>
+
+                {/* Wishlist Heart Button next to Add to Cart */}
+                <button
+                  onClick={() =>
+                    toggleItem({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.images[0],
+                    })
+                  }
+                  className="p-3 border border-[#E5D5B5]/60 hover:border-[#8A1B28] hover:text-[#8A1B28] text-[#555] rounded bg-white shadow-sm transition-colors h-12 flex items-center justify-center aspect-square"
+                  title="Add to wishlist"
+                >
+                  <Heart
+                    className={cn(
+                      "h-5 w-5 stroke-[1.8]",
+                      isInWishlist(product.id)
+                        ? "fill-[#8A1B28] text-[#8A1B28]"
+                        : "text-[#555]",
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Buy It Now Button */}
+              <div className="pt-2">
+                <button
+                  onClick={() => {
+                    const firstSize = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes[0] : undefined;
+                    const firstColor = Array.isArray(product.colors) && product.colors.length > 0 
+                      ? (typeof product.colors[0] === "string" ? product.colors[0] : (product.colors[0] as any).name)
+                      : undefined;
+                    
+                    addItem({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.images[0] ?? "",
+                      size: firstSize,
+                      color: firstColor,
+                      quantity: quantity,
+                    });
+                    openCart();
+                  }}
+                  className="w-full h-12 bg-white hover:bg-[#FAF9F6] border-2 border-black text-black text-xs lg:text-sm font-bold uppercase tracking-widest rounded transition-colors shadow-sm text-center"
+                >
+                  Buy It Now
+                </button>
+              </div>
+
               {/* WhatsApp To Buy CTA Button */}
-              <div className="pt-4">
+              <div className="pt-2">
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2.5 bg-[#8A1B28] hover:bg-[#721620] text-white text-xs lg:text-sm font-bold uppercase tracking-widest py-4 px-6 rounded-full transition-colors shadow-md text-center"
+                  className="w-full flex items-center justify-center gap-2.5 bg-[#8A1B28] hover:bg-[#721620] text-white text-xs lg:text-sm font-bold uppercase tracking-widest py-3 px-6 rounded-full transition-colors shadow-md text-center"
                 >
                   <MessageCircle className="h-5 w-5 fill-current" />
                   Whatsapp to Buy
