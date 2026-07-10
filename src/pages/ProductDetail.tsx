@@ -18,9 +18,11 @@ import {
   Minus,
   Plus,
   Share2,
+  Star,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useCreateReviewMutation } from "@/api/hooks/review.hooks";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -39,6 +41,32 @@ export default function ProductDetail() {
   );
 
   const mockProduct = products.find((p) => p.id === id);
+
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+
+  const isLoggedIn = typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"));
+  const postReviewMutation = useCreateReviewMutation();
+
+  const handlePostReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+
+    postReviewMutation.mutate({
+      productId,
+      rating: reviewRating,
+      comment: reviewComment.trim()
+    }, {
+      onSuccess: () => {
+        setReviewComment("");
+        setReviewRating(5);
+        alert("Thank you for your feedback! Review submitted successfully.");
+      },
+      onError: (err: any) => {
+        alert(err.response?.data?.message || err.message || "Failed to submit review. You might have already reviewed this product.");
+      }
+    });
+  };
 
   const processImageUrl = (url: string) => {
     if (!url) return "";
@@ -439,6 +467,133 @@ export default function ProductDetail() {
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Product Reviews Section */}
+          <div className="mt-16 max-w-4xl mx-auto border-t border-[#E5D5B5]/60 pt-12">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="font-display text-2xl font-bold text-[#2C2C2C] tracking-wide">
+                Customer Reviews
+              </h2>
+              <div className="flex items-center gap-1.5 bg-[#8A1B28]/5 text-[#8A1B28] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                <Star className="h-4 w-4 fill-[#8A1B28] text-[#8A1B28]" />
+                <span>{dbProduct?.rating || 0} ({dbProduct?.numReviews || 0} reviews)</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+              {/* Reviews List */}
+              <div className="md:col-span-2 space-y-6">
+                {!dbProduct?.reviews || dbProduct.reviews.length === 0 ? (
+                  <p className="text-muted-foreground text-sm py-4">No reviews yet. Be the first to review this product!</p>
+                ) : (
+                  dbProduct.reviews.map((rev) => (
+                    <div key={rev.id} className="border-b border-border pb-6 last:border-b-0 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm text-[#2C2C2C]">
+                          {rev.user ? `${rev.user.firstName || ""} ${rev.user.lastName || ""}`.trim() : "Anonymous User"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(rev.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                        </span>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={cn(
+                              "h-3.5 w-3.5",
+                              s <= rev.rating ? "fill-[#8A1B28] text-[#8A1B28]" : "text-gray-300"
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs lg:text-sm text-[#555] leading-relaxed">
+                        {rev.comment}
+                      </p>
+                      {rev.reply && (
+                        <div className="ml-4 mt-3 bg-[#FAF9F6] border-l-2 border-[#8A1B28] p-3.5 rounded-r-lg space-y-1">
+                          <p className="text-[10px] font-bold text-[#8A1B28] uppercase tracking-wider">
+                            Reply from P&N
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {rev.reply}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Add Review Form */}
+              <div className="bg-card border border-[#E5D5B5] rounded-xl p-5 shadow-sm space-y-4">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-[#2C2C2C]">
+                  Write a Review
+                </h3>
+                {isLoggedIn ? (
+                  <form onSubmit={handlePostReview} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide block">
+                        Your Rating
+                      </label>
+                      <div className="flex gap-1.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setReviewRating(s)}
+                            className="focus:outline-none transition-transform hover:scale-110"
+                          >
+                            <Star
+                              className={cn(
+                                "h-6 w-6 transition-colors",
+                                s <= reviewRating ? "fill-[#8A1B28] text-[#8A1B28]" : "text-gray-300 hover:text-[#8A1B28]/50"
+                              )}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label htmlFor="rev-comment" className="text-xs font-bold text-muted-foreground uppercase tracking-wide block">
+                        Comment
+                      </label>
+                      <textarea
+                        id="rev-comment"
+                        value={reviewComment}
+                        onChange={(e) => setReviewComment(e.target.value)}
+                        placeholder="Share your thoughts about this product..."
+                        rows={3}
+                        className="w-full text-xs lg:text-sm bg-white border border-[#E5D5B5] focus:border-[#8A1B28] focus:ring-1 focus:ring-[#8A1B28]/20 rounded-lg p-2.5 outline-none transition-all resize-none"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={postReviewMutation.isPending}
+                      className="w-full py-2.5 bg-[#8A1B28] hover:bg-[#721620] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-sm disabled:opacity-50"
+                    >
+                      {postReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center py-4 space-y-2">
+                    <p className="text-xs text-muted-foreground leading-normal">
+                      You must be logged in to leave a review.
+                    </p>
+                    <Link
+                      to="/login"
+                      className="inline-block text-xs font-bold text-[#8A1B28] hover:underline"
+                    >
+                      Login Now
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

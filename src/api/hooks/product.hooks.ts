@@ -51,6 +51,17 @@ export interface DBProduct {
     name: string;
   } | null;
   variants?: DBProductVariant[];
+  reviews?: {
+    id: string;
+    rating: number;
+    comment: string;
+    reply: string | null;
+    createdAt: string;
+    user: {
+      firstName: string;
+      lastName: string;
+    };
+  }[];
 }
 
 export interface ProductsResponse {
