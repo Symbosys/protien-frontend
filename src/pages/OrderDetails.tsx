@@ -196,7 +196,7 @@ export default function OrderDetails(): JSX.Element {
         cardLast4: "XXXX",
         network: "Visa",
         status: dbOrder.paymentStatus,
-        transactionId: "TXN_" + dbOrder.orderNumber,
+        transactionId: dbOrder.cashfreeOrderId || ("TXN_" + dbOrder.orderNumber),
       },
       items: dbOrder.items.map((item: any) => ({
         id: item.productId,
