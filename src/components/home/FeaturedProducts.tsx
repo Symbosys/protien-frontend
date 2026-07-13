@@ -5,7 +5,6 @@ import { useProductsQuery } from "@/api/hooks/product.hooks";
 import { products as mockProducts } from "@/data/products";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
@@ -32,7 +31,6 @@ export default function FeaturedProducts() {
     limit: 8,
     sort: "newest",
   });
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Map backend products → ProductCardItem, fallback to mock data while loading or if empty
   const featured: ProductCardItem[] =
@@ -93,18 +91,34 @@ export default function FeaturedProducts() {
             ))}
           </div>
         ) : (
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto hide-scrollbar pb-4"
-          >
-            {featured.map((product, index) => (
-              <div
-                key={product.id}
-                className="min-w-[220px] sm:min-w-[260px] max-w-[280px] flex-shrink-0"
-              >
-                <ProductCard product={product} index={index} />
+          <div className="w-full overflow-hidden relative py-2">
+            <div 
+              className="animate-scroll-ltr flex hover:[animation-play-state:paused] cursor-pointer"
+              style={{ animationDuration: "40s" }}
+            >
+              {/* First track */}
+              <div className="flex shrink-0 items-center justify-around gap-4 md:gap-6 px-4 min-w-full">
+                {featured.map((product, index) => (
+                  <div
+                    key={`track1-${product.id}-${index}`}
+                    className="min-w-[220px] sm:min-w-[260px] max-w-[280px] flex-shrink-0"
+                  >
+                    <ProductCard product={product} index={index} />
+                  </div>
+                ))}
               </div>
-            ))}
+              {/* Second track (identical for seamless loop) */}
+              <div className="flex shrink-0 items-center justify-around gap-4 md:gap-6 px-4 min-w-full">
+                {featured.map((product, index) => (
+                  <div
+                    key={`track2-${product.id}-${index}`}
+                    className="min-w-[220px] sm:min-w-[260px] max-w-[280px] flex-shrink-0"
+                  >
+                    <ProductCard product={product} index={index} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

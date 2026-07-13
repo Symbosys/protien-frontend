@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://protien-backend.vercel.app/api";
-// const API_BASE_URL = "http://192.168.1.2:4000/api";
+// const API_BASE_URL = "https://protien-backend.vercel.app/api";
+const API_BASE_URL = "http://192.168.1.2:4000/api";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
