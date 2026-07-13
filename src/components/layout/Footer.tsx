@@ -39,7 +39,7 @@ export default function Footer() {
               href="mailto:akkigupta2411@gmail.com"
               className="text-white hover:text-[#8CFF64] transition-colors text-sm lg:text-base font-semibold"
             >
-              akkigupta2411@gmail.com
+              support@protein-and-nutrients.com
             </a>
           </div>
 
