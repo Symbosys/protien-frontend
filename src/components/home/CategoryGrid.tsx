@@ -1,9 +1,7 @@
 "use client";
 
 import { useCategoriesQuery, DBCategory } from "@/api/hooks/category.hooks";
-import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
-import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { apiClient } from "@/api/apiclient/apiClient";
 
@@ -14,7 +12,6 @@ interface CategoryItem {
 
 export default function CategoryGrid() {
   const { data, isLoading } = useCategoriesQuery({ limit: 50 });
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const processImageUrl = (url: string | null) => {
     if (!url)
@@ -66,42 +63,65 @@ export default function CategoryGrid() {
           </Link>
         </div>
 
-        {/* Scrollable Category Grid */}
-        <div
-          ref={scrollRef}
-          className="flex gap-6 overflow-x-auto hide-scrollbar pb-4"
-        >
-          {categoriesList.map((category: CategoryItem, index: number) => {
-            const imageUrl = processImageUrl(category.image);
-            return (
-              <motion.div
-                key={category.name}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.04, duration: 0.3 }}
-                className="flex-shrink-0"
-              >
-                <Link
-                  to={`/products?category=${category.name}`}
-                  className="flex flex-col items-center group flex-shrink-0"
-                >
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border border-[#E5D5B5] group-hover:border-[#8A1B28] transition-all duration-300 shadow-sm">
-                    <div className="w-full h-full rounded-full overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={category.name}
-                        className="w-full h-full object-cover"
-                      />
+        {/* Scrollable Category Grid - Infinite Scroll LTR */}
+        <div className="w-full overflow-hidden relative py-2">
+          <div 
+            className="animate-scroll-ltr flex hover:[animation-play-state:paused] cursor-pointer"
+            style={{ animationDuration: "35s" }}
+          >
+            {/* First track */}
+            <div className="flex shrink-0 items-center justify-around gap-8 md:gap-12 px-4 min-w-full">
+              {categoriesList.map((category: CategoryItem, idx: number) => {
+                const imageUrl = processImageUrl(category.image);
+                return (
+                  <Link
+                    key={`track1-${category.name}-${idx}`}
+                    to={`/products?category=${encodeURIComponent(category.name)}`}
+                    className="flex flex-col items-center group flex-shrink-0"
+                  >
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border border-[#E5D5B5] group-hover:border-[#8A1B28] transition-all duration-300 shadow-sm">
+                      <div className="w-full h-full rounded-full overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={category.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 text-[#2C2C2C] group-hover:text-[#8A1B28] transition-colors text-center truncate w-20 md:w-24">
-                    {category.name}
-                  </span>
-                </Link>
-              </motion.div>
-            );
-          })}
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 text-[#2C2C2C] group-hover:text-[#8A1B28] transition-colors text-center truncate w-20 md:w-24">
+                      {category.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+            {/* Second track (identical for seamless loop) */}
+            <div className="flex shrink-0 items-center justify-around gap-8 md:gap-12 px-4 min-w-full">
+              {categoriesList.map((category: CategoryItem, idx: number) => {
+                const imageUrl = processImageUrl(category.image);
+                return (
+                  <Link
+                    key={`track2-${category.name}-${idx}`}
+                    to={`/products?category=${encodeURIComponent(category.name)}`}
+                    className="flex flex-col items-center group flex-shrink-0"
+                  >
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border border-[#E5D5B5] group-hover:border-[#8A1B28] transition-all duration-300 shadow-sm">
+                      <div className="w-full h-full rounded-full overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={category.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 text-[#2C2C2C] group-hover:text-[#8A1B28] transition-colors text-center truncate w-20 md:w-24">
+                      {category.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </section>
