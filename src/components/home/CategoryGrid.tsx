@@ -46,6 +46,8 @@ export default function CategoryGrid() {
     image: cat.image,
   }));
 
+  const repeatedCategories = [...categoriesList, ...categoriesList, ...categoriesList];
+
   return (
     <section className="py-10 bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
@@ -70,8 +72,8 @@ export default function CategoryGrid() {
             style={{ animationDuration: "35s" }}
           >
             {/* First track */}
-            <div className="flex shrink-0 items-center justify-around gap-8 md:gap-12 px-4 min-w-full">
-              {categoriesList.map((category: CategoryItem, idx: number) => {
+            <div className="flex shrink-0 items-center justify-start gap-4 md:gap-6 px-2 min-w-full">
+              {repeatedCategories.map((category: CategoryItem, idx: number) => {
                 const imageUrl = processImageUrl(category.image);
                 return (
                   <Link
@@ -96,8 +98,8 @@ export default function CategoryGrid() {
               })}
             </div>
             {/* Second track (identical for seamless loop) */}
-            <div className="flex shrink-0 items-center justify-around gap-8 md:gap-12 px-4 min-w-full">
-              {categoriesList.map((category: CategoryItem, idx: number) => {
+            <div className="flex shrink-0 items-center justify-start gap-4 md:gap-6 px-2 min-w-full">
+              {repeatedCategories.map((category: CategoryItem, idx: number) => {
                 const imageUrl = processImageUrl(category.image);
                 return (
                   <Link
