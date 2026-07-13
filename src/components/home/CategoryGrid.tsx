@@ -23,11 +23,12 @@ export default function CategoryGrid() {
       url.startsWith("blob:")
     )
       return url;
-    
+
     // Resolve dynamic base URL from apiClient configuration
     const clientBaseUrl = apiClient.defaults.baseURL || "";
-    const baseUrl = clientBaseUrl.replace("/api", "") || "http://192.168.1.2:4000";
-    
+    const baseUrl =
+      clientBaseUrl.replace("/api", "") || "http://192.168.1.2:4000";
+
     return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
@@ -41,12 +42,18 @@ export default function CategoryGrid() {
     return null;
   }
 
-  const categoriesList: CategoryItem[] = rawCategories.map((cat: DBCategory) => ({
-    name: cat.name,
-    image: cat.image,
-  }));
+  const categoriesList: CategoryItem[] = rawCategories.map(
+    (cat: DBCategory) => ({
+      name: cat.name,
+      image: cat.image,
+    }),
+  );
 
-  const repeatedCategories = [...categoriesList, ...categoriesList, ...categoriesList];
+  const repeatedCategories = [
+    ...categoriesList,
+    ...categoriesList,
+    ...categoriesList,
+  ];
 
   return (
     <section className="py-10 bg-white">
@@ -67,9 +74,9 @@ export default function CategoryGrid() {
 
         {/* Scrollable Category Grid - Infinite Scroll LTR */}
         <div className="w-full overflow-hidden relative py-2">
-          <div 
+          <div
             className="animate-scroll-ltr flex hover:[animation-play-state:paused] cursor-pointer"
-            style={{ animationDuration: "35s" }}
+            style={{ animationDuration: "50s" }}
           >
             {/* First track */}
             <div className="flex shrink-0 items-center justify-start gap-4 md:gap-6 px-2 min-w-full">
