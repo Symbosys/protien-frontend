@@ -87,13 +87,13 @@ export default function HeroSlider() {
             <img
               src={slides[current].image}
               alt={slides[current].title}
-              className="w-full h-full object-cover opacity-80"
+              className="w-full h-full object-cover object-top opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />
           </div>
 
           {/* Content */}
-          <div className="relative z-10 h-full flex items-center">
+          <div className="relative z-10 h-full flex items-center pt-8 lg:pt-12">
             <div className="max-w-7xl mx-auto px-4 lg:px-8 w-full">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
