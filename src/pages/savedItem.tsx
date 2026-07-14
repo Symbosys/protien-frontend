@@ -127,7 +127,7 @@ const SavedItems = () => {
                                                     </h3>
                                                 </Link>
                                                 <p className="text-muted-foreground text-sm font-medium">
-                                                    ${item.price.toLocaleString()}
+                                                    ₹{item.price.toLocaleString()}
                                                 </p>
                                             </div>
 

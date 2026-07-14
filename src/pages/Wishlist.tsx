@@ -100,7 +100,7 @@ export default function WishlistPage() {
                         {item.name}
                       </h3>
                     </Link>
-                    <p className="font-medium">${item.price.toLocaleString()}</p>
+                    <p className="font-medium">₹{item.price.toLocaleString()}</p>
                   </motion.div>
                 ))}
               </div>
