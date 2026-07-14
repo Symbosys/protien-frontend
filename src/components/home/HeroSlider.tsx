@@ -1,34 +1,37 @@
 "use client";
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const slides = [
   {
     id: 1,
-    subtitle: 'PREMIUM SPORTS NUTRITION',
-    title: 'PREMIUM\nPROTEIN SERIES',
-    price: 'START FROM ₹1999',
-    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop',
-    cta: { text: 'Shop Now', link: '/products' },
+    subtitle: "PREMIUM SPORTS NUTRITION",
+    title: "PREMIUM\nPROTEIN SERIES",
+    price: "START FROM ₹1999",
+    image:
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop",
+    cta: { text: "Shop Now", link: "/products" },
   },
   {
     id: 2,
-    subtitle: 'ENGINEERED FOR PERFORMANCE',
-    title: 'BREAK YOUR\nLIMITS',
-    price: 'UP TO 40% OFF',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop',
-    cta: { text: 'Explore Collections', link: '/products' },
+    subtitle: "ENGINEERED FOR PERFORMANCE",
+    title: "BREAK YOUR\nLIMITS",
+    price: "UP TO 40% OFF",
+    image:
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop",
+    cta: { text: "Explore Collections", link: "/products" },
   },
   {
     id: 3,
-    subtitle: 'NEW ARRIVALS',
-    title: 'ULTRA CLEAN\nWHEY PROTEIN',
-    price: 'JUST LAUNCHED',
-    image: 'https://images.unsplash.com/photo-1579722820308-d74e571900a9?q=80&w=2070&auto=format&fit=crop',
-    cta: { text: 'Shop Now', link: '/products' },
+    subtitle: "NEW ARRIVALS",
+    title: "ULTRA CLEAN\nWHEY PROTEIN",
+    price: "JUST LAUNCHED",
+    image:
+      "https://images.unsplash.com/photo-1579722820308-d74e571900a9?q=80&w=2070&auto=format&fit=crop",
+    cta: { text: "Shop Now", link: "/products" },
   },
 ];
 
@@ -56,7 +59,7 @@ export default function HeroSlider() {
 
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
+      x: direction > 0 ? "100%" : "-100%",
       opacity: 0,
     }),
     center: {
@@ -64,14 +67,17 @@ export default function HeroSlider() {
       opacity: 1,
     },
     exit: (direction: number) => ({
-      x: direction > 0 ? '-100%' : '100%',
+      x: direction > 0 ? "-100%" : "100%",
       opacity: 0,
     }),
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-4 lg:px-8 mt-6">
-      <div className="relative w-full overflow-hidden bg-black rounded-3xl" style={{ height: 'clamp(420px, 75vh, 700px)' }}>
+    <section className="max-w-7xl mx-auto px-4 lg:px-8 mt-9">
+      <div
+        className="relative w-full overflow-hidden bg-black rounded-3xl"
+        style={{ height: "clamp(420px, 75vh, 700px)" }}
+      >
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={current}
@@ -80,7 +86,7 @@ export default function HeroSlider() {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             className="absolute inset-0 w-full h-full"
           >
             {/* Background Image with Overlay */}
@@ -152,7 +158,7 @@ export default function HeroSlider() {
                 setCurrent(index);
               }}
               className={`h-2.5 rounded-full transition-all duration-300 ${
-                index === current ? 'w-8 bg-[#8CFF64]' : 'w-2.5 bg-white/50'
+                index === current ? "w-8 bg-[#8CFF64]" : "w-2.5 bg-white/50"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
