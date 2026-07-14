@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ const slides = [
     subtitle: 'PREMIUM SPORTS NUTRITION',
     title: 'PREMIUM\nPROTEIN SERIES',
     price: 'START FROM ₹1999',
-    image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop',
     cta: { text: 'Shop Now', link: '/products' },
   },
   {
@@ -20,7 +19,7 @@ const slides = [
     subtitle: 'ENGINEERED FOR PERFORMANCE',
     title: 'BREAK YOUR\nLIMITS',
     price: 'UP TO 40% OFF',
-    image: 'https://images.unsplash.com/photo-1594882645126-14020914d58d?q=80&w=2085&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop',
     cta: { text: 'Explore Collections', link: '/products' },
   },
   {
@@ -28,7 +27,7 @@ const slides = [
     subtitle: 'NEW ARRIVALS',
     title: 'ULTRA CLEAN\nWHEY PROTEIN',
     price: 'JUST LAUNCHED',
-    image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1579722820308-d74e571900a9?q=80&w=2070&auto=format&fit=crop',
     cta: { text: 'Shop Now', link: '/products' },
   },
 ];
@@ -72,7 +71,7 @@ export default function HeroSlider() {
 
   return (
     <section className="relative w-full overflow-hidden bg-black" style={{ height: 'clamp(420px, 75vh, 700px)' }}>
-      <AnimatePresence initial={false} custom={direction} mode="wait">
+      <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={current}
           custom={direction}
@@ -88,9 +87,9 @@ export default function HeroSlider() {
             <img
               src={slides[current].image}
               alt={slides[current].title}
-              className="w-full h-full object-cover opacity-40"
+              className="w-full h-full object-cover opacity-80"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />
           </div>
 
           {/* Content */}
@@ -102,7 +101,11 @@ export default function HeroSlider() {
                 transition={{ delay: 0.2, duration: 0.6 }}
                 className="max-w-lg"
               >
-                <h1 className="heading-bold text-4xl sm:text-5xl lg:text-7xl text-white mb-4 whitespace-pre-line">
+                <span className="text-white/70 font-semibold text-xs sm:text-sm tracking-widest uppercase mb-2 block">
+                  {slides[current].subtitle}
+                </span>
+
+                <h1 className="heading-bold text-4xl sm:text-5xl lg:text-7xl text-white mb-4 whitespace-pre-line leading-[1.1]">
                   {slides[current].title}
                 </h1>
 
