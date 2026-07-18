@@ -1,76 +1,77 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { useReviewsQuery, ReviewItem } from "@/api/hooks/review.hooks";
 
-const reviews = [
-  {
-    id: 1,
-    name: "Kavita Sharma",
-    title: "Awesome Preworkout",
-    text: "The flavor is great, not sweet, and not bland. The flavor is there. It does make me a bit itchy but definitely helps with keeping me busy.",
-    rating: 5,
-    date: "13 Aug 2024",
-    product: "C4 Pre-Workout",
-  },
-  {
-    id: 2,
-    name: "Ranjit Singh",
-    title: "Great Quality Protein",
-    text: "Overall a very good product. I've been using it for 3 months now. No side effects and the muscle recovery is noticeably faster. Highly recommend!",
-    rating: 5,
-    date: "28 Jul 2024",
-    product: "Gold Standard Whey",
-  },
-  {
-    id: 3,
-    name: "Ananya Gupta",
-    title: "Best Creatine Ever",
-    text: "Superb quality creatine. It mixes well, no gritty taste. My strength has gone up significantly in just 4 weeks of use. Definitely worth the price.",
-    rating: 5,
-    date: "15 Jun 2024",
-    product: "Creatine Monohydrate",
-  },
-  {
-    id: 4,
-    name: "Vikram Patel",
-    title: "Perfect Peanut Butter",
-    text: "Love the crunchy texture! No added sugar or oil. Pure peanut goodness. I've tried many brands but Pintola stands out. My go-to breakfast now.",
-    rating: 5,
-    date: "02 May 2024",
-    product: "Pintola Peanut Butter",
-  },
-  {
-    id: 5,
-    name: "Priya Nair",
-    title: "Multivitamins that Work",
-    text: "I feel so much more energetic since I started taking these multivitamins. No more afternoon fatigue. The tablets are easy to swallow too.",
-    rating: 4,
-    date: "19 Apr 2024",
-    product: "HK Vitals Multivitamin",
-  },
-];
+interface TestimonialItem {
+  id: string;
+  name: string;
+  title: string;
+  text: string;
+  rating: number;
+  date: string;
+  product: string;
+}
 
 export default function Testimonials() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const { data, isLoading } = useReviewsQuery({ limit: 10 });
 
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -340, behavior: 'smooth' });
+    scrollRef.current?.scrollBy({ left: -340, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 340, behavior: 'smooth' });
+    scrollRef.current?.scrollBy({ left: 340, behavior: "smooth" });
   };
+
+  const formatDate = (isoString: string) => {
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return "Recent";
+    }
+  };
+
+  if (isLoading) {
+    return null;
+  }
+
+  const rawReviews = data?.reviews || [];
+
+  if (rawReviews.length === 0) {
+    return null;
+  }
+
+  const activeReviews: TestimonialItem[] = rawReviews.map((r: ReviewItem) => ({
+    id: r.id,
+    name: r.customerName && r.customerName.toLowerCase() !== "anonymous" ? r.customerName : "Verified Buyer",
+    title: r.rating === 5 ? "Highly Recommended!" : "Great Quality Product",
+    text: r.comment,
+    rating: r.rating,
+    date: formatDate(r.date),
+    product: r.productName,
+  }));
+
 
   return (
     <section className="py-14 bg-[#FAFAFA]">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        
         {/* Header */}
         <div className="flex items-end justify-between mb-10">
           <div>
-            <h2 className="heading-bold text-3xl sm:text-4xl lg:text-5xl text-gray-300 italic" style={{ fontStyle: 'italic' }}>
+            <h2
+              className="heading-bold text-3xl sm:text-4xl lg:text-5xl text-gray-300 italic"
+              style={{ fontStyle: "italic" }}
+            >
               FEATURED
             </h2>
             <h2 className="heading-bold text-3xl sm:text-4xl lg:text-5xl text-black">
@@ -100,7 +101,7 @@ export default function Testimonials() {
           ref={scrollRef}
           className="flex gap-5 overflow-x-auto hide-scrollbar pb-4"
         >
-          {reviews.map((review, index) => (
+          {activeReviews.map((review: TestimonialItem, index: number) => (
             <motion.div
               key={review.id}
               initial={{ opacity: 0, y: 15 }}
@@ -113,13 +114,21 @@ export default function Testimonials() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex gap-0.5">
                   {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-orange-400 text-orange-400" />
+                    <Star
+                      key={i}
+                      className="w-4 h-4 fill-orange-400 text-orange-400"
+                    />
                   ))}
                   {[...Array(5 - review.rating)].map((_, i) => (
-                    <Star key={`empty-${i}`} className="w-4 h-4 fill-gray-200 text-gray-200" />
+                    <Star
+                      key={`empty-${i}`}
+                      className="w-4 h-4 fill-gray-200 text-gray-200"
+                    />
                   ))}
                 </div>
-                <span className="text-[11px] text-gray-400 font-medium">{review.date}</span>
+                <span className="text-[11px] text-gray-400 font-medium">
+                  {review.date}
+                </span>
               </div>
 
               {/* Review Title */}
@@ -136,9 +145,14 @@ export default function Testimonials() {
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#8CFF64] flex items-center justify-center text-black font-bold text-xs">
-                    {review.name.split(' ').map(n => n[0]).join('')}
+                    {review.name
+                      .split(" ")
+                      .map((n: string) => n[0])
+                      .join("")}
                   </div>
-                  <span className="text-xs font-semibold text-gray-700">{review.name}</span>
+                  <span className="text-xs font-semibold text-gray-700">
+                    {review.name}
+                  </span>
                 </div>
                 <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">
                   {review.product}

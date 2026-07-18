@@ -18,6 +18,7 @@ export default function Login() {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const requestOtpMutation = useRequestOtpMutation();
   const verifyOtpMutation = useVerifyOtpMutation();
@@ -58,11 +59,13 @@ export default function Login() {
 
     setLoading(true);
     setError("");
+    setSuccessMessage("");
 
     try {
-      await requestOtpMutation.mutateAsync({
+      const response = await requestOtpMutation.mutateAsync({
         phoneNumber: `+91${phoneNumber}`,
       });
+      setSuccessMessage(response.message || "OTP sent successfully");
       setIsOtpOpen(true);
     } catch (err: any) {
       console.error("OTP send error:", err);
@@ -255,6 +258,11 @@ export default function Login() {
                       +91 {phoneNumber}
                     </span>
                   </p>
+                  {successMessage && (
+                    <div className="mt-3 text-sm text-green-600 dark:text-green-400 bg-green-500/10 py-2 px-3 rounded-xl border border-green-500/20 inline-block font-medium">
+                      {successMessage}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-center gap-3 mb-8">

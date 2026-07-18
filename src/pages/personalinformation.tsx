@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
+import { useUserQuery, useUpdateUserMutation } from '@/api/hooks/user.hooks';
+import { toast } from 'sonner';
 import {
     User,
     Mail,
@@ -13,34 +16,210 @@ import {
     ShieldCheck
 } from 'lucide-react';
 
+interface CategoryItem {
+  name: string;
+  image: string | null;
+}
+
 export default function PersonalInformation() {
+    const navigate = useNavigate();
+    const updateMutation = useUpdateUserMutation();
+
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    // Mock User Data
+    // Inline edit states for email and phone
+    const [isEditingEmail, setIsEditingEmail] = useState(false);
+    const [isEditingPhone, setIsEditingPhone] = useState(false);
+    const [emailInput, setEmailInput] = useState('');
+    const [phoneInput, setPhoneInput] = useState('');
+
+    // Fetch user info from localStorage and API
+    const localUser = useMemo(() => {
+        try {
+            const userString = localStorage.getItem('user');
+            return userString ? JSON.parse(userString) : null;
+        } catch {
+            return null;
+        }
+    }, []);
+
+    const userId = localUser?.id || '';
+
+    const { data: userProfileData, isLoading: isProfileLoading } = useUserQuery(userId, !!userId);
+    const user = userProfileData?.data || localUser;
+
+    // Form data state
     const [formData, setFormData] = useState({
-        firstName: 'Amit',
-        lastName: 'Das',
-        gender: 'Male',
-        email: 'amit.das@example.com',
-        phone: '+91 98765 43210',
-        dob: '1995-08-15' // YYYY-MM-DD
+        firstName: '',
+        lastName: '',
+        gender: '',
+        email: '',
+        phone: '',
+        dob: ''
     });
+
+    // Check Authentication
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !localStorage.getItem('user_token')) {
+            navigate('/login');
+        }
+    }, [navigate]);
+
+    // Sync state with fetched user data
+    useEffect(() => {
+        if (user) {
+            let formattedDob = '';
+            if (user.dateOfBirth) {
+                try {
+                    formattedDob = new Date(user.dateOfBirth).toISOString().split('T')[0];
+                } catch {
+                    formattedDob = user.dateOfBirth;
+                }
+            }
+            setFormData({
+                firstName: user.firstName || 'Amit',
+                lastName: user.lastName || 'Das',
+                gender: user.gender || 'Male',
+                email: user.email || 'amit.das@example.com',
+                phone: user.phoneNumber || '+91 98765 43210',
+                dob: formattedDob || '1995-08-15'
+            });
+        }
+    }, [user]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
+    // Save profile details (name, gender, dob)
+    const handleSave = async () => {
+        if (!userId) {
+            toast.error('User ID not found. Please log in again.');
+            return;
+        }
         setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setLoading(false);
+        try {
+            await updateMutation.mutateAsync({
+                id: userId,
+                data: {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    gender: formData.gender,
+                    dateOfBirth: formData.dob
+                }
+            });
+            // Update local storage user record
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                parsed.firstName = formData.firstName;
+                parsed.lastName = formData.lastName;
+                parsed.gender = formData.gender;
+                parsed.dateOfBirth = formData.dob;
+                localStorage.setItem('user', JSON.stringify(parsed));
+            }
+            toast.success('Profile details updated successfully!');
             setIsEditing(false);
-            // Toast success would go here
-        }, 1000);
+        } catch (error: any) {
+            console.error('Failed to save profile changes:', error);
+            toast.error(error?.response?.data?.message || 'Failed to update profile details.');
+        } finally {
+            setLoading(false);
+        }
     };
+
+    // Save email address changes
+    const handleUpdateEmail = async () => {
+        if (!userId) {
+            toast.error('User ID not found.');
+            return;
+        }
+        if (!emailInput.trim()) {
+            toast.error('Please enter a valid email address.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await updateMutation.mutateAsync({
+                id: userId,
+                data: { email: emailInput.trim() }
+            });
+            // Update local storage user record
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                parsed.email = emailInput.trim();
+                localStorage.setItem('user', JSON.stringify(parsed));
+            }
+            setFormData(prev => ({ ...prev, email: emailInput.trim() }));
+            toast.success('Email address updated successfully!');
+            setIsEditingEmail(false);
+        } catch (error: any) {
+            console.error('Failed to update email:', error);
+            toast.error(error?.response?.data?.message || 'Failed to update email address.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Save mobile number changes
+    const handleUpdatePhone = async () => {
+        if (!userId) {
+            toast.error('User ID not found.');
+            return;
+        }
+        if (!phoneInput.trim()) {
+            toast.error('Please enter a valid mobile number.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await updateMutation.mutateAsync({
+                id: userId,
+                data: { phoneNumber: phoneInput.trim() }
+            });
+            // Update local storage user record
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                parsed.phoneNumber = phoneInput.trim();
+                localStorage.setItem('user', JSON.stringify(parsed));
+            }
+            setFormData(prev => ({ ...prev, phone: phoneInput.trim() }));
+            toast.success('Mobile number updated successfully!');
+            setIsEditingPhone(false);
+        } catch (error: any) {
+            console.error('Failed to update phone number:', error);
+            toast.error(error?.response?.data?.message || 'Failed to update mobile number.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (isProfileLoading) {
+        return (
+            <MainLayout>
+                <div className="pt-32 pb-16 bg-background/50">
+                    <div className="container-luxe max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="h-10 w-64 bg-secondary/50 animate-pulse rounded mb-4" />
+                        <div className="h-4 w-48 bg-secondary/50 animate-pulse rounded mb-12" />
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2 space-y-6">
+                                <div className="h-96 bg-secondary/30 animate-pulse rounded-xl" />
+                                <div className="h-48 bg-secondary/30 animate-pulse rounded-xl" />
+                            </div>
+                            <div className="space-y-6">
+                                <div className="h-64 bg-secondary/30 animate-pulse rounded-xl" />
+                                <div className="h-32 bg-secondary/30 animate-pulse rounded-xl" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </MainLayout>
+        );
+    }
 
     return (
         <MainLayout>
@@ -66,7 +245,6 @@ export default function PersonalInformation() {
                                     <div className="relative group">
                                         <div className="w-24 h-24 rounded-full bg-muted border-2 border-border flex items-center justify-center overflow-hidden">
                                             <User className="w-10 h-10 text-muted-foreground" />
-                                            {/* <img src="..." alt="Profile" className="w-full h-full object-cover" /> */}
                                         </div>
                                         <button className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors" title="Change Photo">
                                             <Camera className="w-4 h-4" />
@@ -189,6 +367,7 @@ export default function PersonalInformation() {
                                 </div>
 
                                 <div className="space-y-6">
+                                    {/* Email Address Block */}
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-muted/30 rounded-xl border border-border">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -199,9 +378,40 @@ export default function PersonalInformation() {
                                                 <p className="text-sm text-muted-foreground">{formData.email}</p>
                                             </div>
                                         </div>
-                                        <button className="text-sm font-medium text-primary hover:underline">Update</button>
+                                        {isEditingEmail ? (
+                                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                <input
+                                                    type="email"
+                                                    value={emailInput}
+                                                    onChange={(e) => setEmailInput(e.target.value)}
+                                                    className="px-3 py-1.5 text-sm bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-full sm:w-48 text-foreground"
+                                                />
+                                                <button
+                                                    onClick={handleUpdateEmail}
+                                                    disabled={loading}
+                                                    className="text-xs font-semibold text-primary px-3 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 disabled:opacity-50"
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditingEmail(false)}
+                                                    disabled={loading}
+                                                    className="text-xs font-semibold text-muted-foreground px-3 py-1.5 bg-muted rounded-lg hover:bg-muted/80 disabled:opacity-50"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => { setIsEditingEmail(true); setEmailInput(formData.email); }}
+                                                className="text-sm font-medium text-primary hover:underline"
+                                            >
+                                                Update
+                                            </button>
+                                        )}
                                     </div>
 
+                                    {/* Mobile Number Block */}
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-muted/30 rounded-xl border border-border">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
@@ -212,7 +422,37 @@ export default function PersonalInformation() {
                                                 <p className="text-sm text-muted-foreground">{formData.phone}</p>
                                             </div>
                                         </div>
-                                        <button className="text-sm font-medium text-primary hover:underline">Update</button>
+                                        {isEditingPhone ? (
+                                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                <input
+                                                    type="text"
+                                                    value={phoneInput}
+                                                    onChange={(e) => setPhoneInput(e.target.value)}
+                                                    className="px-3 py-1.5 text-sm bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-full sm:w-48 text-foreground"
+                                                />
+                                                <button
+                                                    onClick={handleUpdatePhone}
+                                                    disabled={loading}
+                                                    className="text-xs font-semibold text-primary px-3 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 disabled:opacity-50"
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditingPhone(false)}
+                                                    disabled={loading}
+                                                    className="text-xs font-semibold text-muted-foreground px-3 py-1.5 bg-muted rounded-lg hover:bg-muted/80 disabled:opacity-50"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => { setIsEditingPhone(true); setPhoneInput(formData.phone); }}
+                                                className="text-sm font-medium text-primary hover:underline"
+                                            >
+                                                Update
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

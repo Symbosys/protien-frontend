@@ -1,8 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Home, Grid3X3, Search, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { Grid3X3, Home, Search, ShoppingBag, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
   { icon: Home, label: 'Shop', path: '/' },

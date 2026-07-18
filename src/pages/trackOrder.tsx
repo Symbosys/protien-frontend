@@ -161,7 +161,7 @@ const TrackOrder = () => {
                                             </div>
                                             <div>
                                                 <p className="font-medium">{item.name}</p>
-                                                <p className="text-sm text-muted-foreground">${item.price}</p>
+                                                <p className="text-sm text-muted-foreground">₹{item.price}</p>
                                             </div>
                                         </div>
                                     ))}

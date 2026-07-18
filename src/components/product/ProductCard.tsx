@@ -2,7 +2,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart, ShoppingBag, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -33,6 +33,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
 
@@ -55,6 +56,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       image: product.images[0] ?? "",
       size: firstSize,
       color: firstColor,
+      quantity: quantity,
     });
   };
 
@@ -80,11 +82,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
-      className="bg-white border border-[#E5D5B5]/60 hover:border-[#8A1B28]/40 hover:shadow-medium transition-all duration-300 rounded overflow-hidden"
+      className="bg-white border border-[#E5D5B5]/60 hover:border-[#8A1B28]/40 hover:shadow-medium transition-all duration-300 rounded overflow-hidden flex flex-col justify-between h-full"
     >
       <Link
         to={`/product/${product.id}`}
-        className="group block"
+        className="group block flex-1"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -121,21 +123,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               </span>
             )}
           </div>
-
-          {/* Quick Add to Bag overlay on hover */}
-          <div className="absolute bottom-2 left-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-            <button
-              onClick={handleAddToCart}
-              className="flex-1 flex items-center justify-center gap-1 py-2 bg-white/95 backdrop-blur-sm border border-[#E5D5B5] text-[#2C2C2C] hover:bg-[#8A1B28] hover:text-white hover:border-[#8A1B28] text-[9px] font-bold uppercase tracking-widest rounded transition-colors shadow-sm"
-            >
-              <ShoppingBag className="h-3.5 w-3.5" />
-              Add to Bag
-            </button>
-          </div>
         </div>
 
         {/* Product Info Block */}
-        <div className="p-4 space-y-1">
+        <div className="p-4 pb-2 space-y-1">
           {/* Row: Title & Wishlist Heart */}
           <div className="flex justify-between items-center gap-2">
             <h3 className="font-display text-sm lg:text-base text-[#2C2C2C] font-semibold tracking-wide group-hover:text-[#8A1B28] transition-colors truncate">
@@ -176,6 +167,46 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
         </div>
       </Link>
+
+      {/* Action Block outside Link */}
+      <div className="p-4 pt-0">
+        <div className="flex gap-2 items-center pt-2 border-t border-gray-100">
+          <div className="flex items-center border border-[#E5D5B5]/60 rounded bg-[#FAF9F6] h-8 px-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setQuantity(Math.max(1, quantity - 1));
+              }}
+              className="p-0.5 text-[#555] hover:text-[#8A1B28] transition-colors"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="w-8 text-center text-xs font-bold text-[#2C2C2C]">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setQuantity(quantity + 1);
+              }}
+              className="p-0.5 text-[#555] hover:text-[#8A1B28] transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+
+          <button
+            onClick={handleAddToCart}
+            className="flex-1 h-8 bg-black hover:bg-black/90 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-colors shadow-sm"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 }

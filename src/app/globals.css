@@ -338,3 +338,24 @@
   transform: translateY(0);
   transition: opacity 300ms, transform 300ms;
 }
+
+/* Left to Right Infinite Scroll Banner */
+@keyframes scroll-ltr {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-scroll-ltr {
+  display: flex;
+  width: max-content;
+  animation: scroll-ltr 25s linear infinite;
+}
+
+.animate-scroll-ltr:hover {
+  animation-play-state: paused;
+}
+

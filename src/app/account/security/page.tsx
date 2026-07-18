@@ -1,7 +1,7 @@
-// "use client";
+"use client";
 
-// import LoginSecurity from "@/pages/LoginSecurity";
+import LoginSecurity from "@/pages/LoginSecurity";
 
-// export default function Page() {
-//   return <LoginSecurity />;
-// }
+export default function Page() {
+  return <LoginSecurity />;
+}

@@ -6,7 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, ChevronDown, Plus, Minus, X } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
 import ProductCard from "@/components/product/ProductCard";
-import { products as mockProducts, categories as mockCategories } from "@/data/products";
+import {
+  products as mockProducts,
+  categories as mockCategories,
+} from "@/data/products";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCategoriesQuery } from "@/api/hooks/category.hooks";
@@ -33,11 +36,11 @@ export default function ProductsPage() {
     karat: false,
     weight: false,
     price: false,
-    stock: false
+    stock: false,
   });
 
   const toggleSection = (section: string) => {
-    setOpenSection(prev => ({ ...prev, [section]: !prev[section] }));
+    setOpenSection((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const selectedCategory = searchParams.get("category");
@@ -56,10 +59,18 @@ export default function ProductsPage() {
   });
 
   const processImageUrl = (url: any) => {
-    if (!url) return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
-    const finalUrl = typeof url === "string" ? url : (url.url || "");
-    if (typeof finalUrl !== "string" || !finalUrl) return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
-    if (finalUrl.startsWith("http://") || finalUrl.startsWith("https://") || finalUrl.startsWith("data:") || finalUrl.startsWith("blob:")) return finalUrl;
+    if (!url)
+      return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
+    const finalUrl = typeof url === "string" ? url : url.url || "";
+    if (typeof finalUrl !== "string" || !finalUrl)
+      return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
+    if (
+      finalUrl.startsWith("http://") ||
+      finalUrl.startsWith("https://") ||
+      finalUrl.startsWith("data:") ||
+      finalUrl.startsWith("blob:")
+    )
+      return finalUrl;
     const baseUrl = process.env.NEXT_PUBLIC_API_URL
       ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
       : "http://localhost:4000";
@@ -69,10 +80,10 @@ export default function ProductsPage() {
   // Map database categories, fallback to mock categories
   const categories = useMemo(() => {
     if (categoriesData?.categories && categoriesData.categories.length > 0) {
-      return categoriesData.categories.map(cat => ({
+      return categoriesData.categories.map((cat) => ({
         id: cat.id,
         name: cat.name,
-        image: processImageUrl(cat.image)
+        image: processImageUrl(cat.image),
       }));
     }
     return mockCategories;
@@ -86,7 +97,9 @@ export default function ProductsPage() {
         id: dbP.id,
         name: dbP.name,
         price: Number(dbP.price),
-        originalPrice: dbP.discountPrice ? Number(dbP.discountPrice) : undefined,
+        originalPrice: dbP.discountPrice
+          ? Number(dbP.discountPrice)
+          : undefined,
         images: [
           processImageUrl(dbP.image),
           ...(Array.isArray(dbP.images) ? dbP.images.map(processImageUrl) : []),
@@ -98,34 +111,38 @@ export default function ProductsPage() {
         netWeight: undefined,
         sizes: Array.isArray(dbP.sizes) ? dbP.sizes : [],
         colors: Array.isArray(dbP.colors)
-          ? (dbP.colors as any[]).map((c: any) => typeof c === "string" ? { name: c } : c)
+          ? (dbP.colors as any[]).map((c: any) =>
+              typeof c === "string" ? { name: c } : c,
+            )
           : [],
       }));
     }
 
     // Apply front-end filters to display exactly what the user clicks
     if (selectedCategory) {
-      list = list.filter(p => p.category.toLowerCase() === selectedCategory.toLowerCase());
+      list = list.filter(
+        (p) => p.category.toLowerCase() === selectedCategory.toLowerCase(),
+      );
     }
     if (selectedBrandId) {
-      list = list.filter(p => p.brandId === selectedBrandId);
+      list = list.filter((p) => p.brandId === selectedBrandId);
     }
     if (selectedKarat) {
-      list = list.filter(p => p.karat?.includes(selectedKarat));
+      list = list.filter((p) => p.karat?.includes(selectedKarat));
     }
     if (selectedWeight) {
       if (selectedWeight === "light") {
-        list = list.filter(p => {
+        list = list.filter((p) => {
           const w = parseFloat(p.netWeight || "0");
           return w <= 5;
         });
       } else if (selectedWeight === "medium") {
-        list = list.filter(p => {
+        list = list.filter((p) => {
           const w = parseFloat(p.netWeight || "0");
           return w > 5 && w <= 12;
         });
       } else if (selectedWeight === "heavy") {
-        list = list.filter(p => {
+        list = list.filter((p) => {
           const w = parseFloat(p.netWeight || "0");
           return w > 12;
         });
@@ -133,15 +150,15 @@ export default function ProductsPage() {
     }
     if (selectedPriceRange) {
       if (selectedPriceRange === "under-50k") {
-        list = list.filter(p => p.price < 50000);
+        list = list.filter((p) => p.price < 50000);
       } else if (selectedPriceRange === "50k-100k") {
-        list = list.filter(p => p.price >= 50000 && p.price <= 100000);
+        list = list.filter((p) => p.price >= 50000 && p.price <= 100000);
       } else if (selectedPriceRange === "over-100k") {
-        list = list.filter(p => p.price > 100000);
+        list = list.filter((p) => p.price > 100000);
       }
     }
     if (selectedStock === "in") {
-      list = list.filter(p => p.inStock);
+      list = list.filter((p) => p.inStock);
     }
 
     // Sort items
@@ -154,7 +171,15 @@ export default function ProductsPage() {
     }
 
     return list;
-  }, [productsData, selectedCategory, selectedKarat, selectedWeight, selectedPriceRange, selectedStock, sort]);
+  }, [
+    productsData,
+    selectedCategory,
+    selectedKarat,
+    selectedWeight,
+    selectedPriceRange,
+    selectedStock,
+    sort,
+  ]);
 
   const updateFilter = (key: string, value: string | null) => {
     const newParams = new URLSearchParams(searchParams);
@@ -174,32 +199,44 @@ export default function ProductsPage() {
     <MainLayout>
       <div className="py-12 bg-[#FAF9F6]">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          
           {/* Categories Circle Slider on Top */}
           <div className="mb-12 overflow-x-auto pb-4 scrollbar-hide">
             <div className="flex justify-start md:justify-center items-center gap-6 md:gap-10 min-w-max px-2">
               {categories.map((cat) => (
                 <button
                   key={cat.name}
-                  onClick={() => updateFilter("category", selectedCategory === cat.name ? null : cat.name)}
+                  onClick={() =>
+                    updateFilter(
+                      "category",
+                      selectedCategory === cat.name ? null : cat.name,
+                    )
+                  }
                   className="flex flex-col items-center group flex-shrink-0"
                 >
-                  <div className={cn(
-                    "w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border transition-all duration-300 shadow-sm",
-                    selectedCategory === cat.name ? "border-[#8A1B28] ring-2 ring-[#8A1B28]/20" : "border-[#E5D5B5] group-hover:border-[#8A1B28]"
-                  )}>
+                  <div
+                    className={cn(
+                      "w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border transition-all duration-300 shadow-sm",
+                      selectedCategory === cat.name
+                        ? "border-[#8A1B28] ring-2 ring-[#8A1B28]/20"
+                        : "border-[#E5D5B5] group-hover:border-[#8A1B28]",
+                    )}
+                  >
                     <div className="w-full h-full rounded-full overflow-hidden">
-                      <img 
-                        src={cat.image} 
-                        alt={cat.name} 
+                      <img
+                        src={cat.image}
+                        alt={cat.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
-                  <span className={cn(
-                    "text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 transition-colors",
-                    selectedCategory === cat.name ? "text-[#8A1B28]" : "text-[#2C2C2C] group-hover:text-[#8A1B28]"
-                  )}>
+                  <span
+                    className={cn(
+                      "text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 transition-colors",
+                      selectedCategory === cat.name
+                        ? "text-[#8A1B28]"
+                        : "text-[#2C2C2C] group-hover:text-[#8A1B28]",
+                    )}
+                  >
                     {cat.name}
                   </span>
                 </button>
@@ -237,9 +274,13 @@ export default function ProductsPage() {
 
           {displayProducts.length === 0 && (
             <div className="text-center py-20 bg-background border border-border rounded p-6">
-              <h3 className="font-display text-lg font-bold text-primary mb-2 uppercase">No Products Found</h3>
-              <p className="text-xs text-muted-foreground mb-6">Try resetting your active filters to explore more items.</p>
-              <button 
+              <h3 className="font-display text-lg font-bold text-primary mb-2 uppercase">
+                No Products Found
+              </h3>
+              <p className="text-xs text-muted-foreground mb-6">
+                Try resetting your active filters to explore more items.
+              </p>
+              <button
                 onClick={clearFilters}
                 className="bg-foreground hover:bg-primary text-background text-xs font-semibold uppercase tracking-widest py-3 px-6 rounded transition-colors"
               >
@@ -247,7 +288,6 @@ export default function ProductsPage() {
               </button>
             </div>
           )}
-
         </div>
       </div>
 
@@ -276,22 +316,30 @@ export default function ProductsPage() {
                 <span className="font-display text-base font-bold text-[#8A1B28] uppercase tracking-wider">
                   Filter & Sort
                 </span>
-                <button onClick={() => setIsFilterOpen(false)} className="p-2 text-[#2C2C2C] hover:text-[#8A1B28]" title="Close filter drawer" aria-label="Close filter drawer">
+                <button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="p-2 text-[#2C2C2C] hover:text-[#8A1B28]"
+                  title="Close filter drawer"
+                  aria-label="Close filter drawer"
+                >
                   <X className="h-5 w-5 stroke-[2]" />
                 </button>
               </div>
 
               {/* Collapsible Options Scroll Area */}
               <div className="flex-1 overflow-y-auto divide-y divide-[#E5D5B5]/60 px-5">
-                
                 {/* 1. Sort By Accordion */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("sort")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
                   >
                     <span>Sort By</span>
-                    {openSection.sort ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.sort ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.sort && (
@@ -307,7 +355,9 @@ export default function ProductsPage() {
                             onClick={() => setSort(opt.value)}
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
-                              sort === opt.value ? "text-[#8A1B28]" : "text-[#555] hover:text-[#8A1B28]"
+                              sort === opt.value
+                                ? "text-[#8A1B28]"
+                                : "text-[#555] hover:text-[#8A1B28]",
                             )}
                           >
                             {opt.label}
@@ -320,12 +370,16 @@ export default function ProductsPage() {
 
                 {/* 2. Category Name Accordion */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("category")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
                   >
                     <span>Category Name</span>
-                    {openSection.category ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.category ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.category && (
@@ -338,10 +392,17 @@ export default function ProductsPage() {
                         {categories.map((cat) => (
                           <button
                             key={cat.name}
-                            onClick={() => updateFilter("category", selectedCategory === cat.name ? null : cat.name)}
+                            onClick={() =>
+                              updateFilter(
+                                "category",
+                                selectedCategory === cat.name ? null : cat.name,
+                              )
+                            }
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
-                              selectedCategory === cat.name ? "text-[#8A1B28] font-bold" : "text-[#555] hover:text-[#8A1B28]"
+                              selectedCategory === cat.name
+                                ? "text-[#8A1B28] font-bold"
+                                : "text-[#555] hover:text-[#8A1B28]",
                             )}
                           >
                             {cat.name}
@@ -354,12 +415,16 @@ export default function ProductsPage() {
 
                 {/* Brand Accordion */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("brand")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
                   >
                     <span>Brand</span>
-                    {openSection.brand ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.brand ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.brand && (
@@ -372,10 +437,17 @@ export default function ProductsPage() {
                         {brandsData?.brands?.map((brand) => (
                           <button
                             key={brand.id}
-                            onClick={() => updateFilter("brandId", selectedBrandId === brand.id ? null : brand.id)}
+                            onClick={() =>
+                              updateFilter(
+                                "brandId",
+                                selectedBrandId === brand.id ? null : brand.id,
+                              )
+                            }
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
-                              selectedBrandId === brand.id ? "text-[#8A1B28] font-bold" : "text-[#555] hover:text-[#8A1B28]"
+                              selectedBrandId === brand.id
+                                ? "text-[#8A1B28] font-bold"
+                                : "text-[#555] hover:text-[#8A1B28]",
                             )}
                           >
                             {brand.name}
@@ -388,12 +460,16 @@ export default function ProductsPage() {
 
                 {/* 3. Gold Karat Accordion */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("karat")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-foreground"
                   >
                     <span>Options</span>
-                    {openSection.karat ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.karat ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.karat && (
@@ -406,10 +482,17 @@ export default function ProductsPage() {
                         {["Flavor 1", "Flavor 2"].map((kt) => (
                           <button
                             key={kt}
-                            onClick={() => updateFilter("karat", selectedKarat === kt ? null : kt)}
+                            onClick={() =>
+                              updateFilter(
+                                "karat",
+                                selectedKarat === kt ? null : kt,
+                              )
+                            }
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
-                              selectedKarat === kt ? "text-primary font-bold" : "text-muted-foreground hover:text-primary"
+                              selectedKarat === kt
+                                ? "text-primary font-bold"
+                                : "text-muted-foreground hover:text-primary",
                             )}
                           >
                             {kt}
@@ -422,12 +505,16 @@ export default function ProductsPage() {
 
                 {/* 4. Gross Weight Accordion */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("weight")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
                   >
                     <span>Gross Weight</span>
-                    {openSection.weight ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.weight ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.weight && (
@@ -440,14 +527,21 @@ export default function ProductsPage() {
                         {[
                           { value: "light", label: "Under 5 grams" },
                           { value: "medium", label: "5 - 12 grams" },
-                          { value: "heavy", label: "Over 12 grams" }
+                          { value: "heavy", label: "Over 12 grams" },
                         ].map((wt) => (
                           <button
                             key={wt.value}
-                            onClick={() => updateFilter("weight", selectedWeight === wt.value ? null : wt.value)}
+                            onClick={() =>
+                              updateFilter(
+                                "weight",
+                                selectedWeight === wt.value ? null : wt.value,
+                              )
+                            }
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
-                              selectedWeight === wt.value ? "text-[#8A1B28] font-bold" : "text-[#555] hover:text-[#8A1B28]"
+                              selectedWeight === wt.value
+                                ? "text-[#8A1B28] font-bold"
+                                : "text-[#555] hover:text-[#8A1B28]",
                             )}
                           >
                             {wt.label}
@@ -460,12 +554,16 @@ export default function ProductsPage() {
 
                 {/* 5. Total Amount Range */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("price")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
                   >
                     <span>Total Amount</span>
-                    {openSection.price ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.price ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.price && (
@@ -478,14 +576,23 @@ export default function ProductsPage() {
                         {[
                           { value: "under-50k", label: "Under ₹50,000" },
                           { value: "50k-100k", label: "₹50,000 - ₹1,00,000" },
-                          { value: "over-100k", label: "Over ₹1,00,000" }
+                          { value: "over-100k", label: "Over ₹1,00,000" },
                         ].map((pr) => (
                           <button
                             key={pr.value}
-                            onClick={() => updateFilter("priceRange", selectedPriceRange === pr.value ? null : pr.value)}
+                            onClick={() =>
+                              updateFilter(
+                                "priceRange",
+                                selectedPriceRange === pr.value
+                                  ? null
+                                  : pr.value,
+                              )
+                            }
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
-                              selectedPriceRange === pr.value ? "text-[#8A1B28] font-bold" : "text-[#555] hover:text-[#8A1B28]"
+                              selectedPriceRange === pr.value
+                                ? "text-[#8A1B28] font-bold"
+                                : "text-[#555] hover:text-[#8A1B28]",
                             )}
                           >
                             {pr.label}
@@ -498,12 +605,16 @@ export default function ProductsPage() {
 
                 {/* 6. Availability */}
                 <div className="py-4">
-                  <button 
+                  <button
                     onClick={() => toggleSection("stock")}
                     className="w-full flex justify-between items-center text-xs uppercase font-bold tracking-wider text-[#2C2C2C]"
                   >
                     <span>Availability</span>
-                    {openSection.stock ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {openSection.stock ? (
+                      <Minus className="h-3.5 w-3.5" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </button>
                   <AnimatePresence>
                     {openSection.stock && (
@@ -514,10 +625,17 @@ export default function ProductsPage() {
                         className="overflow-hidden mt-3 pl-2 space-y-2.5"
                       >
                         <button
-                          onClick={() => updateFilter("stock", selectedStock === "in" ? null : "in")}
+                          onClick={() =>
+                            updateFilter(
+                              "stock",
+                              selectedStock === "in" ? null : "in",
+                            )
+                          }
                           className={cn(
                             "block text-xs text-left py-1 w-full font-medium transition-colors",
-                            selectedStock === "in" ? "text-[#8A1B28] font-bold" : "text-[#555] hover:text-[#8A1B28]"
+                            selectedStock === "in"
+                              ? "text-[#8A1B28] font-bold"
+                              : "text-[#555] hover:text-[#8A1B28]",
                           )}
                         >
                           In Stock Only
@@ -526,7 +644,6 @@ export default function ProductsPage() {
                     )}
                   </AnimatePresence>
                 </div>
-
               </div>
 
               {/* Bottom Buttons */}
@@ -547,7 +664,6 @@ export default function ProductsPage() {
                   Apply
                 </button>
               </div>
-
             </motion.div>
           </>
         )}

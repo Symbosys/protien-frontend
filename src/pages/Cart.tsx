@@ -95,7 +95,7 @@ export default function CartPage() {
                         </div>
 
                         <span className="font-medium text-[#2C2C2C]">
-                          ${(item.price * item.quantity).toLocaleString()}
+                          ₹{(item.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -111,22 +111,22 @@ export default function CartPage() {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-[10px] uppercase tracking-widest text-[#555]">
                       <span>Subtotal ({itemCount} items)</span>
-                      <span className="text-[#2C2C2C]">${subtotal.toLocaleString()}</span>
+                      <span className="text-[#2C2C2C]">₹{subtotal.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-[10px] uppercase tracking-widest text-[#555]">
                       <span>Shipping</span>
-                      <span className="text-[#2C2C2C]">{shipping === 0 ? 'Free' : `$${shipping}`}</span>
+                      <span className="text-[#2C2C2C]">{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
                     </div>
                     {shipping > 0 && (
                       <p className="text-[10px] text-[#888]">
-                        Free shipping on orders over $500
+                        Free shipping on orders over ₹500
                       </p>
                     )}
                   </div>
 
                   <div className="flex justify-between font-display text-xl text-[#2C2C2C] py-6 border-t border-[#E5E5E5]">
                     <span>Total</span>
-                    <span>${total.toLocaleString()}</span>
+                    <span>₹{total.toLocaleString()}</span>
                   </div>
 
                   {/* Promo Code */}

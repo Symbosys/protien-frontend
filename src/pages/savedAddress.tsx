@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import {
     MapPin,
@@ -12,6 +12,12 @@ import {
     X,
     Phone
 } from 'lucide-react';
+import {
+  useAddressesQuery,
+  useAddAddressMutation,
+  useUpdateAddressMutation,
+  useDeleteAddressMutation
+} from '@/api/hooks/address.hooks';
 
 type AddressType = 'Home' | 'Work' | 'Other';
 
@@ -28,35 +34,12 @@ interface Address {
     isDefault: boolean;
 }
 
-const MOCK_ADDRESSES: Address[] = [
-    {
-        id: '1',
-        name: 'Amit Das',
-        mobile: '9876543210',
-        pincode: '400001',
-        locality: 'Sector 18',
-        address: 'Flat 402, Sunshine Heights',
-        city: 'Mumbai',
-        state: 'Maharashtra',
-        type: 'Home',
-        isDefault: true
-    },
-    {
-        id: '2',
-        name: 'Amit Das',
-        mobile: '9876543210',
-        pincode: '560001',
-        locality: 'MG Road',
-        address: 'Office 204, Tech Park',
-        city: 'Bangalore',
-        state: 'Karnataka',
-        type: 'Work',
-        isDefault: false
-    }
-];
-
 export default function SavedAddresses() {
-    const [addresses, setAddresses] = useState<Address[]>(MOCK_ADDRESSES);
+    const { data: dbAddresses = [], isLoading, error } = useAddressesQuery();
+    const addAddressMutation = useAddAddressMutation();
+    const updateAddressMutation = useUpdateAddressMutation();
+    const deleteAddressMutation = useDeleteAddressMutation();
+
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -64,6 +47,21 @@ export default function SavedAddresses() {
     const [formData, setFormData] = useState<Partial<Address>>({
         type: 'Home'
     });
+
+    const addresses: Address[] = useMemo(() => {
+        return dbAddresses.map((addr) => ({
+            id: addr.id,
+            name: addr.name,
+            mobile: addr.mobile,
+            pincode: addr.pincode,
+            locality: addr.locality || '',
+            address: addr.address,
+            city: addr.city,
+            state: addr.state,
+            type: addr.type === 'HOME' ? 'Home' : addr.type === 'WORK' ? 'Work' : 'Other',
+            isDefault: addr.isDefault,
+        }));
+    }, [dbAddresses]);
 
     const handleAddNew = () => {
         setFormData({ type: 'Home' });
@@ -79,30 +77,68 @@ export default function SavedAddresses() {
 
     const handleDelete = (id: string) => {
         if (window.confirm('Are you sure you want to delete this address?')) {
-            setAddresses(prev => prev.filter(a => a.id !== id));
+            deleteAddressMutation.mutate(id, {
+                onError: (err) => {
+                    alert(err instanceof Error ? err.message : 'Failed to delete address');
+                }
+            });
         }
     };
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (editingId) {
-            // Update existing
-            setAddresses(prev => prev.map(a => a.id === editingId ? { ...a, ...formData } as Address : a));
-        } else {
-            // Add new
-            const newAddr = {
-                ...formData,
-                id: Date.now().toString(),
-                isDefault: addresses.length === 0 // Make default if it's the first one
-            } as Address;
-            setAddresses(prev => [...prev, newAddr]);
-        }
+        const payload = {
+            name: formData.name || '',
+            mobile: formData.mobile || '',
+            pincode: formData.pincode || '',
+            locality: formData.locality || '',
+            address: formData.address || '',
+            city: formData.city || '',
+            state: formData.state || '',
+            type: (formData.type?.toUpperCase() as "HOME" | "WORK" | "OTHER") || "HOME",
+            isDefault: formData.isDefault || false,
+            longitude: null,
+            latitude: null
+        };
 
-        setIsAddingNew(false);
-        setFormData({ type: 'Home' });
-        setEditingId(null);
+        if (editingId) {
+            updateAddressMutation.mutate({ id: editingId, payload }, {
+                onSuccess: () => {
+                    setIsAddingNew(false);
+                    setFormData({ type: 'Home' });
+                    setEditingId(null);
+                },
+                onError: (err) => {
+                    alert(err instanceof Error ? err.message : 'Failed to update address');
+                }
+            });
+        } else {
+            addAddressMutation.mutate(payload, {
+                onSuccess: () => {
+                    setIsAddingNew(false);
+                    setFormData({ type: 'Home' });
+                    setEditingId(null);
+                },
+                onError: (err) => {
+                    alert(err instanceof Error ? err.message : 'Failed to add address');
+                }
+            });
+        }
     };
+
+    if (isLoading) {
+        return (
+            <MainLayout>
+                <div className="min-h-screen bg-background font-sans text-foreground pb-20 mt-40 flex items-center justify-center">
+                    <div className="text-center space-y-2">
+                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                        <p className="text-muted-foreground text-sm">Loading saved addresses...</p>
+                    </div>
+                </div>
+            </MainLayout>
+        );
+    }
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

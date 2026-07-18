@@ -1,30 +1,34 @@
 import axios from "axios";
 
+const API_BASE_URL = "https://protien-backend.vercel.app/api";
+// const API_BASE_URL = "http://localhost:4000/api";
+
 export const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : "http://localhost:4000/api",
-    headers: {
-        "Content-Type": "application/json",
-    },
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // Request interceptor to attach authentication token
 if (typeof window !== "undefined") {
-    apiClient.interceptors.request.use(
-        (config) => {
-            try {
-                const token = localStorage.getItem("user_token") || localStorage.getItem("token");
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                }
-            } catch (error) {
-                console.error("Error fetching token from localStorage:", error);
-            }
-            return config;
-        },
-        (error) => {
-            return Promise.reject(error);
+  apiClient.interceptors.request.use(
+    (config) => {
+      try {
+        const token =
+          localStorage.getItem("user_token") || localStorage.getItem("token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
         }
-    );
+      } catch (error) {
+        console.error("Error fetching token from localStorage:", error);
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    },
+  );
 }
 
 export default apiClient;
