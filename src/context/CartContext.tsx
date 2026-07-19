@@ -26,8 +26,8 @@ interface CartContextType {
   openCart: () => void;
   closeCart: () => void;
   addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => Promise<any>;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  removeItem: (id: string) => Promise<any>;
+  updateQuantity: (id: string, quantity: number) => Promise<any>;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -97,8 +97,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Remove item
-  const removeItem = (id: string) => {
-    removeCartItemMutation.mutate(id, {
+  const removeItem = async (id: string) => {
+    return removeCartItemMutation.mutateAsync(id, {
       onSuccess: () => {
         toast.success("Removed from bag");
       },
@@ -109,13 +109,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Update item quantity
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = async (id: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(id);
-      return;
+      return removeItem(id);
     }
 
-    updateCartItemMutation.mutate(
+    return updateCartItemMutation.mutateAsync(
       { itemId: id, quantity },
       {
         onError: (err: any) => {
