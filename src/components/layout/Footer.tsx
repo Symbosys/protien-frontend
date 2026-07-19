@@ -8,8 +8,12 @@ import {
   Youtube,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCategoriesQuery } from "@/api/hooks/category.hooks";
 
 export default function Footer() {
+  const { data: categoriesData } = useCategoriesQuery({ page: 1, limit: 6 });
+  const categories = categoriesData?.categories?.slice(0, 6) ?? [];
+
   return (
     <footer className="bg-black text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
@@ -125,15 +129,6 @@ export default function Footer() {
                 <span>Ratu road ranchi-5</span>
               </div>
 
-              {/* Address 2 */}
-              {/* <div className="flex items-start gap-2.5">
-                <MapPin className="h-5 w-5 text-[#8CFF64] flex-shrink-0 mt-0.5" />
-                <span>
-                  LGF-110, OC Square, Commercial Complex, Orange County, Ahinsa Khand 1, Indirapuram, Ghaziabad,<br />
-                  Uttar Pradesh 201014
-                </span>
-              </div> */}
-
               {/* Phone / Contact */}
               <div className="flex items-center gap-2.5">
                 <Phone className="h-5 w-5 text-[#8CFF64] flex-shrink-0" />
@@ -163,33 +158,30 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Categories */}
+          {/* Column 2: Categories — dynamic, max 6 */}
           <div className="space-y-6">
             <h4 className="font-display text-base font-bold text-[#8CFF64] border-b border-white/10 pb-2 uppercase">
               Categories
             </h4>
             <ul className="space-y-2.5 text-xs lg:text-sm text-white/60 font-medium">
-              {[
-                "Whey Protein",
-                "Creatine",
-                "Pre Workout",
-                "BCAA",
-                "Multivitamins",
-                "Fish Oil",
-                "Peanut Butter",
-                "L-Carnitine",
-              ].map((cat) => (
-                <li key={cat}>
-                  <Link
-                    to={`/products?category=${cat}`}
-                    className="hover:text-[#8CFF64] transition-colors"
-                  >
-                    {cat}
-                  </Link>
-                </li>
-              ))}
+              {categories.length > 0
+                ? categories.map((cat) => (
+                    <li key={cat.id}>
+                      <Link
+                        to={`/products?category=${encodeURIComponent(cat.name)}`}
+                        className="hover:text-[#8CFF64] transition-colors"
+                      >
+                        {cat.name}
+                      </Link>
+                    </li>
+                  ))
+                : /* Skeleton placeholders while loading */
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <li key={i} className="h-4 w-28 bg-white/10 rounded animate-pulse" />
+                  ))}
             </ul>
           </div>
+
 
           {/* Column 3: Quick Links */}
           <div className="space-y-6">
