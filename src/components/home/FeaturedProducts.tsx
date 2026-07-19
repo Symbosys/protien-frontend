@@ -1,11 +1,11 @@
 "use client";
 
-import ProductCard, { ProductCardItem } from "@/components/product/ProductCard";
 import { useProductsQuery } from "@/api/hooks/product.hooks";
+import ProductCard, { ProductCardItem } from "@/components/product/ProductCard";
 import { products as mockProducts } from "@/data/products";
-import { ArrowRight, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
@@ -55,6 +55,7 @@ export default function FeaturedProducts() {
                 typeof c === "string" ? { name: c } : c,
               )
             : [],
+          variants: p.variants,
         }))
       : mockProducts.slice(0, 8);
 

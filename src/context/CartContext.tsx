@@ -17,6 +17,7 @@ export interface CartItem {
   quantity: number;
   size?: string;
   color?: string;
+  variant?: any;
 }
 
 interface CartContextType {
@@ -24,7 +25,7 @@ interface CartContextType {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number }) => void;
+  addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => Promise<any>;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -64,14 +65,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       quantity: item.quantity,
       size: item.size || undefined,
       color: item.color || undefined,
+      variant: item.variant || undefined,
     }));
   }, [backendCart]);
 
-  const addItem = (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number }) => {
+  const addItem = async (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => {
     // When adding from ProductCard/ProductDetail, item.id is product.id.
-    addToCartMutation.mutate(
+    return addToCartMutation.mutateAsync(
       {
         productId: item.id, // item.id is the product ID
+        variantId: item.variantId,
         size: item.size,
         color: item.color,
         quantity: item.quantity ?? 1,

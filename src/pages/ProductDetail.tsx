@@ -18,6 +18,7 @@ import {
   Plus,
   Share2,
   Star,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -118,6 +119,15 @@ export default function ProductDetail() {
   const [isMainDetailOpen, setIsMainDetailOpen] = useState(true);
   const [zoomScale, setZoomScale] = useState(false);
 
+  // Variant states
+  const [selectedVariantIdState, setSelectedVariantIdState] = useState<string>("");
+  const [isAdding, setIsAdding] = useState(false);
+
+  const variants = dbProduct?.variants || [];
+  const hasVariants = variants.length > 0;
+  const activeVariantId = selectedVariantIdState || (hasVariants ? variants[0].id : "");
+  const activeVariant = variants.find(v => v.id === activeVariantId);
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -198,6 +208,7 @@ export default function ProductDetail() {
             category: p.category?.name ?? "Uncategorized",
             rating: p.rating,
             inStock: p.quantity > 0,
+            variants: p.variants,
           }))
       : products.filter((p) => p.id !== id).slice(0, 4);
 
@@ -223,8 +234,10 @@ export default function ProductDetail() {
 
           {/* Product Gallery & Info Grid */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Gallery: Thumbnail Bar + Main Zoom Frame (Left columns) */}
-            <div className="lg:col-span-7 flex flex-col md:flex-row gap-4">
+            {/* Left Column: Gallery + Description */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Gallery: Thumbnail Bar + Main Zoom Frame */}
+              <div className="flex flex-col md:flex-row gap-4">
               {/* Thumbnails list */}
               <div className="flex md:flex-col gap-3 order-2 md:order-1 flex-shrink-0">
                 {product.images.map((img, idx) => (
@@ -250,7 +263,7 @@ export default function ProductDetail() {
               {/* Main Image Frame */}
               <div className="flex-1 order-1 md:order-2 bg-card border border-border rounded-xl overflow-hidden relative aspect-square shadow-sm flex items-center justify-center p-3">
                 <img
-                  src={product.images[selectedImage]}
+                  src={(activeVariant && activeVariant.image) ? processImageUrl(activeVariant.image) : product.images[selectedImage]}
                   alt={product.name}
                   className={cn(
                     "w-full h-full object-cover rounded-lg",
@@ -270,6 +283,19 @@ export default function ProductDetail() {
               </div>
             </div>
 
+              {/* Product Description */}
+              {product.description && (
+                <div className="space-y-3 bg-white p-6 rounded-xl border border-[#E5D5B5]/60 shadow-sm mt-6">
+                  <span className="text-xs uppercase font-extrabold text-[#888] tracking-wider block border-b border-[#E5D5B5]/30 pb-2 mb-2">
+                    Product Description
+                  </span>
+                  <p className="text-xs lg:text-sm text-[#444] leading-relaxed whitespace-pre-line">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Info Block (Right columns) */}
             <div className="lg:col-span-5 space-y-6">
               {/* Title & Icons line */}
@@ -279,7 +305,7 @@ export default function ProductDetail() {
                     {product.name}
                   </h1>
                   <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mt-1">
-                    {product.inStock ? "● In-Stock" : "● Out of Stock"}
+                    {(activeVariant ? activeVariant.quantity > 0 : product.inStock) ? "● In-Stock" : "● Out of Stock"}
                   </span>
                 </div>
 
@@ -337,7 +363,7 @@ export default function ProductDetail() {
                     Standard rate
                   </span>
                   <span className="text-xl lg:text-2xl font-extrabold text-[#8A1B28]">
-                    ₹{product.price.toLocaleString("en-IN")}
+                    ₹{(activeVariant ? Number(activeVariant.price) : product.price).toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="text-right">
@@ -372,6 +398,58 @@ export default function ProductDetail() {
                 </div>
               </div>
 
+              {/* Variant Selector */}
+              {hasVariants && (
+                <div className="space-y-3 pt-4 border-t border-[#E5D5B5]/60">
+                  <span className="text-[10px] uppercase font-extrabold text-gray-500 tracking-wider">
+                    Select Option
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {variants.map((v) => {
+                      const label = v.attributeValues
+                        .map((av) => `${av.attribute?.name || 'Option'}: ${av.value}`)
+                        .join(" | ");
+                      const isSelected = activeVariantId === v.id;
+                      const vPrice = Number(v.price);
+                      
+                      return (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => setSelectedVariantIdState(v.id)}
+                          className={cn(
+                            "text-left p-3 rounded-lg border transition-all flex items-center justify-between gap-3 bg-white",
+                            isSelected
+                              ? "border-black ring-1 ring-black bg-black/[0.01]"
+                              : "border-gray-200 hover:border-gray-300"
+                          )}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {v.image && (
+                              <div className="h-8 w-8 rounded overflow-hidden border bg-gray-50 flex-shrink-0">
+                                <img
+                                  src={processImageUrl(v.image)}
+                                  alt={label}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-black uppercase tracking-wider">
+                                {label || "Default"}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-xs font-bold text-[#8A1B28] flex-shrink-0">
+                            ₹{vPrice.toLocaleString("en-IN")}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Quantity Selector and Add to Cart Section */}
               <div className="flex items-center gap-4 pt-4">
                 {/* Quantity Box */}
@@ -397,24 +475,65 @@ export default function ProductDetail() {
 
                 {/* Add to Cart Button */}
                 <button
-                  onClick={() => {
-                    const firstSize = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes[0] : undefined;
-                    const firstColor = Array.isArray(product.colors) && product.colors.length > 0 
-                      ? (typeof product.colors[0] === "string" ? product.colors[0] : (product.colors[0] as any).name)
-                      : undefined;
-                    addItem({
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      image: product.images[0] ?? "",
-                      size: firstSize,
-                      color: firstColor,
-                      quantity: quantity,
-                    });
+                  onClick={async () => {
+                    setIsAdding(true);
+                    try {
+                      if (hasVariants && activeVariant) {
+                        let resolvedSize: string | undefined = undefined;
+                        let resolvedColor: string | undefined = undefined;
+
+                        activeVariant.attributeValues.forEach(av => {
+                          const nameLower = av.attribute?.name?.toLowerCase() || "";
+                          if (nameLower === "size" || nameLower === "weight") {
+                            resolvedSize = av.value;
+                          } else if (nameLower === "color" || nameLower === "flavour" || nameLower === "flavor") {
+                            resolvedColor = av.value;
+                          }
+                        });
+
+                        await addItem({
+                          id: product.id,
+                          name: product.name,
+                          price: Number(activeVariant.price),
+                          image: activeVariant.image ? processImageUrl(activeVariant.image) : (product.images[0] || ""),
+                          size: resolvedSize,
+                          color: resolvedColor,
+                          variantId: activeVariant.id,
+                          quantity: quantity,
+                        });
+                      } else {
+                        const firstSize = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes[0] : undefined;
+                        const firstColor = Array.isArray(product.colors) && product.colors.length > 0 
+                          ? (typeof product.colors[0] === "string" ? product.colors[0] : (product.colors[0] as any).name)
+                          : undefined;
+
+                        await addItem({
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.images[0] ?? "",
+                          size: firstSize,
+                          color: firstColor,
+                          quantity: quantity,
+                        });
+                      }
+                    } catch (err) {
+                      // handled by context
+                    } finally {
+                      setIsAdding(false);
+                    }
                   }}
-                  className="flex-1 h-12 bg-black hover:bg-black/90 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded shadow-sm"
+                  disabled={isAdding || !(activeVariant ? activeVariant.quantity > 0 : product.inStock)}
+                  className="flex-1 h-12 bg-black hover:bg-black/90 disabled:bg-black/60 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded shadow-sm flex items-center justify-center gap-2"
                 >
-                  Add to Cart
+                  {isAdding ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add to Cart"
+                  )}
                 </button>
 
                 {/* Wishlist Heart Button next to Add to Cart */}
@@ -500,14 +619,7 @@ export default function ProductDetail() {
                         {product.category}
                       </span>
                     </div>
-                    <div className="flex justify-between border-b border-border pb-2">
-                      <span className="font-semibold text-black">
-                        Brand
-                      </span>
-                      <span className="font-bold text-black">
-                        {product.brand || "Protein & Nutrients"}
-                      </span>
-                    </div>
+
                     {product.subcategory && (
                       <div className="flex justify-between border-b border-border pb-2">
                         <span className="font-semibold text-black">
@@ -518,14 +630,7 @@ export default function ProductDetail() {
                         </span>
                       </div>
                     )}
-                    <div className="flex justify-between border-b border-border pb-2">
-                      <span className="font-semibold text-black">
-                        Net Weight
-                      </span>
-                      <span className="font-bold text-black">
-                        {product.netWeight || "N/A"}
-                      </span>
-                    </div>
+
                     <div className="flex justify-between border-b border-border pb-2 md:col-span-2">
                       <span className="font-semibold text-black">
                         Category Name

@@ -94,9 +94,12 @@ export default function CartDrawer() {
                           </button>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">
-                          {item.size && `Size: ${item.size}`}
-                          {item.size && item.color && " / "}
-                          {item.color && `Color: ${item.color}`}
+                          {item.variant?.attributeValues && item.variant.attributeValues.length > 0
+                            ? item.variant.attributeValues.map((av: any) => `${av.attribute?.name || 'Option'}: ${av.value}`).join(' / ')
+                            : [
+                                item.size && `Size: ${item.size}`,
+                                item.color && `Color: ${item.color}`
+                              ].filter(Boolean).join(' / ')}
                         </p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center border border-border rounded-md">

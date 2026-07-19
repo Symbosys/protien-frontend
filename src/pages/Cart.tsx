@@ -72,9 +72,12 @@ export default function CartPage() {
                       </div>
 
                       <p className="text-[10px] uppercase tracking-widest text-[#888] mb-4">
-                        {item.size && `Size: ${item.size}`}
-                        {item.size && item.color && ' / '}
-                        {item.color && `Color: ${item.color}`}
+                        {item.variant?.attributeValues && item.variant.attributeValues.length > 0
+                          ? item.variant.attributeValues.map((av: any) => `${av.attribute?.name || 'Option'}: ${av.value}`).join(' / ')
+                          : [
+                              item.size && `Size: ${item.size}`,
+                              item.color && `Color: ${item.color}`
+                            ].filter(Boolean).join(' / ')}
                       </p>
 
                       <div className="flex items-center justify-between">

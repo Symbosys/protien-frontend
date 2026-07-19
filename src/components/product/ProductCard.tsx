@@ -1,8 +1,8 @@
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { Heart, ShoppingBag, Plus, Minus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, ShoppingBag, Plus, Minus, X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -24,6 +24,24 @@ export interface ProductCardItem {
   netWeight?: string;
   sizes?: string[];
   colors?: { name: string; hex?: string }[] | string[];
+  variants?: {
+    id: string;
+    productId: string;
+    sku: string | null;
+    price: string | number;
+    discountPrice: string | number | null;
+    quantity: number;
+    image: string | null;
+    attributeValues: {
+      id: string;
+      attributeId: string;
+      value: string;
+      attribute: {
+        id: string;
+        name: string;
+      };
+    }[];
+  }[];
 }
 
 interface ProductCardProps {
@@ -37,8 +55,25 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // Variant selector states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVariantId, setSelectedVariantId] = useState<string>("");
+  const [modalQuantity, setModalQuantity] = useState(1);
+
+  // Loading states
+  const [isAddingLocal, setIsAddingLocal] = useState(false);
+  const [isAddingModal, setIsAddingModal] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+
+    if (product.variants && product.variants.length > 0) {
+      setSelectedVariantId(product.variants[0].id);
+      setModalQuantity(quantity);
+      setIsModalOpen(true);
+      return;
+    }
+
     // Resolve first size/color safely for both string[] and object[] shapes
     const firstSize = Array.isArray(product.sizes) && product.sizes.length > 0
       ? (typeof product.sizes[0] === "string" ? product.sizes[0] : undefined)
@@ -49,15 +84,58 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           : (product.colors[0] as { name: string }).name)
       : undefined;
 
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[0] ?? "",
-      size: firstSize,
-      color: firstColor,
-      quantity: quantity,
+    setIsAddingLocal(true);
+    try {
+      await addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0] ?? "",
+        size: firstSize,
+        color: firstColor,
+        quantity: quantity,
+      });
+    } catch (err) {
+      // toast error handled inside CartContext
+    } finally {
+      setIsAddingLocal(false);
+    }
+  };
+
+  const handleConfirmAdd = async () => {
+    const selectedVariant = product.variants?.find(v => v.id === selectedVariantId);
+    if (!selectedVariant) return;
+
+    let resolvedSize: string | undefined = undefined;
+    let resolvedColor: string | undefined = undefined;
+
+    selectedVariant.attributeValues.forEach(av => {
+      const nameLower = av.attribute.name.toLowerCase();
+      if (nameLower === "size") {
+        resolvedSize = av.value;
+      } else if (nameLower === "color" || nameLower === "flavour" || nameLower === "flavor") {
+        resolvedColor = av.value;
+      }
     });
+
+    setIsAddingModal(true);
+    try {
+      await addItem({
+        id: product.id,
+        name: product.name,
+        price: Number(selectedVariant.price),
+        image: selectedVariant.image || product.images[0] || "",
+        size: resolvedSize,
+        color: resolvedColor,
+        variantId: selectedVariant.id,
+        quantity: modalQuantity,
+      });
+      setIsModalOpen(false);
+    } catch (err) {
+      // toast error handled inside CartContext
+    } finally {
+      setIsAddingModal(false);
+    }
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -201,12 +279,149 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           <button
             onClick={handleAddToCart}
-            className="flex-1 h-8 bg-black hover:bg-black/90 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-colors shadow-sm"
+            disabled={isAddingLocal}
+            className="flex-1 h-8 bg-black hover:bg-black/90 disabled:bg-black/60 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-all shadow-sm flex items-center justify-center gap-1.5"
           >
-            Add to Cart
+            {isAddingLocal ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              "Add to Cart"
+            )}
           </button>
         </div>
       </div>
+
+      {/* Variant Selection Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Glassmorphic Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsModalOpen(false)}
+            />
+            
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white border border-[#E5D5B5] rounded-2xl shadow-2xl max-w-md w-full p-6 z-10 overflow-hidden flex flex-col gap-4 text-black"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-black transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              {/* Header */}
+              <div>
+                <span className="text-[10px] uppercase font-extrabold tracking-widest text-[#8A1B28]">
+                  Select Options
+                </span>
+                <h4 className="font-display text-base lg:text-lg font-bold text-black uppercase tracking-wide mt-1">
+                  {product.name}
+                </h4>
+              </div>
+
+              {/* Variant List */}
+              <div className="space-y-2">
+                <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">
+                  Available Options:
+                </p>
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                  {product.variants?.map((v) => {
+                    const displayName = v.attributeValues
+                      .map((av) => `${av.attribute.name}: ${av.value}`)
+                      .join(" | ");
+                    const isSelected = selectedVariantId === v.id;
+                    const vPrice = Number(v.price);
+                    
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedVariantId(v.id)}
+                        className={cn(
+                          "w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between gap-4",
+                          isSelected
+                            ? "border-black bg-black/[0.02] ring-1 ring-black"
+                            : "border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded bg-gray-50 border overflow-hidden flex-shrink-0">
+                            <img
+                              src={v.image || product.images[0] || ""}
+                              alt={displayName}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-black uppercase tracking-wider">
+                              {displayName || "Default Variant"}
+                            </p>
+                            <p className="text-[10px] text-gray-400 font-semibold uppercase">
+                              SKU: {v.sku || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-xs font-bold text-[#8A1B28]">
+                            ₹{vPrice.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quantity Selector & Confirm Actions */}
+              <div className="flex items-center gap-4 pt-4 border-t border-gray-100 mt-2">
+                <div className="flex items-center border border-gray-200 rounded h-10 px-3 bg-gray-50">
+                  <button
+                    type="button"
+                    onClick={() => setModalQuantity(Math.max(1, modalQuantity - 1))}
+                    className="p-1 text-gray-500 hover:text-black transition-colors"
+                  >
+                    <Minus className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="w-10 text-center text-sm font-bold text-black">
+                    {modalQuantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setModalQuantity(modalQuantity + 1)}
+                    className="p-1 text-gray-500 hover:text-black transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleConfirmAdd}
+                  disabled={isAddingModal}
+                  className="flex-1 h-10 bg-black hover:bg-black/90 disabled:bg-black/60 text-white text-xs font-bold uppercase tracking-wider rounded transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  {isAddingModal ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add to Bag"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
