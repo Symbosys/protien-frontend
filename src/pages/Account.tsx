@@ -1,31 +1,43 @@
 import { motion } from 'framer-motion';
 import {
-  Package, Truck, RotateCcw, CreditCard, Wallet,
-  User, MapPin, FileText, Lock,
-  Heart, Bookmark, Store, Clock,
-  Gift, Ticket, HelpCircle, MessageCircle,
-  ChevronRight
+  Package,
+  Truck,
+  User,
+  MapPin,
+  Heart,
+  MessageCircle,
+  Loader2,
 } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import AccountHeader from '@/components/account/AccountHeader';
 import AccountCard from '@/components/account/AccountCard';
 import OrdersPreview from '@/components/account/OrdersPreview';
 import AddressPreview from '@/components/account/AddressPreview';
-// import SecuritySettings from '@/components/account/SecuritySettings';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
-import { useUserQuery } from '@/api/hooks/user.hooks';
+import { useEffect, useMemo, useState } from 'react';
+import { useUserQuery, useUpdateUserMutation } from '@/api/hooks/user.hooks';
 import { useLogoutMutation } from '@/api/hooks/auth.hooks';
+import { toast } from 'sonner';
 
-const accountSections = [
+interface AccountItem {
+  icon: any;
+  title: string;
+  subtitle: string;
+  href: string;
+  badge?: string;
+}
+
+interface AccountSection {
+  title: string;
+  items: AccountItem[];
+}
+
+const accountSections: AccountSection[] = [
   {
-    title: 'Orders & Payments',
+    title: 'Orders & Tracking',
     items: [
-      { icon: Package, title: 'My Orders', subtitle: 'View & track orders', href: '/MyntraOrderPage' },
+      { icon: Package, title: 'My Orders', subtitle: 'View & track orders', href: '/account/orders' },
       { icon: Truck, title: 'Track Orders', subtitle: 'Real-time tracking', href: '/track-order' },
-      { icon: RotateCcw, title: 'Returns & Refunds', subtitle: 'Manage returns', href: '/return-refund' },
-      { icon: CreditCard, title: 'Saved Cards', subtitle: 'Manage payment methods', href: '/account/cards' },
-      { icon: Wallet, title: 'UPI & Wallets', subtitle: 'Link payment options', href: '/account/wallets' },
     ],
   },
   {
@@ -33,25 +45,17 @@ const accountSections = [
     items: [
       { icon: User, title: 'Personal Information', subtitle: 'Name, email, phone', href: '/account/personal-information' },
       { icon: MapPin, title: 'Saved Addresses', subtitle: 'Manage delivery addresses', href: '/account/addresses' },
-      // { icon: FileText, title: 'PAN & Legal Info', subtitle: 'Tax & legal documents', href: '/account/legal' },
-      { icon: Lock, title: 'Login & Security', subtitle: 'Password & 2FA', href: '/account/security' },
     ],
   },
   {
     title: 'My Stuff',
     items: [
       { icon: Heart, title: 'Wishlist', subtitle: 'Items you love', href: '/wishlist', badge: '12' },
-      { icon: Bookmark, title: 'Saved Items', subtitle: 'Bookmarked for later', href: '/account/saved' },
-      // { icon: Store, title: 'Followed Stores', subtitle: 'Favorite brands', href: '/account/stores' },
-      { icon: Clock, title: 'Recently Viewed', subtitle: 'Browsing history', href: '/account/history' },
     ],
   },
   {
     title: 'Rewards & Support',
     items: [
-      { icon: Gift, title: 'Reward Points', subtitle: '2,450 points available', href: '/account/rewards', variant: 'highlight' as const },
-      { icon: Ticket, title: 'Coupons', subtitle: '5 coupons available', href: '/account/coupons', badge: '5' },
-      // { icon: HelpCircle, title: 'Help Center', subtitle: 'FAQs & guides', href: '/help' },
       { icon: MessageCircle, title: 'Chat Support', subtitle: '24/7 assistance', href: '/support' },
     ],
   },
@@ -70,6 +74,7 @@ const container = {
 export default function AccountPage() {
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
+  const updateUserMutation = useUpdateUserMutation();
 
   const localUser = useMemo(() => {
     try {
@@ -85,11 +90,25 @@ export default function AccountPage() {
   const { data: userProfileData } = useUserQuery(userId, !!userId);
   const user = userProfileData?.data || localUser;
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+
   useEffect(() => {
     if (!localStorage.getItem('user_token')) {
       navigate('/login');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || '');
+      setLastName(user.lastName || '');
+      setEmail(user.email || '');
+      setPhoneNumber(user.phoneNumber || '');
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     console.log('Logout clicked');
@@ -108,27 +127,58 @@ export default function AccountPage() {
     navigate('/login');
   };
 
-  const handleEditProfile = () => {
-    console.log('Edit profile clicked');
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName.trim()) {
+      toast.error("First name is required");
+      return;
+    }
+    if (!email.trim()) {
+      toast.error("Email address is required");
+      return;
+    }
+
+    updateUserMutation.mutate(
+      {
+        id: userId,
+        data: {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          phoneNumber: phoneNumber.trim(),
+        },
+      },
+      {
+        onSuccess: (response) => {
+          toast.success("Profile updated successfully");
+          if (response?.data) {
+            localStorage.setItem('user', JSON.stringify(response.data));
+          }
+        },
+        onError: (err: any) => {
+          toast.error(err.message || "Failed to update profile");
+        },
+      }
+    );
   };
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-secondary/30">
+      <div className="min-h-screen bg-[#FAF9F6] text-black">
         {/* Mobile Header */}
-        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-md border-b border-border lg:hidden">
-          <div className="container-luxe py-3">
-            <h1 className="font-display text-lg font-semibold">My Account</h1>
+        <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 lg:hidden">
+          <div className="container py-3 px-4">
+            <h1 className="text-lg font-bold text-black">My Account</h1>
           </div>
         </div>
 
-        <div className="pt-20 lg:pt-32 pb-24 lg:pb-16">
+        <div className="pt-20 lg:pt-32 pb-24 lg:pb-16 max-w-6xl mx-auto px-4">
           <div className="container-luxe">
             {/* Desktop Title */}
             <motion.h1
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="hidden lg:block font-display text-3xl md:text-4xl mb-8"
+              className="hidden lg:block font-bold text-3xl mb-8 text-black"
             >
               My Account
             </motion.h1>
@@ -138,12 +188,17 @@ export default function AccountPage() {
               <AccountHeader
                 user={user}
                 onLogout={handleLogout}
-                onEditProfile={handleEditProfile}
+                onEditProfile={() => {
+                  const targetElement = document.getElementById("profile-form-section");
+                  if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
               />
             </div>
 
             {/* Main Grid Layout */}
-            <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
               {/* Left Column - Dashboard Cards */}
               <div className="lg:col-span-2 space-y-6">
                 {accountSections.map((section, sectionIndex) => (
@@ -153,7 +208,7 @@ export default function AccountPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: sectionIndex * 0.05 }}
                   >
-                    <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+                    <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-1">
                       {section.title}
                     </h2>
                     <motion.div
@@ -170,7 +225,6 @@ export default function AccountPage() {
                           subtitle={item.subtitle}
                           href={item.href}
                           badge={item.badge}
-                          variant={item.variant}
                         />
                       ))}
                     </motion.div>
@@ -178,11 +232,100 @@ export default function AccountPage() {
                 ))}
               </div>
 
-              {/* Right Column - Orders, Address, Security */}
+              {/* Right Column - Profile Form & Previews */}
               <div className="space-y-6">
+                
+                {/* Profile Form Card */}
+                <motion.div
+                  id="profile-form-section"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
+                >
+                  <div className="p-5 border-b border-gray-100 flex items-center gap-2">
+                    <User className="w-4.5 h-4.5 text-black" />
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">
+                      Personal Information
+                    </h2>
+                  </div>
+                  
+                  <div className="p-5">
+                    <form onSubmit={handleUpdateProfile} className="space-y-4">
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            First Name
+                          </label>
+                          <input
+                            type="text"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            className="w-full px-3.5 py-2 text-sm bg-white border border-gray-200 rounded-lg text-black focus:border-black focus:outline-none transition-colors shadow-sm"
+                            placeholder="John"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            Last Name
+                          </label>
+                          <input
+                            type="text"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            className="w-full px-3.5 py-2 text-sm bg-white border border-gray-200 rounded-lg text-black focus:border-black focus:outline-none transition-colors shadow-sm"
+                            placeholder="Doe"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full px-3.5 py-2 text-sm bg-white border border-gray-200 rounded-lg text-black focus:border-black focus:outline-none transition-colors shadow-sm"
+                          placeholder="john.doe@example.com"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          className="w-full px-3.5 py-2 text-sm bg-white border border-gray-200 rounded-lg text-black focus:border-black focus:outline-none transition-colors shadow-sm"
+                          placeholder="+91 9876543210"
+                        />
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          type="submit"
+                          disabled={updateUserMutation.isPending}
+                          className="w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-gray-900 disabled:opacity-50 transition-colors shadow-sm"
+                        >
+                          {updateUserMutation.isPending && (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          )}
+                          Save Changes
+                        </button>
+                      </div>
+
+                    </form>
+                  </div>
+                </motion.div>
+
+                {/* Previews */}
                 <OrdersPreview />
                 <AddressPreview />
-                {/* <SecuritySettings /> */}
               </div>
             </div>
           </div>

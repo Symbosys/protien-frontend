@@ -80,6 +80,7 @@ export default function CheckoutPage() {
         shippingState: selectedAddr.state,
         shippingPincode: selectedAddr.pincode,
         paymentMethod: isCashfree ? 'CASHFREE' : 'COD',
+        addressId: selectedAddr.id,
       },
       {
         onSuccess: async (data) => {
