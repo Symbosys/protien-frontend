@@ -58,7 +58,7 @@ export default function FeaturedProducts() {
             : [],
           variants: p.variants,
         }))
-      : mockProducts.slice(0, 8);
+      : [];
 
 
   return (

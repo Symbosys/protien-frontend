@@ -51,19 +51,17 @@ export default function ProductsPage() {
   const selectedBrandId = searchParams.get("brandId");
 
   // Fetch from backend
-  const { data: categoriesData } = useCategoriesQuery({ limit: 100 });
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useCategoriesQuery({ limit: 100 });
   const { data: brandsData } = useBrandsQuery({ limit: 100 });
-  const { data: productsData, isLoading } = useProductsQuery({
+  const { data: productsData, isLoading: isProductsLoading } = useProductsQuery({
     limit: 100,
     brandId: selectedBrandId || undefined,
   });
 
   const processImageUrl = (url: any) => {
-    if (!url)
-      return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
+    if (!url) return "";
     const finalUrl = typeof url === "string" ? url : url.url || "";
-    if (typeof finalUrl !== "string" || !finalUrl)
-      return "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";
+    if (typeof finalUrl !== "string" || !finalUrl) return "";
     if (
       finalUrl.startsWith("http://") ||
       finalUrl.startsWith("https://") ||
@@ -77,7 +75,7 @@ export default function ProductsPage() {
     return `${baseUrl}${finalUrl.startsWith("/") ? "" : "/"}${finalUrl}`;
   };
 
-  // Map database categories, fallback to mock categories
+  // Map database categories
   const categories = useMemo(() => {
     if (categoriesData?.categories && categoriesData.categories.length > 0) {
       return categoriesData.categories.map((cat) => ({
@@ -86,12 +84,12 @@ export default function ProductsPage() {
         image: processImageUrl(cat.image),
       }));
     }
-    return mockCategories;
+    return [];
   }, [categoriesData]);
 
   // Resolve active products list
   const displayProducts = useMemo(() => {
-    let list: any[] = mockProducts;
+    let list: any[] = [];
     if (productsData?.products && productsData.products.length > 0) {
       list = productsData.products.map((dbP: any) => ({
         id: dbP.id,
@@ -103,7 +101,7 @@ export default function ProductsPage() {
         images: [
           processImageUrl(dbP.image),
           ...(Array.isArray(dbP.images) ? dbP.images.map(processImageUrl) : []),
-        ],
+        ].filter(Boolean),
         category: dbP.category?.name || "Uncategorized",
         brandId: dbP.brandId,
         inStock: (dbP.variants && dbP.variants.length > 0)
@@ -203,47 +201,58 @@ export default function ProductsPage() {
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
           {/* Categories Circle Slider on Top */}
           <div className="mb-12 overflow-x-auto pb-4 scrollbar-hide">
-            <div className="flex justify-start md:justify-center items-center gap-6 md:gap-10 min-w-max px-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat.name}
-                  onClick={() =>
-                    updateFilter(
-                      "category",
-                      selectedCategory === cat.name ? null : cat.name,
-                    )
-                  }
-                  className="flex flex-col items-center group flex-shrink-0"
-                >
-                  <div
-                    className={cn(
-                      "w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border transition-all duration-300 shadow-sm",
-                      selectedCategory === cat.name
-                        ? "border-[#8A1B28] ring-2 ring-[#8A1B28]/20"
-                        : "border-[#E5D5B5] group-hover:border-[#8A1B28]",
-                    )}
-                  >
-                    <div className="w-full h-full rounded-full overflow-hidden">
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+            {isCategoriesLoading ? (
+              <div className="flex justify-start md:justify-center items-center gap-6 md:gap-10 min-w-max px-2">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="flex flex-col items-center animate-pulse flex-shrink-0">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-200 border border-gray-100 shadow-sm" />
+                    <div className="h-3 w-14 bg-gray-200 rounded mt-3" />
                   </div>
-                  <span
-                    className={cn(
-                      "text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 transition-colors",
-                      selectedCategory === cat.name
-                        ? "text-[#8A1B28]"
-                        : "text-[#2C2C2C] group-hover:text-[#8A1B28]",
-                    )}
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-start md:justify-center items-center gap-6 md:gap-10 min-w-max px-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.name}
+                    onClick={() =>
+                      updateFilter(
+                        "category",
+                        selectedCategory === cat.name ? null : cat.name,
+                      )
+                    }
+                    className="flex flex-col items-center group flex-shrink-0"
                   >
-                    {cat.name}
-                  </span>
-                </button>
-              ))}
-            </div>
+                    <div
+                      className={cn(
+                        "w-16 h-16 md:w-20 md:h-20 rounded-full p-1 bg-white border transition-all duration-300 shadow-sm",
+                        selectedCategory === cat.name
+                          ? "border-[#8A1B28] ring-2 ring-[#8A1B28]/20"
+                          : "border-[#E5D5B5] group-hover:border-[#8A1B28]",
+                      )}
+                    >
+                      <div className="w-full h-full rounded-full overflow-hidden">
+                        <img
+                          src={cat.image}
+                          alt={cat.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        "text-[10px] md:text-xs font-bold uppercase tracking-wider mt-3 transition-colors",
+                        selectedCategory === cat.name
+                          ? "text-[#8A1B28]"
+                          : "text-[#2C2C2C] group-hover:text-[#8A1B28]",
+                      )}
+                    >
+                      {cat.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Title & Toolbar */}
@@ -253,7 +262,9 @@ export default function ProductsPage() {
                 {selectedCategory || "All Supplements"}
               </h1>
               <p className="text-xs text-muted-foreground tracking-wide mt-1">
-                Showing {displayProducts.length} unique products
+                {isProductsLoading
+                  ? "Loading products..."
+                  : `Showing ${displayProducts.length} unique products`}
               </p>
             </div>
 
@@ -267,14 +278,30 @@ export default function ProductsPage() {
             </button>
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
-            {displayProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
-          </div>
-
-          {displayProducts.length === 0 && (
+          {/* Products Grid / Loading State */}
+          {isProductsLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-[#E5D5B5]/60 rounded overflow-hidden p-4 space-y-4 animate-pulse h-[340px] flex flex-col justify-between shadow-sm"
+                >
+                  <div className="aspect-square bg-gray-200 rounded-lg w-full" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  </div>
+                  <div className="h-8 bg-gray-200 rounded w-full mt-2" />
+                </div>
+              ))}
+            </div>
+          ) : displayProducts.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
+              {displayProducts.map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
+            </div>
+          ) : (
             <div className="text-center py-20 bg-background border border-border rounded p-6">
               <h3 className="font-display text-lg font-bold text-primary mb-2 uppercase">
                 No Products Found

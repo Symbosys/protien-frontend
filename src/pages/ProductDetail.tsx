@@ -260,7 +260,7 @@ export default function ProductDetail() {
         inStock: isStockAvailable,
         netWeight: undefined,
       }
-    : mockProduct;
+    : null;
   const { addItem, openCart } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
 
@@ -354,7 +354,7 @@ export default function ProductDetail() {
             inStock: p.quantity > 0,
             variants: p.variants,
           }))
-      : products.filter((p) => p.id !== id).slice(0, 4);
+      : [];
 
   return (
     <MainLayout>
