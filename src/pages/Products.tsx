@@ -106,8 +106,9 @@ export default function ProductsPage() {
         ],
         category: dbP.category?.name || "Uncategorized",
         brandId: dbP.brandId,
-        rating: dbP.rating || 5,
-        inStock: dbP.quantity > 0,
+        inStock: (dbP.variants && dbP.variants.length > 0)
+          ? dbP.variants.some((v: any) => Number(v.quantity) > 0) || Number(dbP.quantity) > 0
+          : Number(dbP.quantity) > 0,
         netWeight: undefined,
         sizes: Array.isArray(dbP.sizes) ? dbP.sizes : [],
         colors: Array.isArray(dbP.colors)

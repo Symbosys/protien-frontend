@@ -143,20 +143,25 @@ export default function ProductDetail() {
     }
   }, [attributesMap, dbProduct]);
 
-  // Find the selected variant matching current selections
+  // Find the selected variant matching current selections, or fallback to first variant
   const selectedVariant = useMemo(() => {
-    if (!dbProduct?.variants || Object.keys(selectedAttributes).length === 0)
+    if (!dbProduct?.variants || dbProduct.variants.length === 0)
       return null;
 
-    return dbProduct.variants.find((v) => {
-      return Object.entries(selectedAttributes).every(
-        ([attrName, selectedVal]) => {
-          return v.attributeValues.some(
-            (av) => av.attribute.name === attrName && av.value === selectedVal,
-          );
-        },
-      );
-    });
+    if (Object.keys(selectedAttributes).length > 0) {
+      const match = dbProduct.variants.find((v) => {
+        return Object.entries(selectedAttributes).every(
+          ([attrName, selectedVal]) => {
+            return v.attributeValues.some(
+              (av) => av.attribute.name === attrName && av.value === selectedVal,
+            );
+          },
+        );
+      });
+      if (match) return match;
+    }
+
+    return dbProduct.variants[0] || null;
   }, [selectedAttributes, dbProduct]);
 
   // Reset selected state whenever the product changes to avoid carrying over stale state
@@ -219,8 +224,14 @@ export default function ProductDetail() {
     setSelectedImage(0);
   }, [selectedVariant?.id]);
 
-  const hasVariants = dbProduct?.variants && dbProduct.variants.length > 0;
+  const hasVariants = Boolean(dbProduct?.variants && dbProduct.variants.length > 0);
+  const hasVariantStock = hasVariants && Boolean(dbProduct?.variants?.some((v) => Number(v.quantity) > 0));
   const variantAvailable = hasVariants ? !!selectedVariant : true;
+  const isStockAvailable = selectedVariant
+    ? Number(selectedVariant.quantity) > 0
+    : hasVariants
+      ? hasVariantStock
+      : (dbProduct ? Number(dbProduct.quantity) > 0 : true);
 
   const product = dbProduct
     ? {
@@ -246,7 +257,7 @@ export default function ProductDetail() {
         sizes: Array.isArray(dbProduct.sizes) ? dbProduct.sizes : [],
         colors: Array.isArray(dbProduct.colors) ? dbProduct.colors : [],
         tags: [],
-        inStock: variantAvailable ? (selectedVariant ? selectedVariant.quantity > 0 : dbProduct.quantity > 0) : false,
+        inStock: isStockAvailable,
         netWeight: undefined,
       }
     : mockProduct;

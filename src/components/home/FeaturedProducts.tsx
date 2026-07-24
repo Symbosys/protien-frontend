@@ -47,8 +47,9 @@ export default function FeaturedProducts() {
             ...(Array.isArray(p.images) ? p.images.map(processImageUrl) : []),
           ],
           category: p.category?.name ?? "Uncategorized",
-          rating: p.rating,
-          inStock: p.quantity > 0,
+          inStock: (p.variants && p.variants.length > 0)
+            ? p.variants.some((v: any) => Number(v.quantity) > 0) || Number(p.quantity) > 0
+            : Number(p.quantity) > 0,
           sizes: Array.isArray(p.sizes) ? p.sizes : [],
           colors: Array.isArray(p.colors)
             ? (p.colors as any[]).map((c) =>
