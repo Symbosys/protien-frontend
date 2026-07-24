@@ -139,10 +139,10 @@ export default function Footer() {
                     Contact Us
                   </span>
                   <a
-                    href="tel:6200065378"
+                    href="tel:6200540268"
                     className="hover:text-[#8CFF64] font-bold"
                   >
-                    7759-957841
+                    6200540268
                   </a>
                 </div>
               </div>
