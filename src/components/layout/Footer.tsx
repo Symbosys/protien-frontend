@@ -58,7 +58,9 @@ export default function Footer() {
               </svg>
             </div>
             <a
-              href="https://wa.me/916200065378"
+              href={`https://wa.me/916200065378?text=${encodeURIComponent(
+                "Hello Protein & Nutrients! I would like to chat with customer support."
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white hover:text-[#8CFF64] transition-colors text-sm lg:text-base font-semibold uppercase"

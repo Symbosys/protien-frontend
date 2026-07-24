@@ -3,9 +3,13 @@
 import { MessageCircle } from "lucide-react";
 
 export default function WhatsAppButton() {
+  const defaultMessage = encodeURIComponent(
+    "Hello Protein & Nutrients! I have an inquiry about your products."
+  );
+
   return (
     <a
-      href="https://wa.me/916200065378"
+      href={`https://wa.me/916200065378?text=${defaultMessage}`}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-24 lg:bottom-6 left-4 z-40 w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300"
