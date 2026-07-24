@@ -89,6 +89,7 @@ export interface CreateOrderInput {
   shippingPincode: string;
   paymentMethod?: string;
   note?: string;
+  addressId?: string;
 }
 
 export interface CreateOrderResponse {

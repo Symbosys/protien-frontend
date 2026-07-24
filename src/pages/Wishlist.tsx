@@ -1,75 +1,90 @@
-import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, ShoppingBag, X, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/button';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
-
 
 export default function WishlistPage() {
   const { items, removeItem, isLoading } = useWishlist();
   const { addItem } = useCart();
 
+  const handleAddToCart = (item: (typeof items)[0]) => {
+    addItem({ id: item.id, name: item.name, price: item.price, image: item.image });
+  };
+
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="pt-32 pb-16">
-          <div className="container-luxe">
-            <div className="h-10 w-48 bg-secondary/50 animate-pulse rounded mb-8" />
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="aspect-[3/4] bg-secondary/30 animate-pulse rounded-lg" />
-              ))}
-            </div>
+        <div className="min-h-screen bg-[#F7F8FA] flex items-center justify-center pt-28">
+          <div className="text-center space-y-3">
+            <Loader2 className="w-6 h-6 animate-spin text-black mx-auto" />
+            <p className="text-sm text-gray-400">Loading your wishlist…</p>
           </div>
         </div>
       </MainLayout>
     );
   }
 
-  const handleAddToCart = (item: typeof items[0]) => {
-    addItem({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-    });
-  };
-
   return (
     <MainLayout>
-      <div className="pt-32 pb-16">
-        <div className="container-luxe">
-          <h1 className="font-display text-3xl md:text-4xl lg:text-5xl mb-8">
-            Wishlist
-          </h1>
+      <div className="min-h-screen bg-[#F7F8FA] text-black pb-20">
+
+        {/* Hero */}
+        <div className="bg-white border-b border-gray-100 pt-28 pb-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Account</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-black flex items-center gap-2.5">
+                <Heart className="w-6 h-6 text-rose-500 fill-rose-500" />
+                Wishlist
+              </h1>
+            </div>
+            {items.length > 0 && (
+              <p className="text-xs font-semibold text-gray-400 pb-1">
+                {items.length} {items.length === 1 ? 'item' : 'items'} saved
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
           {items.length === 0 ? (
-            <div className="text-center py-16">
-              <Heart className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-              <h2 className="text-xl font-medium mb-2">Your wishlist is empty</h2>
-              <p className="text-muted-foreground mb-8">
-                Save your favorite items to revisit them later
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center text-center py-24 bg-white border border-dashed border-gray-200 rounded-2xl"
+            >
+              <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-5">
+                <Heart className="w-7 h-7 text-rose-400" />
+              </div>
+              <h2 className="text-lg font-bold text-black mb-1">Your wishlist is empty</h2>
+              <p className="text-sm text-gray-400 mb-7 max-w-xs">
+                Save products you love and come back to them anytime.
               </p>
-              <Button variant="hero" size="lg" asChild>
-                <Link to="/products">Explore Products</Link>
-              </Button>
-            </div>
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gray-900 transition-colors shadow-sm"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Explore Products
+              </Link>
+            </motion.div>
           ) : (
-            <>
-              <p className="text-muted-foreground mb-8">{items.length} items saved</p>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
+              <AnimatePresence>
                 {items.map((item, index) => (
                   <motion.div
                     key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group"
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-gray-200 transition-all"
                   >
-                    <div className="relative aspect-[3/4] bg-muted rounded-lg overflow-hidden mb-4">
+                    {/* Image */}
+                    <div className="relative aspect-square overflow-hidden bg-gray-50">
                       <Link to={`/product/${item.id}`}>
                         <img
                           src={item.image}
@@ -77,35 +92,43 @@ export default function WishlistPage() {
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </Link>
+
+                      {/* Remove button */}
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="absolute top-3 right-3 p-2 bg-background/80 rounded-full hover:bg-background transition-colors"
+                        className="absolute top-2.5 right-2.5 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors"
+                        title="Remove from wishlist"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
-                      
+
+                      {/* Add to bag overlay */}
                       <motion.button
-                        initial={{ opacity: 0, y: 10 }}
-                        whileHover={{ opacity: 1, y: 0 }}
-                        className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 py-3 bg-background/90 backdrop-blur-sm text-foreground text-sm font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        initial={{ opacity: 0, y: 6 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 py-2.5 bg-black/90 text-white text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
                         onClick={() => handleAddToCart(item)}
                       >
-                        <ShoppingBag className="h-4 w-4" />
+                        <ShoppingBag className="w-3.5 h-3.5" />
                         Add to Bag
                       </motion.button>
                     </div>
 
-                    <Link to={`/product/${item.id}`}>
-                      <h3 className="font-medium line-clamp-1 group-hover:text-primary transition-colors">
-                        {item.name}
-                      </h3>
-                    </Link>
-                    <p className="font-medium">₹{item.price.toLocaleString()}</p>
+                    {/* Info */}
+                    <div className="p-3.5">
+                      <Link to={`/product/${item.id}`}>
+                        <h3 className="text-sm font-semibold text-black line-clamp-1 hover:underline mb-1">
+                          {item.name}
+                        </h3>
+                      </Link>
+                      <p className="text-sm font-bold text-black">₹{item.price.toLocaleString()}</p>
+                    </div>
                   </motion.div>
                 ))}
-              </div>
-            </>
+              </AnimatePresence>
+            </div>
           )}
+
         </div>
       </div>
     </MainLayout>

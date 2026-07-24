@@ -178,6 +178,144 @@ const formatDate = (dateStr: string | Date) => {
   });
 };
 
+const generateHtmlTable = (headers: string[], rows: string[][]) => {
+  const headerCols = headers.map(h => `<th class="border-b border-gray-200 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-black bg-gray-50">${h}</th>`).join("");
+  const rowHtml = rows.map(row => {
+    const cols = row.map(cell => `<td class="border-b border-gray-100 px-4 py-3 text-sm text-gray-600">${cell}</td>`).join("");
+    return `<tr class="hover:bg-gray-50/50 transition-colors">${cols}</tr>`;
+  }).join("");
+
+  const tableHtml = `
+    <div class="overflow-x-auto my-6 border border-gray-200 rounded-xl shadow-sm">
+      <table class="min-w-full border-collapse bg-white">
+        <thead>
+          <tr>${headerCols}</tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          ${rowHtml}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  return tableHtml.replace(/\n/g, " ").replace(/\s+/g, " ");
+};
+
+const parseMarkdown = (markdown: string) => {
+  if (!markdown) return "";
+  
+  let html = markdown;
+
+  // Process Code blocks first
+  const codeBlocks: string[] = [];
+  html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+    const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+    codeBlocks.push(`<pre class="bg-gray-50 p-4 rounded-lg my-4 font-mono text-sm overflow-x-auto border text-gray-700"><code>${code}</code></pre>`);
+    return placeholder;
+  });
+
+  const inlineCodes: string[] = [];
+  html = html.replace(/`(.*?)`/g, (match, code) => {
+    const placeholder = `__INLINE_CODE_${inlineCodes.length}__`;
+    inlineCodes.push(`<code class="bg-gray-50 px-1.5 py-0.5 rounded font-mono text-xs border text-gray-700">${code}</code>`);
+    return placeholder;
+  });
+
+  // Parse Markdown Tables
+  const lines = html.split("\n");
+  let inTable = false;
+  let tableHeaders: string[] = [];
+  let tableRows: string[][] = [];
+  let newLines: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith("|") && line.endsWith("|")) {
+      const cells = line.split("|").map(c => c.trim()).slice(1, -1);
+      
+      if (!inTable) {
+        inTable = true;
+        tableHeaders = cells;
+      } else {
+        const isSeparator = cells.every(c => /^:?-+:?$/.test(c));
+        if (isSeparator) {
+          continue;
+        } else {
+          tableRows.push(cells);
+        }
+      }
+    } else {
+      if (inTable) {
+        const tableHtml = generateHtmlTable(tableHeaders, tableRows);
+        newLines.push(tableHtml);
+        inTable = false;
+        tableHeaders = [];
+        tableRows = [];
+      }
+      newLines.push(lines[i]);
+    }
+  }
+  if (inTable) {
+    const tableHtml = generateHtmlTable(tableHeaders, tableRows);
+    newLines.push(tableHtml);
+  }
+
+  html = newLines.join("\n");
+
+  // Headings
+  html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-extrabold mt-5 mb-2 text-black uppercase">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-extrabold mt-6 mb-3 text-black border-b pb-1 uppercase">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-extrabold mt-8 mb-4 text-black border-b pb-2 uppercase">$1</h1>');
+
+  // Bold & Italic
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-black">$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+
+  // Blockquotes
+  html = html.replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-[#5BBF3D] pl-6 py-1 my-4 italic text-black/80 bg-gray-50 rounded-r">$1</blockquote>');
+
+  // Links
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-[#5BBF3D] underline hover:text-[#4A9E30] font-bold">$1</a>');
+
+  // Lists
+  html = html.replace(/^[\-\*] (.*$)/gim, '<li class="list-disc ml-5 mb-1 text-gray-600">$1</li>');
+
+  // Restore placeholders
+  codeBlocks.forEach((code, index) => {
+    html = html.replace(`__CODE_BLOCK_${index}__`, code);
+  });
+  inlineCodes.forEach((code, index) => {
+    html = html.replace(`__INLINE_CODE_${index}__`, code);
+  });
+
+  // Paragraphs
+  const blocks = html.split(/\n{2,}/);
+  const parsedBlocks = blocks.map((block) => {
+    const trimmed = block.trim();
+    if (!trimmed) return "";
+    if (
+      trimmed.startsWith("<h") ||
+      trimmed.startsWith("<p") ||
+      trimmed.startsWith("<ul") ||
+      trimmed.startsWith("<ol") ||
+      trimmed.startsWith("<li") ||
+      trimmed.startsWith("<blockquote") ||
+      trimmed.startsWith("<pre") ||
+      trimmed.startsWith("<div class=\"overflow-x-auto my-6\"") ||
+      trimmed.startsWith("##") ||
+      trimmed.startsWith("#") ||
+      trimmed.startsWith(">") ||
+      trimmed.startsWith("-") ||
+      trimmed.startsWith("*")
+    ) {
+      return block;
+    }
+    return `<p class="mb-4 leading-relaxed text-gray-600">${block.replace(/\n/g, "<br />")}</p>`;
+  });
+
+  return parsedBlocks.join("\n");
+};
+
 export default function BlogDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -369,7 +507,7 @@ export default function BlogDetail() {
                 prose-blockquote:border-l-4 prose-blockquote:border-[#5BBF3D] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:my-8 prose-blockquote:text-lg prose-blockquote:text-black/80
                 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6
                 prose-li:my-2"
-              dangerouslySetInnerHTML={{ __html: activeBlog.content }}
+              dangerouslySetInnerHTML={{ __html: parseMarkdown(activeBlog.content) }}
             />
 
             {/* Related Articles */}

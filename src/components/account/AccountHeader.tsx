@@ -105,11 +105,10 @@ export default function AccountHeader({ onLogout, onEditProfile, user }: Account
         </div>
         
         {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border/50">
+        <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-border/50">
           {[
             { label: 'Total Orders', value: '24' },
             { label: 'Wishlist Items', value: wishlistCount.toString() },
-            { label: 'Reward Points', value: '2,450' },
           ].map((stat, i) => (
             <div key={i} className="text-center sm:text-left">
               <p className="text-xl sm:text-2xl font-display font-semibold text-foreground">{stat.value}</p>

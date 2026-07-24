@@ -18,6 +18,7 @@ import {
   Plus,
   Share2,
   Star,
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -252,6 +253,7 @@ export default function ProductDetail() {
   const { addItem, openCart } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
 
+  const [isAdding, setIsAdding] = useState(false);
   if (isLoading) {
     return (
       <MainLayout>
@@ -332,6 +334,7 @@ export default function ProductDetail() {
             category: p.category?.name ?? "Uncategorized",
             rating: p.rating,
             inStock: p.quantity > 0,
+            variants: p.variants,
           }))
       : products.filter((p) => p.id !== id).slice(0, 4);
 
@@ -357,8 +360,10 @@ export default function ProductDetail() {
 
           {/* Product Gallery & Info Grid */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Gallery: Thumbnail Bar + Main Zoom Frame (Left columns) */}
-            <div className="lg:col-span-7 flex flex-col md:flex-row gap-4">
+            {/* Left Column: Gallery + Description */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Gallery: Thumbnail Bar + Main Zoom Frame */}
+              <div className="flex flex-col md:flex-row gap-4">
               {/* Thumbnails list */}
               <div className="flex md:flex-col gap-3 order-2 md:order-1 flex-shrink-0">
                 {product.images.map((img, idx) => (
@@ -384,7 +389,7 @@ export default function ProductDetail() {
               {/* Main Image Frame */}
               <div className="flex-1 order-1 md:order-2 bg-card border border-border rounded-xl overflow-hidden relative aspect-square shadow-sm flex items-center justify-center p-3">
                 <img
-                  src={product.images[selectedImage]}
+                  src={(selectedVariant && selectedVariant.image) ? processImageUrl(selectedVariant.image) : product.images[selectedImage]}
                   alt={product.name}
                   className={cn(
                     "w-full h-full object-cover rounded-lg",
@@ -404,6 +409,19 @@ export default function ProductDetail() {
               </div>
             </div>
 
+              {/* Product Description */}
+              {product.description && (
+                <div className="space-y-3 bg-white p-6 rounded-xl border border-[#E5D5B5]/60 shadow-sm mt-6">
+                  <span className="text-xs uppercase font-extrabold text-[#888] tracking-wider block border-b border-[#E5D5B5]/30 pb-2 mb-2">
+                    Product Description
+                  </span>
+                  <p className="text-xs lg:text-sm text-[#444] leading-relaxed whitespace-pre-line">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Info Block (Right columns) */}
             <div className="lg:col-span-5 space-y-6">
               {/* Title & Icons line */}
@@ -413,7 +431,7 @@ export default function ProductDetail() {
                     {product.name}
                   </h1>
                   <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mt-1">
-                    {product.inStock ? "● In-Stock" : "● Out of Stock"}
+                    {(selectedVariant ? selectedVariant.quantity > 0 : product.inStock) ? "● In-Stock" : "● Out of Stock"}
                   </span>
                 </div>
 
@@ -597,44 +615,64 @@ export default function ProductDetail() {
 
                 {/* Add to Cart Button */}
                 <button
-                  disabled={!product.inStock}
-                  onClick={() => {
-                    const firstSize =
-                      selectedAttributes["Size"] ||
-                      selectedAttributes["size"] ||
-                      (Array.isArray(product.sizes) && product.sizes.length > 0
-                        ? product.sizes[0]
-                        : undefined);
-                    const firstColor =
-                      selectedAttributes["Flavour"] ||
-                      selectedAttributes["flavour"] ||
-                      selectedAttributes["Flavor"] ||
-                      selectedAttributes["flavor"] ||
-                      (Array.isArray(product.colors) &&
-                      product.colors.length > 0
-                        ? typeof product.colors[0] === "string"
-                          ? product.colors[0]
-                          : (product.colors[0] as any).name
-                        : undefined);
-                    addItem({
-                      id: product.id,
-                      variantId: selectedVariant?.id,
-                      name: product.name,
-                      price: product.price,
-                      image: product.images[0] ?? "",
-                      size: firstSize,
-                      color: firstColor,
-                      quantity: quantity,
-                    });
+                  disabled={isAdding || !product.inStock}
+                  onClick={async () => {
+                    setIsAdding(true);
+                    try {
+                      const firstSize =
+                        selectedAttributes["Size"] ||
+                        selectedAttributes["size"] ||
+                        selectedAttributes["Weight"] ||
+                        selectedAttributes["weight"] ||
+                        (Array.isArray(product.sizes) && product.sizes.length > 0
+                          ? product.sizes[0]
+                          : undefined);
+                      const firstColor =
+                        selectedAttributes["Flavour"] ||
+                        selectedAttributes["flavour"] ||
+                        selectedAttributes["Flavor"] ||
+                        selectedAttributes["flavor"] ||
+                        selectedAttributes["Color"] ||
+                        selectedAttributes["color"] ||
+                        (Array.isArray(product.colors) &&
+                        product.colors.length > 0
+                          ? typeof product.colors[0] === "string"
+                            ? product.colors[0]
+                            : (product.colors[0] as any).name
+                          : undefined);
+                      await addItem({
+                        id: product.id,
+                        variantId: selectedVariant?.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.images[0] ?? "",
+                        size: firstSize,
+                        color: firstColor,
+                        quantity: quantity,
+                      });
+                    } catch (err) {
+                      // handled by context
+                    } finally {
+                      setIsAdding(false);
+                    }
                   }}
                   className={cn(
-                    "flex-1 h-12 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded shadow-sm transition-all",
-                    product.inStock
+                    "flex-1 h-12 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded shadow-sm flex items-center justify-center gap-2 transition-all",
+                    product.inStock && !isAdding
                       ? "bg-black hover:bg-black/90 cursor-pointer"
                       : "bg-gray-400 cursor-not-allowed"
                   )}
                 >
-                  {variantAvailable ? (product.inStock ? "Add to Cart" : "Out of Stock") : "Variant unavailable"}
+                  {isAdding ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : variantAvailable ? (
+                    product.inStock ? "Add to Cart" : "Out of Stock"
+                  ) : (
+                    "Variant unavailable"
+                  )}
                 </button>
 
                 {/* Wishlist Heart Button next to Add to Cart */}
@@ -733,14 +771,7 @@ export default function ProductDetail() {
                         </span>
                       </div>
                     )}
-                    <div className="flex justify-between border-b border-border pb-2">
-                      <span className="font-semibold text-black">
-                        Net Weight
-                      </span>
-                      <span className="font-bold text-black">
-                        {product.netWeight || "N/A"}
-                      </span>
-                    </div>
+
                     <div className="flex justify-between border-b border-border pb-2 md:col-span-2">
                       <span className="font-semibold text-black">
                         Category Name

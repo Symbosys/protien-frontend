@@ -17,6 +17,7 @@ export interface CartItem {
   quantity: number;
   size?: string;
   color?: string;
+  variant?: any;
 }
 
 interface CartContextType {
@@ -24,9 +25,9 @@ interface CartContextType {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => Promise<any>;
+  removeItem: (id: string) => Promise<any>;
+  updateQuantity: (id: string, quantity: number) => Promise<any>;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -64,12 +65,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       quantity: item.quantity,
       size: item.size || undefined,
       color: item.color || undefined,
+      variant: item.variant || undefined,
     }));
   }, [backendCart]);
 
-  const addItem = (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => {
+  const addItem = async (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => {
     // When adding from ProductCard/ProductDetail, item.id is product.id.
-    addToCartMutation.mutate(
+    return addToCartMutation.mutateAsync(
       {
         productId: item.id, // item.id is the product ID
         variantId: item.variantId,
@@ -95,8 +97,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Remove item
-  const removeItem = (id: string) => {
-    removeCartItemMutation.mutate(id, {
+  const removeItem = async (id: string) => {
+    return removeCartItemMutation.mutateAsync(id, {
       onSuccess: () => {
         toast.success("Removed from bag");
       },
@@ -107,13 +109,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Update item quantity
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = async (id: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(id);
-      return;
+      return removeItem(id);
     }
 
-    updateCartItemMutation.mutate(
+    return updateCartItemMutation.mutateAsync(
       { itemId: id, quantity },
       {
         onError: (err: any) => {

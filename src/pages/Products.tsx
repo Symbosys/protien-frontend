@@ -115,6 +115,7 @@ export default function ProductsPage() {
               typeof c === "string" ? { name: c } : c,
             )
           : [],
+        variants: dbP.variants,
       }));
     }
 
