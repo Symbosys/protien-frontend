@@ -18,7 +18,7 @@ export default function Footer() {
           {/* Logo */}
           <div className="w-[82px] h-[82px] bg-white flex items-center justify-center p-2 rounded-md">
             <img
-              src="/logo.jpg"
+              src="/logo.png"
               alt="Protein & Nutrients Logo"
               className="w-full h-full object-contain"
             />
@@ -39,7 +39,7 @@ export default function Footer() {
               href="mailto:akkigupta2411@gmail.com"
               className="text-white hover:text-[#8CFF64] transition-colors text-sm lg:text-base font-semibold"
             >
-              support@protein-and-nutrients.com
+              akkigupta2411@gmail.com
             </a>
           </div>
 

@@ -19,7 +19,7 @@ import {
   Share2,
   Star,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCreateReviewMutation } from "@/api/hooks/review.hooks";
 
@@ -44,10 +44,13 @@ export default function ProductDetail() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
 
-  const isLoggedIn = typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"));
-  
+  const isLoggedIn =
+    typeof window !== "undefined" &&
+    (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"));
+
   // Extract logged-in user's full name
-  const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+  const userStr =
+    typeof window !== "undefined" ? localStorage.getItem("user") : null;
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const userFullName = currentUser
     ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim()
@@ -59,45 +62,181 @@ export default function ProductDetail() {
     e.preventDefault();
     if (!reviewComment.trim()) return;
 
-    postReviewMutation.mutate({
-      productId,
-      rating: reviewRating,
-      comment: reviewComment.trim()
-    }, {
-      onSuccess: () => {
-        setReviewComment("");
-        setReviewRating(5);
-        alert("Thank you for your feedback! Review submitted successfully.");
+    postReviewMutation.mutate(
+      {
+        productId,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
       },
-      onError: (err: any) => {
-        alert(err.response?.data?.message || err.message || "Failed to submit review. You might have already reviewed this product.");
-      }
-    });
+      {
+        onSuccess: () => {
+          setReviewComment("");
+          setReviewRating(5);
+          alert("Thank you for your feedback! Review submitted successfully.");
+        },
+        onError: (err: any) => {
+          alert(
+            err.response?.data?.message ||
+              err.message ||
+              "Failed to submit review. You might have already reviewed this product.",
+          );
+        },
+      },
+    );
   };
 
   const processImageUrl = (url: string) => {
     if (!url) return "";
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL
       ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
       : "http://192.168.1.2:4000";
     return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
+  const [selectedAttributes, setSelectedAttributes] = useState<
+    Record<string, string>
+  >({});
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [isMainDetailOpen, setIsMainDetailOpen] = useState(true);
+  const [zoomScale, setZoomScale] = useState(false);
+
+  // Group all available attribute values by attribute name from all variants
+  const attributesMap = useMemo(() => {
+    const map: Record<
+      string,
+      { id: string; value: string; image: string | null }[]
+    > = {};
+    if (!dbProduct?.variants) return map;
+
+    dbProduct.variants.forEach((v) => {
+      v.attributeValues.forEach((av) => {
+        const attrName = av.attribute.name;
+        if (!map[attrName]) {
+          map[attrName] = [];
+        }
+        // Avoid duplicate value names
+        if (!map[attrName].some((item) => item.value === av.value)) {
+          map[attrName].push({
+            id: av.id,
+            value: av.value,
+            image: av.image || null,
+          });
+        }
+      });
+    });
+    return map;
+  }, [dbProduct]);
+
+  // Initialize selectedAttributes state
+  useEffect(() => {
+    if (dbProduct?.variants && dbProduct.variants.length > 0) {
+      const initial: Record<string, string> = {};
+      Object.entries(attributesMap).forEach(([attrName, vals]) => {
+        if (vals.length > 0) {
+          initial[attrName] = vals[0].value;
+        }
+      });
+      setSelectedAttributes(initial);
+    }
+  }, [attributesMap, dbProduct]);
+
+  // Find the selected variant matching current selections
+  const selectedVariant = useMemo(() => {
+    if (!dbProduct?.variants || Object.keys(selectedAttributes).length === 0)
+      return null;
+
+    return dbProduct.variants.find((v) => {
+      return Object.entries(selectedAttributes).every(
+        ([attrName, selectedVal]) => {
+          return v.attributeValues.some(
+            (av) => av.attribute.name === attrName && av.value === selectedVal,
+          );
+        },
+      );
+    });
+  }, [selectedAttributes, dbProduct]);
+
+  // Reset selected state whenever the product changes to avoid carrying over stale state
+  useEffect(() => {
+    setSelectedAttributes({});
+    setSelectedImage(0);
+    setQuantity(1);
+  }, [productId]);
+
+  // Display ONLY the selected variant's images, or fallback to main product images
+  const allProductImages = useMemo(() => {
+    if (selectedVariant) {
+      let variantImgs: string[] = [];
+      if (Array.isArray(selectedVariant.images)) {
+        variantImgs = selectedVariant.images;
+      } else if (typeof selectedVariant.images === 'string') {
+        try {
+          variantImgs = JSON.parse(selectedVariant.images);
+        } catch (e) {
+          variantImgs = [];
+        }
+      }
+      if (variantImgs.length > 0) {
+        return variantImgs.map(processImageUrl);
+      }
+      if (selectedVariant.image) {
+        return [processImageUrl(selectedVariant.image)];
+      }
+    }
+
+    const imgs: string[] = [];
+
+    // Add main product image
+    if (dbProduct?.image) {
+      imgs.push(processImageUrl(dbProduct.image));
+    }
+
+    // Add product supplementary images
+    if (Array.isArray(dbProduct?.images)) {
+      dbProduct.images.forEach((img) => {
+        const url = processImageUrl(img);
+        if (url && !imgs.includes(url)) {
+          imgs.push(url);
+        }
+      });
+    }
+
+    // Fallback if empty
+    if (imgs.length === 0) {
+      imgs.push(
+        "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800",
+      );
+    }
+
+    return imgs;
+  }, [selectedVariant, dbProduct]);
+
+  // Reset selected image index to 0 instantly when variant changes
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedVariant?.id]);
+
+  const hasVariants = dbProduct?.variants && dbProduct.variants.length > 0;
+  const variantAvailable = hasVariants ? !!selectedVariant : true;
+
   const product = dbProduct
     ? {
         id: dbProduct.id,
         name: dbProduct.name,
-        price: Number(dbProduct.price),
+        price: selectedVariant
+          ? Number(selectedVariant.price)
+          : Number(dbProduct.price),
+        originalPrice: selectedVariant
+          ? selectedVariant.discountPrice
+            ? Number(selectedVariant.discountPrice)
+            : undefined
+          : dbProduct.discountPrice
+            ? Number(dbProduct.discountPrice)
+            : undefined,
         description: dbProduct.description || "",
-        images: (Array.isArray(dbProduct.images) && dbProduct.images.length > 0
-          ? dbProduct.images
-          : dbProduct.image
-            ? [dbProduct.image]
-            : [
-                "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800",
-              ]
-        ).map(processImageUrl),
+        images: allProductImages,
         category: dbProduct.category?.name || "Uncategorized",
         subcategory: dbProduct.subCategory?.name || "",
         brand: dbProduct.brand || "P&N",
@@ -106,17 +245,12 @@ export default function ProductDetail() {
         sizes: Array.isArray(dbProduct.sizes) ? dbProduct.sizes : [],
         colors: Array.isArray(dbProduct.colors) ? dbProduct.colors : [],
         tags: [],
-        inStock: dbProduct.quantity > 0,
+        inStock: variantAvailable ? (selectedVariant ? selectedVariant.quantity > 0 : dbProduct.quantity > 0) : false,
         netWeight: undefined,
       }
     : mockProduct;
   const { addItem, openCart } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
-
-  const [quantity, setQuantity] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [isMainDetailOpen, setIsMainDetailOpen] = useState(true);
-  const [zoomScale, setZoomScale] = useState(false);
 
   if (isLoading) {
     return (
@@ -173,7 +307,7 @@ export default function ProductDetail() {
     if (!s) return FALLBACK;
     if (s.startsWith("http") || s.startsWith("data:") || s.startsWith("blob:"))
       return s;
-        const base = (
+    const base = (
       process.env.NEXT_PUBLIC_API_URL ?? "http://192.168.1.2:4000"
     ).replace("/api", "");
     return `${base}${s.startsWith("/") ? "" : "/"}${s}`;
@@ -336,9 +470,17 @@ export default function ProductDetail() {
                   <span className="text-[9px] uppercase tracking-widest text-[#888] font-bold block mb-1">
                     Standard rate
                   </span>
-                  <span className="text-xl lg:text-2xl font-extrabold text-[#8A1B28]">
-                    ₹{product.price.toLocaleString("en-IN")}
-                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl lg:text-2xl font-extrabold text-[#8A1B28]">
+                      ₹{product.price.toLocaleString("en-IN")}
+                    </span>
+                    {product.originalPrice &&
+                      product.originalPrice > product.price && (
+                        <span className="text-sm line-through text-muted-foreground">
+                          ₹{product.originalPrice.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                  </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-[#555] font-semibold block uppercase tracking-wide">
@@ -354,23 +496,81 @@ export default function ProductDetail() {
               <div className="space-y-3.5 text-xs lg:text-sm text-black">
                 {product.netWeight && (
                   <div className="flex justify-between border-b border-border pb-2">
-                    <span className="font-semibold text-black">
-                      Weight :
-                    </span>
+                    <span className="font-semibold text-black">Weight :</span>
                     <span className="font-bold text-black">
                       {product.netWeight}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between border-b border-border pb-2">
-                  <span className="font-semibold text-black">
-                    Category :
-                  </span>
+                  <span className="font-semibold text-black">Category :</span>
                   <span className="font-bold text-black">
                     {product.category}
                   </span>
                 </div>
+                <div className="flex justify-between border-b border-border pb-2">
+                  <span className="font-semibold text-black">
+                    SKU :
+                  </span>
+                  <span className="font-bold text-black font-mono">
+                    {selectedVariant?.sku || dbProduct?.sku || "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b border-border pb-2">
+                  <span className="font-semibold text-black">
+                    Availability :
+                  </span>
+                  <span className={cn("font-bold", product.inStock ? "text-emerald-600" : "text-red-600")}>
+                    {variantAvailable ? (product.inStock ? `${selectedVariant ? selectedVariant.quantity : (dbProduct?.quantity ?? 0)} in stock` : "Out of Stock") : "Unavailable"}
+                  </span>
+                </div>
               </div>
+
+              {/* Attribute Selectors */}
+              {Object.keys(attributesMap).length > 0 && (
+                <div className="space-y-4 pt-4 border-t border-[#E5D5B5]/60">
+                  {Object.entries(attributesMap).map(([attrName, vals]) => (
+                    <div key={attrName} className="space-y-2">
+                      <span className="text-[10px] uppercase tracking-widest text-[#888] font-bold block">
+                        Select {attrName}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {vals.map((v) => {
+                          const isSelected =
+                            selectedAttributes[attrName] === v.value;
+                          return (
+                            <button
+                              key={v.id}
+                              type="button"
+                              onClick={() =>
+                                setSelectedAttributes((prev) => ({
+                                  ...prev,
+                                  [attrName]: v.value,
+                                }))
+                              }
+                              className={cn(
+                                "px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded border transition-all flex items-center gap-2 shadow-sm",
+                                isSelected
+                                  ? "bg-black border-black text-white"
+                                  : "bg-white border-[#E5D5B5]/60 text-black hover:border-black",
+                              )}
+                            >
+                              {v.image && (
+                                <img
+                                  src={processImageUrl(v.image)}
+                                  alt={v.value}
+                                  className="w-4 h-4 rounded-full object-cover"
+                                />
+                              )}
+                              {v.value}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Quantity Selector and Add to Cart Section */}
               <div className="flex items-center gap-4 pt-4">
@@ -397,13 +597,28 @@ export default function ProductDetail() {
 
                 {/* Add to Cart Button */}
                 <button
+                  disabled={!product.inStock}
                   onClick={() => {
-                    const firstSize = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes[0] : undefined;
-                    const firstColor = Array.isArray(product.colors) && product.colors.length > 0 
-                      ? (typeof product.colors[0] === "string" ? product.colors[0] : (product.colors[0] as any).name)
-                      : undefined;
+                    const firstSize =
+                      selectedAttributes["Size"] ||
+                      selectedAttributes["size"] ||
+                      (Array.isArray(product.sizes) && product.sizes.length > 0
+                        ? product.sizes[0]
+                        : undefined);
+                    const firstColor =
+                      selectedAttributes["Flavour"] ||
+                      selectedAttributes["flavour"] ||
+                      selectedAttributes["Flavor"] ||
+                      selectedAttributes["flavor"] ||
+                      (Array.isArray(product.colors) &&
+                      product.colors.length > 0
+                        ? typeof product.colors[0] === "string"
+                          ? product.colors[0]
+                          : (product.colors[0] as any).name
+                        : undefined);
                     addItem({
                       id: product.id,
+                      variantId: selectedVariant?.id,
                       name: product.name,
                       price: product.price,
                       image: product.images[0] ?? "",
@@ -412,9 +627,14 @@ export default function ProductDetail() {
                       quantity: quantity,
                     });
                   }}
-                  className="flex-1 h-12 bg-black hover:bg-black/90 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded shadow-sm"
+                  className={cn(
+                    "flex-1 h-12 text-white text-xs lg:text-sm font-bold uppercase tracking-widest rounded shadow-sm transition-all",
+                    product.inStock
+                      ? "bg-black hover:bg-black/90 cursor-pointer"
+                      : "bg-gray-400 cursor-not-allowed"
+                  )}
                 >
-                  Add to Cart
+                  {variantAvailable ? (product.inStock ? "Add to Cart" : "Out of Stock") : "Variant unavailable"}
                 </button>
 
                 {/* Wishlist Heart Button next to Add to Cart */}
@@ -440,7 +660,6 @@ export default function ProductDetail() {
                   />
                 </button>
               </div>
-
 
               {/* WhatsApp To Buy CTA Button */}
               <div className="pt-2">
@@ -488,9 +707,7 @@ export default function ProductDetail() {
               </button>
 
               {isMainDetailOpen && (
-                <div
-                  className="overflow-hidden bg-[#FAF9F6]/60"
-                >
+                <div className="overflow-hidden bg-[#FAF9F6]/60">
                   <div className="p-5 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-xs lg:text-sm text-black">
                     <div className="flex justify-between border-b border-border pb-2">
                       <span className="font-semibold text-black">
@@ -501,9 +718,7 @@ export default function ProductDetail() {
                       </span>
                     </div>
                     <div className="flex justify-between border-b border-border pb-2">
-                      <span className="font-semibold text-black">
-                        Brand
-                      </span>
+                      <span className="font-semibold text-black">Brand</span>
                       <span className="font-bold text-black">
                         {product.brand || "Protein & Nutrients"}
                       </span>
@@ -548,7 +763,10 @@ export default function ProductDetail() {
               </h2>
               <div className="flex items-center gap-1.5 bg-[#8A1B28]/5 text-[#8A1B28] px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
                 <Star className="h-4 w-4 fill-[#8A1B28] text-[#8A1B28]" />
-                <span>{dbProduct?.rating || 0} ({dbProduct?.numReviews || 0} reviews)</span>
+                <span>
+                  {dbProduct?.rating || 0} ({dbProduct?.numReviews || 0}{" "}
+                  reviews)
+                </span>
               </div>
             </div>
 
@@ -556,16 +774,28 @@ export default function ProductDetail() {
               {/* Reviews List */}
               <div className="md:col-span-2 space-y-6">
                 {!dbProduct?.reviews || dbProduct.reviews.length === 0 ? (
-                  <p className="text-black text-sm py-4">No reviews yet. Be the first to review this product!</p>
+                  <p className="text-black text-sm py-4">
+                    No reviews yet. Be the first to review this product!
+                  </p>
                 ) : (
                   dbProduct.reviews.map((rev) => (
-                    <div key={rev.id} className="border-b border-border pb-6 last:border-b-0 space-y-2">
+                    <div
+                      key={rev.id}
+                      className="border-b border-border pb-6 last:border-b-0 space-y-2"
+                    >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm text-black">
-                          {rev.user ? (`${rev.user.firstName || ""} ${rev.user.lastName || ""}`.trim() || "Anonymous User") : "Anonymous User"}
+                          {rev.user
+                            ? `${rev.user.firstName || ""} ${rev.user.lastName || ""}`.trim() ||
+                              "Anonymous User"
+                            : "Anonymous User"}
                         </span>
                         <span className="text-[10px] text-black">
-                          {new Date(rev.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(rev.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
                         </span>
                       </div>
                       <div className="flex gap-0.5">
@@ -574,7 +804,9 @@ export default function ProductDetail() {
                             key={s}
                             className={cn(
                               "h-3.5 w-3.5",
-                              s <= rev.rating ? "fill-[#8A1B28] text-[#8A1B28]" : "text-gray-300"
+                              s <= rev.rating
+                                ? "fill-[#8A1B28] text-[#8A1B28]"
+                                : "text-gray-300",
                             )}
                           />
                         ))}
@@ -605,7 +837,10 @@ export default function ProductDetail() {
                 {isLoggedIn ? (
                   <form onSubmit={handlePostReview} className="space-y-4">
                     <p className="text-[10px] text-gray-500 italic">
-                      Posting as: <span className="font-bold text-[#8A1B28]">{userFullName || currentUser?.email || "Anonymous"}</span>
+                      Posting as:{" "}
+                      <span className="font-bold text-[#8A1B28]">
+                        {userFullName || currentUser?.email || "Anonymous"}
+                      </span>
                     </p>
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-black uppercase tracking-wide block">
@@ -622,7 +857,9 @@ export default function ProductDetail() {
                             <Star
                               className={cn(
                                 "h-6 w-6",
-                                s <= reviewRating ? "fill-[#8A1B28] text-[#8A1B28]" : "text-gray-300 hover:text-[#8A1B28]/50"
+                                s <= reviewRating
+                                  ? "fill-[#8A1B28] text-[#8A1B28]"
+                                  : "text-gray-300 hover:text-[#8A1B28]/50",
                               )}
                             />
                           </button>
@@ -631,7 +868,10 @@ export default function ProductDetail() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label htmlFor="rev-comment" className="text-xs font-bold text-black uppercase tracking-wide block">
+                      <label
+                        htmlFor="rev-comment"
+                        className="text-xs font-bold text-black uppercase tracking-wide block"
+                      >
                         Comment
                       </label>
                       <textarea
@@ -650,7 +890,9 @@ export default function ProductDetail() {
                       disabled={postReviewMutation.isPending}
                       className="w-full py-2.5 bg-[#8A1B28] hover:bg-[#721620] text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm disabled:opacity-50"
                     >
-                      {postReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                      {postReviewMutation.isPending
+                        ? "Submitting..."
+                        : "Submit Review"}
                     </button>
                   </form>
                 ) : (

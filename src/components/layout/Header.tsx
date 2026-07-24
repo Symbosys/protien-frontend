@@ -105,7 +105,7 @@ export default function Header() {
                 className="flex items-center gap-2 group flex-shrink-0"
               >
                 <img
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Protein & Nutrients Logo"
                   className="h-[50px] lg:h-[62px] w-auto object-contain"
                 />

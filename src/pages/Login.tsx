@@ -8,7 +8,10 @@ import {
   LockKeyhole,
   Sparkles,
 } from "lucide-react";
-import { useRequestOtpMutation, useVerifyOtpMutation } from "@/api/hooks/auth.hooks";
+import {
+  useRequestOtpMutation,
+  useVerifyOtpMutation,
+} from "@/api/hooks/auth.hooks";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -69,7 +72,9 @@ export default function Login() {
       setIsOtpOpen(true);
     } catch (err: any) {
       console.error("OTP send error:", err);
-      setError(err.response?.data?.message || err.message || "Failed to send OTP");
+      setError(
+        err.response?.data?.message || err.message || "Failed to send OTP",
+      );
     } finally {
       setLoading(false);
     }
@@ -90,7 +95,7 @@ export default function Login() {
       });
 
       console.log("Login success:", data);
-      
+
       // Save token and user details to localStorage
       if (data.token) {
         localStorage.setItem("user_token", data.token);

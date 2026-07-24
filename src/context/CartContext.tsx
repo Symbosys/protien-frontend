@@ -24,7 +24,7 @@ interface CartContextType {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number }) => void;
+  addItem: (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -67,11 +67,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }));
   }, [backendCart]);
 
-  const addItem = (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number }) => {
+  const addItem = (item: Omit<CartItem, 'quantity' | 'productId'> & { id: string; quantity?: number; variantId?: string }) => {
     // When adding from ProductCard/ProductDetail, item.id is product.id.
     addToCartMutation.mutate(
       {
         productId: item.id, // item.id is the product ID
+        variantId: item.variantId,
         size: item.size,
         color: item.color,
         quantity: item.quantity ?? 1,
