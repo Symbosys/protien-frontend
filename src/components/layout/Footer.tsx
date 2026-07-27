@@ -120,7 +120,7 @@ export default function Footer() {
           <div className="space-y-6">
             <Link to="/" className="flex items-center gap-2 group">
               <span className="font-display text-xl lg:text-2xl font-black tracking-wider text-[#8CFF64] group-hover:text-white transition-colors uppercase">
-                PROTEIN & NUTRIENTS
+                FUEL AND NUTRIENTS
               </span>
             </Link>
 
