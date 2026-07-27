@@ -58,9 +58,9 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const shipping = subtotal >= 500 ? 0 : 25;
-  const tax = Math.round(subtotal * 0.08);
-  const total = subtotal + shipping + tax;
+  const shipping = subtotal > 1500 ? 0 : 100;
+  const tax = Number((subtotal * 0.05).toFixed(2));
+  const total = Number((subtotal + shipping + tax).toFixed(2));
 
   const handleComplete = () => {
     const isCashfree = formData.paymentMethod === 'Cashfree';
@@ -415,7 +415,7 @@ export default function CheckoutPage() {
                     <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tax</span>
+                    <span className="text-muted-foreground">Tax (5%)</span>
                     <span>₹{tax}</span>
                   </div>
                 </div>

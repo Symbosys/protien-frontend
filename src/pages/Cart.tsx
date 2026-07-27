@@ -9,7 +9,7 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, itemCount } = useCart();
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
 
-  const shipping = subtotal >= 500 ? 0 : 25;
+  const shipping = subtotal > 1500 ? 0 : 100;
   const total = subtotal + shipping;
 
   const handleUpdateQuantity = async (itemId: string, newQty: number) => {
@@ -142,7 +142,7 @@ export default function CartPage() {
                     </div>
                     {shipping > 0 && (
                       <p className="text-[10px] text-gray-400">
-                        Free shipping on orders over ₹500
+                        Free shipping on orders over ₹1500
                       </p>
                     )}
                   </div>

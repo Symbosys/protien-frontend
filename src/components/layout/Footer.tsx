@@ -40,10 +40,10 @@ export default function Footer() {
               </svg>
             </div>
             <a
-              href="mailto:akkigupta2411@gmail.com"
+              href="mailto:suppoty@protein-and-nutrients.com"
               className="text-white hover:text-[#8CFF64] transition-colors text-sm lg:text-base font-semibold"
             >
-              akkigupta2411@gmail.com
+              suppoty@protein-and-nutrients.com
             </a>
           </div>
 
@@ -139,10 +139,10 @@ export default function Footer() {
                     Contact Us
                   </span>
                   <a
-                    href="tel:6200540268"
+                    href="tel:7759957841"
                     className="hover:text-[#8CFF64] font-bold"
                   >
-                    6200540268
+                    7759-957841
                   </a>
                 </div>
               </div>

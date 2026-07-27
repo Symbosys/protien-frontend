@@ -81,7 +81,9 @@ export default function OrderDetails(): JSX.Element {
         subtotal: Number(dbOrder.subtotal),
         discount: Number(dbOrder.discount),
         shipping: Number(dbOrder.shippingCharge),
-        tax: Number(dbOrder.tax),
+        tax: dbOrder.tax !== undefined && dbOrder.tax !== null && Number(dbOrder.tax) > 0
+          ? Number(dbOrder.tax)
+          : Number((Number(dbOrder.subtotal) * 0.05).toFixed(2)),
         total: Number(dbOrder.totalAmount),
       },
       timeline: [
@@ -359,7 +361,14 @@ export default function OrderDetails(): JSX.Element {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500 font-medium">Status</span>
-                    <span className="font-bold text-emerald-700 uppercase tracking-wider text-[10px] px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                    <span className={cn(
+                      "font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 rounded-full border",
+                      order.payment.status === "PAID"
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                        : order.payment.status === "FAILED" || order.payment.status === "REFUNDED"
+                        ? "text-red-700 bg-red-50 border-red-200"
+                        : "text-amber-700 bg-amber-50 border-amber-200"
+                    )}>
                       {order.payment.status}
                     </span>
                   </div>
@@ -405,7 +414,7 @@ export default function OrderDetails(): JSX.Element {
                   </div>
                   {order.pricing.tax > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500 font-medium">Tax</span>
+                      <span className="text-gray-500 font-medium">Tax (5%)</span>
                       <span className="font-semibold text-black">
                         ₹{order.pricing.tax.toLocaleString("en-IN")}
                       </span>

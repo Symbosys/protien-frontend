@@ -91,31 +91,34 @@ export default function ProductsPage() {
   const displayProducts = useMemo(() => {
     let list: any[] = [];
     if (productsData?.products && productsData.products.length > 0) {
-      list = productsData.products.map((dbP: any) => ({
-        id: dbP.id,
-        name: dbP.name,
-        price: Number(dbP.price),
-        originalPrice: dbP.discountPrice
-          ? Number(dbP.discountPrice)
-          : undefined,
-        images: [
-          processImageUrl(dbP.image),
-          ...(Array.isArray(dbP.images) ? dbP.images.map(processImageUrl) : []),
-        ].filter(Boolean),
-        category: dbP.category?.name || "Uncategorized",
-        brandId: dbP.brandId,
-        inStock: (dbP.variants && dbP.variants.length > 0)
-          ? dbP.variants.some((v: any) => Number(v.quantity) > 0) || Number(dbP.quantity) > 0
-          : Number(dbP.quantity) > 0,
-        netWeight: undefined,
-        sizes: Array.isArray(dbP.sizes) ? dbP.sizes : [],
-        colors: Array.isArray(dbP.colors)
-          ? (dbP.colors as any[]).map((c: any) =>
-              typeof c === "string" ? { name: c } : c,
-            )
-          : [],
-        variants: dbP.variants,
-      }));
+      list = productsData.products.map((dbP: any) => {
+        const priceNum = Number(dbP.price);
+        const discNum = dbP.discountPrice ? Number(dbP.discountPrice) : 0;
+        const hasDiscount = discNum > 0 && discNum < priceNum;
+        return {
+          id: dbP.id,
+          name: dbP.name,
+          price: hasDiscount ? discNum : priceNum,
+          originalPrice: hasDiscount ? priceNum : undefined,
+          images: [
+            processImageUrl(dbP.image),
+            ...(Array.isArray(dbP.images) ? dbP.images.map(processImageUrl) : []),
+          ].filter(Boolean),
+          category: dbP.category?.name || "Uncategorized",
+          brandId: dbP.brandId,
+          inStock: (dbP.variants && dbP.variants.length > 0)
+            ? dbP.variants.some((v: any) => Number(v.quantity) > 0) || Number(dbP.quantity) > 0
+            : Number(dbP.quantity) > 0,
+          netWeight: undefined,
+          sizes: Array.isArray(dbP.sizes) ? dbP.sizes : [],
+          colors: Array.isArray(dbP.colors)
+            ? (dbP.colors as any[]).map((c: any) =>
+                typeof c === "string" ? { name: c } : c,
+              )
+            : [],
+          variants: dbP.variants,
+        };
+      });
     }
 
     // Apply front-end filters to display exactly what the user clicks

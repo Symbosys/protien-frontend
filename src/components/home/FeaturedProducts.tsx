@@ -37,27 +37,32 @@ export default function FeaturedProducts() {
   // Map backend products → ProductCardItem, fallback to mock data while loading or if empty
   const featured: ProductCardItem[] =
     productsData?.products && productsData.products.length > 0
-      ? productsData.products.slice(0, 8).map((p) => ({
-          id: p.id,
-          name: p.name,
-          price: Number(p.price),
-          originalPrice: p.discountPrice ? Number(p.discountPrice) : undefined,
-          images: [
-            processImageUrl(p.image),
-            ...(Array.isArray(p.images) ? p.images.map(processImageUrl) : []),
-          ],
-          category: p.category?.name ?? "Uncategorized",
-          inStock: (p.variants && p.variants.length > 0)
-            ? p.variants.some((v: any) => Number(v.quantity) > 0) || Number(p.quantity) > 0
-            : Number(p.quantity) > 0,
-          sizes: Array.isArray(p.sizes) ? p.sizes : [],
-          colors: Array.isArray(p.colors)
-            ? (p.colors as any[]).map((c) =>
-                typeof c === "string" ? { name: c } : c,
-              )
-            : [],
-          variants: p.variants,
-        }))
+      ? productsData.products.slice(0, 8).map((p) => {
+          const priceNum = Number(p.price);
+          const discNum = p.discountPrice ? Number(p.discountPrice) : 0;
+          const hasDiscount = discNum > 0 && discNum < priceNum;
+          return {
+            id: p.id,
+            name: p.name,
+            price: hasDiscount ? discNum : priceNum,
+            originalPrice: hasDiscount ? priceNum : undefined,
+            images: [
+              processImageUrl(p.image),
+              ...(Array.isArray(p.images) ? p.images.map(processImageUrl) : []),
+            ],
+            category: p.category?.name ?? "Uncategorized",
+            inStock: (p.variants && p.variants.length > 0)
+              ? p.variants.some((v: any) => Number(v.quantity) > 0) || Number(p.quantity) > 0
+              : Number(p.quantity) > 0,
+            sizes: Array.isArray(p.sizes) ? p.sizes : [],
+            colors: Array.isArray(p.colors)
+              ? (p.colors as any[]).map((c) =>
+                  typeof c === "string" ? { name: c } : c,
+                )
+              : [],
+            variants: p.variants,
+          };
+        })
       : [];
 
 

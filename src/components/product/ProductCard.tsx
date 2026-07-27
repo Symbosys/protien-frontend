@@ -118,12 +118,16 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       }
     });
 
+    const vSellingPrice = (selectedVariant.discountPrice && Number(selectedVariant.discountPrice) > 0 && Number(selectedVariant.discountPrice) < Number(selectedVariant.price))
+      ? Number(selectedVariant.discountPrice)
+      : Number(selectedVariant.price);
+
     setIsAddingModal(true);
     try {
       await addItem({
         id: product.id,
         name: product.name,
-        price: Number(selectedVariant.price),
+        price: vSellingPrice,
         image: selectedVariant.image || product.images[0] || "",
         size: resolvedSize,
         color: resolvedColor,
@@ -340,7 +344,9 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
                       .map((av) => `${av.attribute.name}: ${av.value}`)
                       .join(" | ");
                     const isSelected = selectedVariantId === v.id;
-                    const vPrice = Number(v.price);
+                    const vSellingPrice = (v.discountPrice && Number(v.discountPrice) > 0 && Number(v.discountPrice) < Number(v.price))
+                      ? Number(v.discountPrice)
+                      : Number(v.price);
                     
                     return (
                       <button
@@ -372,7 +378,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-xs font-bold text-[#8A1B28]">
-                            ₹{vPrice.toLocaleString("en-IN")}
+                            ₹{vSellingPrice.toLocaleString("en-IN")}
                           </p>
                         </div>
                       </button>

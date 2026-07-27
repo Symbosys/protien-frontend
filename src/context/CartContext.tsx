@@ -58,9 +58,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       id: item.id, // Database CartItem ID (used for updates and removal)
       productId: item.productId, // Original Product ID
       name: item.product?.name || "Unknown Product",
-      price: item.variant 
-        ? Number(item.variant.price) 
-        : Number(item.product?.price || 0),
+      price: item.variant
+        ? (item.variant.discountPrice && Number(item.variant.discountPrice) > 0 && Number(item.variant.discountPrice) < Number(item.variant.price)
+            ? Number(item.variant.discountPrice)
+            : Number(item.variant.price))
+        : (item.product?.discountPrice && Number(item.product.discountPrice) > 0 && Number(item.product.discountPrice) < Number(item.product.price)
+            ? Number(item.product.discountPrice)
+            : Number(item.product?.price || 0)),
       image: item.variant?.image || item.product?.image || "",
       quantity: item.quantity,
       size: item.size || undefined,

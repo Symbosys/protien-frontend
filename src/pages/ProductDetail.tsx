@@ -233,20 +233,36 @@ export default function ProductDetail() {
       ? hasVariantStock
       : (dbProduct ? Number(dbProduct.quantity) > 0 : true);
 
+  const selectedVariantSellingPrice = selectedVariant
+    ? (selectedVariant.discountPrice && Number(selectedVariant.discountPrice) > 0 && Number(selectedVariant.discountPrice) < Number(selectedVariant.price)
+        ? Number(selectedVariant.discountPrice)
+        : Number(selectedVariant.price))
+    : undefined;
+
+  const selectedVariantOriginalPrice = selectedVariant
+    ? (selectedVariant.discountPrice && Number(selectedVariant.discountPrice) > 0 && Number(selectedVariant.discountPrice) < Number(selectedVariant.price)
+        ? Number(selectedVariant.price)
+        : undefined)
+    : undefined;
+
+  const mainProductSellingPrice = dbProduct
+    ? (dbProduct.discountPrice && Number(dbProduct.discountPrice) > 0 && Number(dbProduct.discountPrice) < Number(dbProduct.price)
+        ? Number(dbProduct.discountPrice)
+        : Number(dbProduct.price))
+    : 0;
+
+  const mainProductOriginalPrice = dbProduct
+    ? (dbProduct.discountPrice && Number(dbProduct.discountPrice) > 0 && Number(dbProduct.discountPrice) < Number(dbProduct.price)
+        ? Number(dbProduct.price)
+        : undefined)
+    : undefined;
+
   const product = dbProduct
     ? {
         id: dbProduct.id,
         name: dbProduct.name,
-        price: selectedVariant
-          ? Number(selectedVariant.price)
-          : Number(dbProduct.price),
-        originalPrice: selectedVariant
-          ? selectedVariant.discountPrice
-            ? Number(selectedVariant.discountPrice)
-            : undefined
-          : dbProduct.discountPrice
-            ? Number(dbProduct.discountPrice)
-            : undefined,
+        price: selectedVariant ? selectedVariantSellingPrice! : mainProductSellingPrice,
+        originalPrice: selectedVariant ? selectedVariantOriginalPrice : mainProductOriginalPrice,
         description: dbProduct.description || "",
         images: allProductImages,
         category: dbProduct.category?.name || "Uncategorized",
