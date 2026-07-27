@@ -9,10 +9,10 @@ const allReviews = [
     name: "Alex Smith",
     location: "Mumbai, Maharashtra",
     date: "June 24, 2026",
-    text: "One of the most reliable supplement stores online. The best part is the quality of their whey protein—mixes perfectly every time.",
+    text: "One of the most reliable supplement stores online. The best part is the quality of their whey fuel—mixes perfectly every time.",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120",
     rating: 5,
-    product: "Optimum Nutrition Whey Protein",
+    product: "Optimum Nutrition Whey Fuel",
   },
   {
     id: 2,

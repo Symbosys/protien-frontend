@@ -315,7 +315,7 @@ export default function ProductDetail() {
     if (navigator.share) {
       navigator
         .share({
-          title: `Protein & Nutrients - ${product.name}`,
+          title: `Fuel & Nutrients - ${product.name}`,
           text: product.description,
           url: window.location.href,
         })
@@ -331,7 +331,7 @@ export default function ProductDetail() {
     .map(([key, val]) => `${key}: ${val}`)
     .join(", ");
 
-  const whatsappMessage = `Hello Protein & Nutrients! I am interested in purchasing "${product.name}"${
+  const whatsappMessage = `Hello Fuel & Nutrients! I am interested in purchasing "${product.name}"${
     selectedAttrString ? ` (${selectedAttrString})` : ""
   } - ₹${product.price.toLocaleString("en-IN")}. Could you please share ordering details?`;
   const whatsappUrl = `https://wa.me/916200065378?text=${encodeURIComponent(whatsappMessage)}`;

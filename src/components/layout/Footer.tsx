@@ -23,7 +23,7 @@ export default function Footer() {
           <div className="w-[82px] h-[82px] bg-white flex items-center justify-center p-2 rounded-md">
             <img
               src="/logo.png"
-              alt="Protein & Nutrients Logo"
+              alt="Fuel & Nutrients Logo"
               className="w-full h-full object-contain"
             />
           </div>
@@ -59,7 +59,7 @@ export default function Footer() {
             </div>
             <a
               href={`https://wa.me/916200065378?text=${encodeURIComponent(
-                "Hello Protein & Nutrients! I would like to chat with customer support.",
+                "Hello fuel & Nutrients! I would like to chat with customer support.",
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -274,7 +274,7 @@ export default function Footer() {
         {/* Footer bottom */}
         <div className="border-t border-white/10 mt-12 pt-6 text-center text-xs text-white/40">
           <p>
-            © {new Date().getFullYear()} PROTEIN AND NUTRIENTS. All rights
+            © {new Date().getFullYear()} FUEL AND NUTRIENTS. All rights
             reserved.
           </p>
           <p className="mt-2 font-semibold tracking-wide text-white/60 flex items-center justify-center gap-1.5">
