@@ -59,7 +59,7 @@ export default function Footer() {
             </div>
             <a
               href={`https://wa.me/916200065378?text=${encodeURIComponent(
-                "Hello Protein & Nutrients! I would like to chat with customer support."
+                "Hello Protein & Nutrients! I would like to chat with customer support.",
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -179,11 +179,13 @@ export default function Footer() {
                   ))
                 : /* Skeleton placeholders while loading */
                   Array.from({ length: 4 }).map((_, i) => (
-                    <li key={i} className="h-4 w-28 bg-white/10 rounded animate-pulse" />
+                    <li
+                      key={i}
+                      className="h-4 w-28 bg-white/10 rounded animate-pulse"
+                    />
                   ))}
             </ul>
           </div>
-
 
           {/* Column 3: Quick Links */}
           <div className="space-y-6">

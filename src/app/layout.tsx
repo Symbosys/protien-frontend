@@ -17,7 +17,8 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "Protein and Nutrients | Premium Supplements",
-  description: "Buy High-Quality Whey Protein, Creatine, Pre-Workout, and Vitamins Online",
+  description:
+    "Buy High-Quality Whey Protein, Creatine, Pre-Workout, and Vitamins Online",
 };
 
 export default function RootLayout({
@@ -32,7 +33,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>
-          <Suspense fallback={<div className="min-h-screen bg-[#111111] flex items-center justify-center text-xs uppercase tracking-widest text-[#FFF] animate-pulse">Loading Protein and Nutrients...</div>}>
+          <Suspense
+            fallback={
+              <div className="min-h-screen bg-[#111111] flex items-center justify-center text-xs uppercase tracking-widest text-[#FFF] animate-pulse">
+                Loading Protein and Nutrients...
+              </div>
+            }
+          >
             {children}
           </Suspense>
         </Providers>

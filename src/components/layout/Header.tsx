@@ -99,15 +99,15 @@ export default function Header() {
                 <Menu className="h-6 w-6" />
               </button>
 
-              {/* Logo - Image exactly like reference */}
+              {/* Logo - Highlighted & Prominent */}
               <Link
                 to="/"
-                className="flex items-center gap-2 group flex-shrink-0"
+                className="flex items-center group flex-shrink-0"
               >
                 <img
                   src="/logo.png"
-                  alt="Protein & Nutrients Logo"
-                  className="h-[50px] lg:h-[62px] w-auto object-contain"
+                  alt="Fuel & Nutrients Logo"
+                  className="h-[56px] lg:h-[72px] w-auto object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.18)] filter brightness-[1.03] contrast-[1.05] transition-transform duration-300 group-hover:scale-105"
                 />
               </Link>
             </div>
@@ -307,9 +307,11 @@ export default function Header() {
             >
               <div className="p-5">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-                  <span className="font-display text-lg font-black text-black uppercase">
-                    P&N
-                  </span>
+                  <img
+                    src="/logo.png"
+                    alt="Fuel & Nutrients Logo"
+                    className="h-10 w-auto object-contain drop-shadow-sm"
+                  />
                   <button onClick={() => setIsMenuOpen(false)} className="p-2">
                     <X className="h-6 w-6 text-black" />
                   </button>
