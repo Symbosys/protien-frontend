@@ -40,10 +40,10 @@ export default function Footer() {
               </svg>
             </div>
             <a
-              href="mailto:suppoty@protein-and-nutrients.com"
+              href="mailto:support@protein-and-nutrients.com"
               className="text-white hover:text-[#8CFF64] transition-colors text-sm lg:text-base font-semibold"
             >
-              suppoty@protein-and-nutrients.com
+              support@protein-and-nutrients.com
             </a>
           </div>
 

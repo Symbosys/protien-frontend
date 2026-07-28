@@ -8,7 +8,6 @@ export default function FlashSale() {
   return (
     <section className="py-14 bg-white">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        
         {/* Best Sellers Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -51,7 +50,6 @@ export default function FlashSale() {
 
         {/* Promo Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-8">
-          
           {/* Card 1: Quality Promise */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -68,7 +66,8 @@ export default function FlashSale() {
                 100% AUTHENTIC
               </h3>
               <p className="text-sm text-white/70 leading-relaxed">
-                Every product is sourced directly from manufacturers. Lab tested for purity and potency. GMP certified facility.
+                Every product is sourced directly from manufacturers. Lab tested
+                for purity and potency. GMP certified facility.
               </p>
             </div>
             <div className="pt-4">
@@ -87,19 +86,26 @@ export default function FlashSale() {
             className="bg-[#8CFF64] text-black p-7 rounded-2xl flex flex-col justify-between min-h-[300px]"
           >
             <div>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-black/60 mb-2 block">Smart Savings</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-black/60 mb-2 block">
+                Smart Savings
+              </span>
               <h3 className="heading-bold text-2xl lg:text-3xl text-black mb-3 leading-tight">
-                SUBSCRIBE &<br />SAVE 20%
+                SUBSCRIBE &<br />
+                SAVE 20%
               </h3>
               <p className="text-xs text-black/70 leading-relaxed font-medium">
-                Get your favorite protein and pre-workout delivered monthly. Never run out of your essentials again.
+                Get your favorite protein and pre-workout delivered monthly.
+                Never run out of your essentials again.
               </p>
             </div>
             <div className="pt-4">
-              <a href="#" className="inline-block transition-transform hover:scale-105">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
-                  alt="Get it on Google Play" 
+              <a
+                href="#"
+                className="inline-block transition-transform hover:scale-105"
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                  alt="Get it on Google Play"
                   className="h-10 object-contain"
                 />
               </a>
@@ -115,20 +121,29 @@ export default function FlashSale() {
             className="bg-[#111] text-white p-7 rounded-2xl flex flex-col justify-between min-h-[300px] relative overflow-hidden"
           >
             <div>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-[#8CFF64] mb-2 block">Gifting</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-[#8CFF64] mb-2 block">
+                Gifting
+              </span>
               <h3 className="heading-bold text-xl lg:text-2xl text-white mb-3">
-                GIVE THE GIFT<br/>OF GAINS
+                GIVE THE GIFT
+                <br />
+                OF GAINS
               </h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Perfect for every occasion. A gift card from P&N lets your gym partner pick their favorite supplements.
+                Perfect for every occasion. A gift card from P&N lets your gym
+                partner pick their favorite supplements.
               </p>
             </div>
 
             {/* Gift Card Visual */}
             <div className="w-full h-28 border border-[#8CFF64]/30 bg-[#1A1A1A] rounded-xl p-4 flex items-center justify-between mt-4">
               <div>
-                <span className="font-bold text-sm text-[#8CFF64] block">PROTEIN & NUTRIENTS</span>
-                <span className="text-[8px] uppercase tracking-widest text-white/40">E-GIFT CARD</span>
+                <span className="font-bold text-sm text-[#8CFF64] block">
+                  Fuel & NUTRIENTS
+                </span>
+                <span className="text-[8px] uppercase tracking-widest text-white/40">
+                  E-GIFT CARD
+                </span>
               </div>
               <div className="w-12 h-12 rounded-full bg-[#8CFF64] flex items-center justify-center">
                 <span className="text-2xl">🎁</span>
@@ -146,7 +161,6 @@ export default function FlashSale() {
             </div>
           </motion.div>
         </div>
-
       </div>
     </section>
   );
