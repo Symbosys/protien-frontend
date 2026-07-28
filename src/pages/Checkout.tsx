@@ -58,9 +58,11 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const shipping = subtotal > 1500 ? 0 : 100;
-  const tax = Number((subtotal * 0.05).toFixed(2));
-  const total = Number((subtotal + shipping + tax).toFixed(2));
+  const isOnlinePayment = formData.paymentMethod !== 'COD';
+  const shipping = 0;
+  const tax = 0;
+  const discount = isOnlinePayment ? Number((subtotal * 0.05).toFixed(2)) : 0;
+  const total = Number((subtotal + shipping + tax - discount).toFixed(2));
 
   const handleComplete = () => {
     const isCashfree = formData.paymentMethod === 'Cashfree';
@@ -315,12 +317,17 @@ export default function CheckoutPage() {
                   <h2 className="font-display text-xl mb-6">Payment Method</h2>
 
                   <div className="space-y-4">
-                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'Cashfree' ? "border-foreground" : "border-border hover:border-foreground/50")}>
-                      <input type="radio" name="paymentMethod" value="Cashfree" checked={formData.paymentMethod === 'Cashfree'} onChange={handleInputChange} className="w-4 h-4" />
-                      <CreditCard className="h-5 w-5" />
-                      <span>Pay Online (UPI, Cards, Netbanking)</span>
+                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors justify-between", formData.paymentMethod === 'Cashfree' ? "border-foreground bg-secondary/20" : "border-border hover:border-foreground/50")}>
+                      <div className="flex items-center gap-4">
+                        <input type="radio" name="paymentMethod" value="Cashfree" checked={formData.paymentMethod === 'Cashfree'} onChange={handleInputChange} className="w-4 h-4" />
+                        <CreditCard className="h-5 w-5" />
+                        <span>Pay Online (UPI, Cards, Netbanking)</span>
+                      </div>
+                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                        5% OFF
+                      </span>
                     </label>
-                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'COD' ? "border-foreground" : "border-border hover:border-foreground/50")}>
+                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'COD' ? "border-foreground bg-secondary/20" : "border-border hover:border-foreground/50")}>
                       <input type="radio" name="paymentMethod" value="COD" checked={formData.paymentMethod === 'COD'} onChange={handleInputChange} className="w-4 h-4" />
                       <Truck className="h-5 w-5" />
                       <span>Cash on Delivery</span>
@@ -414,10 +421,18 @@ export default function CheckoutPage() {
                     <span className="text-muted-foreground">Shipping</span>
                     <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tax (5%)</span>
-                    <span>₹{tax}</span>
-                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-sm text-emerald-600 font-medium">
+                      <span>Online Payment Discount (5%)</span>
+                      <span>- ₹{discount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {tax > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tax</span>
+                      <span>₹{tax}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-between font-medium text-lg py-4 border-t border-border">

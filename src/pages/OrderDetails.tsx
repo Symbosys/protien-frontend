@@ -80,10 +80,8 @@ export default function OrderDetails(): JSX.Element {
       pricing: {
         subtotal: Number(dbOrder.subtotal),
         discount: Number(dbOrder.discount),
-        shipping: Number(dbOrder.shippingCharge),
-        tax: dbOrder.tax !== undefined && dbOrder.tax !== null && Number(dbOrder.tax) > 0
-          ? Number(dbOrder.tax)
-          : Number((Number(dbOrder.subtotal) * 0.05).toFixed(2)),
+        shipping: Number(dbOrder.shippingCharge || 0),
+        tax: Number(dbOrder.tax || 0),
         total: Number(dbOrder.totalAmount),
       },
       timeline: [
@@ -398,7 +396,7 @@ export default function OrderDetails(): JSX.Element {
                   </div>
                   {order.pricing.discount > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500 font-medium">Discount</span>
+                      <span className="text-emerald-600 font-medium">Online Payment Discount (5%)</span>
                       <span className="font-semibold text-emerald-600">
                         - ₹{order.pricing.discount.toLocaleString("en-IN")}
                       </span>
