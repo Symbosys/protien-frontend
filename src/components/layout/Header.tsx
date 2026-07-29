@@ -27,7 +27,7 @@ export default function Header() {
   const { items } = useWishlist();
   const location = useLocation();
 
-  const { data: categoriesData } = useCategoriesQuery({ limit: 100 });
+  const { data: categoriesData } = useCategoriesQuery({ limit: 1000 });
   const categoriesList =
     categoriesData?.categories && categoriesData.categories.length > 0
       ? categoriesData.categories.map((cat) => ({
@@ -100,10 +100,7 @@ export default function Header() {
               </button>
 
               {/* Logo - Highlighted & Prominent */}
-              <Link
-                to="/"
-                className="flex items-center group flex-shrink-0"
-              >
+              <Link to="/" className="flex items-center group flex-shrink-0">
                 <img
                   src="/logo.png"
                   alt="Fuel & Nutrients Logo"

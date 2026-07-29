@@ -1,22 +1,24 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Search, X, ArrowRight } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
-import ProductCard from '@/components/product/ProductCard';
-import { products, categories } from '@/data/products';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Search, X, ArrowRight } from "lucide-react";
+import MainLayout from "@/components/layout/MainLayout";
+import ProductCard from "@/components/product/ProductCard";
+import { products, categories } from "@/data/products";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
-  const searchResults = query.length >= 2
-    ? products.filter(p =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.brand.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase()) ||
-        p.tags.some(t => t.toLowerCase().includes(query.toLowerCase()))
-      )
-    : [];
+  const searchResults =
+    query.length >= 2
+      ? products.filter(
+          (p) =>
+            p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.brand.toLowerCase().includes(query.toLowerCase()) ||
+            p.category.toLowerCase().includes(query.toLowerCase()) ||
+            p.tags.some((t) => t.toLowerCase().includes(query.toLowerCase())),
+        )
+      : [];
 
   return (
     <MainLayout>
@@ -36,7 +38,7 @@ export default function SearchPage() {
               />
               {query && (
                 <button
-                  onClick={() => setQuery('')}
+                  onClick={() => setQuery("")}
                   className="absolute right-0 top-1/2 -translate-y-1/2 p-2"
                 >
                   <X className="h-5 w-5" />
@@ -53,7 +55,13 @@ export default function SearchPage() {
                   Popular Searches
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {['Cashmere', 'Leather', 'Evening wear', 'Silk', 'Wool coat'].map((term) => (
+                  {[
+                    "Cashmere",
+                    "Leather",
+                    "Evening wear",
+                    "Silk",
+                    "Wool coat",
+                  ].map((term) => (
                     <button
                       key={term}
                       onClick={() => setQuery(term)}
@@ -94,7 +102,11 @@ export default function SearchPage() {
               {searchResults.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                   {searchResults.map((product, index) => (
-                    <ProductCard key={product.id} product={product} index={index} />
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      index={index}
+                    />
                   ))}
                 </div>
               ) : (

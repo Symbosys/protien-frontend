@@ -14,7 +14,7 @@ interface UnifiedCategory {
 }
 
 export default function CategoriesPage() {
-  const { data, isLoading } = useCategoriesQuery({ limit: 100 });
+  const { data, isLoading } = useCategoriesQuery({ limit: 1000 });
 
   const categories: UnifiedCategory[] = useMemo(() => {
     if (data?.categories && data.categories.length > 0) {
@@ -56,7 +56,7 @@ export default function CategoriesPage() {
           <div className="container-luxe">
             {/* Breadcrumb skeleton */}
             <div className="h-4 w-32 bg-gray-200 animate-pulse rounded mb-4" />
-            
+
             {/* Header skeleton */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div className="space-y-3">
@@ -94,7 +94,9 @@ export default function CategoriesPage() {
         <div className="container-luxe">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-            <Link to="/" className="hover:text-black transition-colors">Home</Link>
+            <Link to="/" className="hover:text-black transition-colors">
+              Home
+            </Link>
             <span>/</span>
             <span className="text-black">Categories</span>
           </div>
@@ -106,7 +108,9 @@ export default function CategoriesPage() {
                 SHOP BY <span className="text-[#8CFF64]">CATEGORY</span>
               </h1>
               <p className="text-gray-500 font-medium text-sm md:text-base mt-2 max-w-xl">
-                Fuel your ambition. Select a category below to explore premium protein powders, recovery aids, vitamins, and pre-workout formulas tailored for your goals.
+                Fuel your ambition. Select a category below to explore premium
+                protein powders, recovery aids, vitamins, and pre-workout
+                formulas tailored for your goals.
               </p>
             </div>
             {/* Total categories badge */}
@@ -163,7 +167,9 @@ export default function CategoriesPage() {
                               <Link
                                 key={sub}
                                 to={`/products?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
-                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                                onClick={(e: React.MouseEvent) =>
+                                  e.stopPropagation()
+                                }
                                 className="text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-white/10 hover:bg-[#8CFF64] hover:text-black border border-white/10 hover:border-transparent text-white rounded-full transition-all duration-300"
                               >
                                 {sub}

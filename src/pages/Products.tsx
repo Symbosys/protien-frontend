@@ -51,12 +51,15 @@ export default function ProductsPage() {
   const selectedBrandId = searchParams.get("brandId");
 
   // Fetch from backend
-  const { data: categoriesData, isLoading: isCategoriesLoading } = useCategoriesQuery({ limit: 100 });
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
+    useCategoriesQuery({ limit: 1000 });
   const { data: brandsData } = useBrandsQuery({ limit: 100 });
-  const { data: productsData, isLoading: isProductsLoading } = useProductsQuery({
-    limit: 100,
-    brandId: selectedBrandId || undefined,
-  });
+  const { data: productsData, isLoading: isProductsLoading } = useProductsQuery(
+    {
+      limit: 100,
+      brandId: selectedBrandId || undefined,
+    },
+  );
 
   const processImageUrl = (url: any) => {
     if (!url) return "";
@@ -102,13 +105,17 @@ export default function ProductsPage() {
           originalPrice: hasDiscount ? priceNum : undefined,
           images: [
             processImageUrl(dbP.image),
-            ...(Array.isArray(dbP.images) ? dbP.images.map(processImageUrl) : []),
+            ...(Array.isArray(dbP.images)
+              ? dbP.images.map(processImageUrl)
+              : []),
           ].filter(Boolean),
           category: dbP.category?.name || "Uncategorized",
           brandId: dbP.brandId,
-          inStock: (dbP.variants && dbP.variants.length > 0)
-            ? dbP.variants.some((v: any) => Number(v.quantity) > 0) || Number(dbP.quantity) > 0
-            : Number(dbP.quantity) > 0,
+          inStock:
+            dbP.variants && dbP.variants.length > 0
+              ? dbP.variants.some((v: any) => Number(v.quantity) > 0) ||
+                Number(dbP.quantity) > 0
+              : Number(dbP.quantity) > 0,
           netWeight: undefined,
           sizes: Array.isArray(dbP.sizes) ? dbP.sizes : [],
           colors: Array.isArray(dbP.colors)
@@ -207,7 +214,10 @@ export default function ProductsPage() {
             {isCategoriesLoading ? (
               <div className="flex justify-start md:justify-center items-center gap-6 md:gap-10 min-w-max px-2">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="flex flex-col items-center animate-pulse flex-shrink-0">
+                  <div
+                    key={i}
+                    className="flex flex-col items-center animate-pulse flex-shrink-0"
+                  >
                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-200 border border-gray-100 shadow-sm" />
                     <div className="h-3 w-14 bg-gray-200 rounded mt-3" />
                   </div>

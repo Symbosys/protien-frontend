@@ -1,14 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Check, CreditCard, Truck, MapPin, ChevronRight, Loader2, Plus } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/button';
-import { useCart } from '@/context/CartContext';
-import { cn } from '@/lib/utils';
-import { useCreateOrderMutation, useVerifyPaymentMutation } from '@/api/hooks/order.hooks';
-import { useAddressesQuery } from '@/api/hooks/address.hooks';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Check,
+  CreditCard,
+  Truck,
+  MapPin,
+  ChevronRight,
+  Loader2,
+  Plus,
+} from "lucide-react";
+import MainLayout from "@/components/layout/MainLayout";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/CartContext";
+import { cn } from "@/lib/utils";
+import {
+  useCreateOrderMutation,
+  useVerifyPaymentMutation,
+} from "@/api/hooks/order.hooks";
+import { useAddressesQuery } from "@/api/hooks/address.hooks";
+import { toast } from "sonner";
 
 const loadCashfreeScript = () => {
   return new Promise((resolve) => {
@@ -24,55 +35,56 @@ const loadCashfreeScript = () => {
   });
 };
 
-
 const steps = [
-  { id: 'shipping', title: 'Shipping', icon: MapPin },
-  { id: 'payment', title: 'Payment', icon: CreditCard },
-  { id: 'review', title: 'Review', icon: Check },
+  { id: "shipping", title: "Shipping", icon: MapPin },
+  { id: "payment", title: "Payment", icon: CreditCard },
+  { id: "review", title: "Review", icon: Check },
 ];
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const [orderNumber, setOrderNumber] = useState('');
+  const [orderNumber, setOrderNumber] = useState("");
   const { items, subtotal, clearCart } = useCart();
-  
+
   const createOrderMutation = useCreateOrderMutation();
   const verifyPaymentMutation = useVerifyPaymentMutation();
   const { data: addresses, isLoading } = useAddressesQuery();
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddressId) {
-      const defaultAddr = addresses.find(a => a.isDefault);
+      const defaultAddr = addresses.find((a) => a.isDefault);
       setSelectedAddressId(defaultAddr ? defaultAddr.id : addresses[0].id);
     }
   }, [addresses, selectedAddressId]);
 
   const [formData, setFormData] = useState({
-    paymentMethod: 'Cashfree',
+    paymentMethod: "Cashfree",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const isOnlinePayment = formData.paymentMethod !== 'COD';
+  const isOnlinePayment = formData.paymentMethod !== "COD";
   const shipping = 0;
   const tax = 0;
   const discount = isOnlinePayment ? Number((subtotal * 0.05).toFixed(2)) : 0;
   const total = Number((subtotal + shipping + tax - discount).toFixed(2));
 
   const handleComplete = () => {
-    const isCashfree = formData.paymentMethod === 'Cashfree';
-    const selectedAddr = addresses?.find(a => a.id === selectedAddressId);
-    
+    const isCashfree = formData.paymentMethod === "Cashfree";
+    const selectedAddr = addresses?.find((a) => a.id === selectedAddressId);
+
     if (!selectedAddr) {
       toast.error("Please select a shipping address");
       return;
     }
-    
+
     createOrderMutation.mutate(
       {
         shippingName: selectedAddr.name,
@@ -81,7 +93,7 @@ export default function CheckoutPage() {
         shippingCity: selectedAddr.city,
         shippingState: selectedAddr.state,
         shippingPincode: selectedAddr.pincode,
-        paymentMethod: isCashfree ? 'CASHFREE' : 'COD',
+        paymentMethod: isCashfree ? "CASHFREE" : "COD",
         addressId: selectedAddr.id,
       },
       {
@@ -89,22 +101,26 @@ export default function CheckoutPage() {
           if (isCashfree && data.cashfreeOrder) {
             const scriptLoaded = await loadCashfreeScript();
             if (!scriptLoaded) {
-              toast.error("Failed to load Cashfree payment gateway. Please try again.");
+              toast.error(
+                "Failed to load Cashfree payment gateway. Please try again.",
+              );
               return;
             }
 
             try {
               const cashfree = (window as any).Cashfree({
-                mode: data.cashfreeOrder.sandbox ? "sandbox" : "production"
+                mode: data.cashfreeOrder.sandbox ? "sandbox" : "production",
               });
 
               cashfree.checkout({
                 paymentSessionId: data.cashfreeOrder.paymentSessionId,
-                returnUrl: `${window.location.origin}/order/${data.order.id}`
+                returnUrl: `${window.location.origin}/order/${data.order.id}`,
               });
             } catch (err: any) {
               console.error("Cashfree Checkout error:", err);
-              toast.error("Could not load Cashfree checkout page. Please try again.");
+              toast.error(
+                "Could not load Cashfree checkout page. Please try again.",
+              );
             }
           } else {
             setOrderNumber(data.order.orderNumber);
@@ -116,10 +132,9 @@ export default function CheckoutPage() {
         onError: (err: any) => {
           toast.error(err.response?.data?.message || "Failed to place order");
         },
-      }
+      },
     );
   };
-
 
   if (isComplete) {
     return (
@@ -134,17 +149,22 @@ export default function CheckoutPage() {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring' }}
+                transition={{ delay: 0.2, type: "spring" }}
                 className="w-20 h-20 mx-auto mb-8 rounded-full bg-success/10 flex items-center justify-center"
               >
                 <Check className="h-10 w-10 text-success" />
               </motion.div>
-              <h1 className="font-display text-3xl md:text-4xl mb-4">Order Confirmed</h1>
+              <h1 className="font-display text-3xl md:text-4xl mb-4">
+                Order Confirmed
+              </h1>
               <p className="text-muted-foreground mb-8">
-                Thank you for your order! We've sent a confirmation email with your order details.
+                Thank you for your order! We've sent a confirmation email with
+                your order details.
               </p>
               <div className="bg-secondary/30 rounded-lg p-6 mb-8">
-                <p className="text-sm text-muted-foreground mb-2">Order Number</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Order Number
+                </p>
                 <p className="font-display text-xl">#{orderNumber}</p>
               </div>
               <Button variant="hero" size="lg" asChild>
@@ -187,12 +207,14 @@ export default function CheckoutPage() {
                     index === currentStep
                       ? "bg-foreground text-background"
                       : index < currentStep
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground",
                   )}
                 >
                   <step.icon className="h-4 w-4" />
-                  <span className="hidden sm:inline text-sm font-medium">{step.title}</span>
+                  <span className="hidden sm:inline text-sm font-medium">
+                    {step.title}
+                  </span>
                 </button>
                 {index < steps.length - 1 && (
                   <ChevronRight className="h-4 w-4 text-muted-foreground mx-2" />
@@ -225,14 +247,19 @@ export default function CheckoutPage() {
                   {isLoading ? (
                     <div className="flex items-center gap-2 py-6">
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Loading saved addresses...</span>
+                      <span className="text-sm text-muted-foreground">
+                        Loading saved addresses...
+                      </span>
                     </div>
                   ) : !addresses || addresses.length === 0 ? (
                     <div className="text-center py-12 border-2 border-dashed border-border rounded-xl bg-card p-6">
                       <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                      <h3 className="text-sm font-bold text-foreground mb-1">No Saved Addresses Found</h3>
+                      <h3 className="text-sm font-bold text-foreground mb-1">
+                        No Saved Addresses Found
+                      </h3>
                       <p className="text-xs text-muted-foreground mb-6">
-                        You need to add at least one shipping address to proceed.
+                        You need to add at least one shipping address to
+                        proceed.
                       </p>
                       <Link
                         to="/account/addresses"
@@ -252,7 +279,7 @@ export default function CheckoutPage() {
                             "p-5 border rounded-xl cursor-pointer bg-white text-black transition-all shadow-sm flex items-start gap-4",
                             selectedAddressId === addr.id
                               ? "border-black ring-2 ring-black/5"
-                              : "border-gray-200 hover:border-gray-300"
+                              : "border-gray-200 hover:border-gray-300",
                           )}
                         >
                           <input
@@ -264,7 +291,9 @@ export default function CheckoutPage() {
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="font-semibold text-sm text-black">{addr.name}</span>
+                              <span className="font-semibold text-sm text-black">
+                                {addr.name}
+                              </span>
                               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200">
                                 {addr.type}
                               </span>
@@ -279,7 +308,10 @@ export default function CheckoutPage() {
                               {addr.locality && `, ${addr.locality}`}
                             </p>
                             <p className="text-sm text-gray-600 mb-1">
-                              {addr.city}, {addr.state} - <span className="font-semibold">{addr.pincode}</span>
+                              {addr.city}, {addr.state} -{" "}
+                              <span className="font-semibold">
+                                {addr.pincode}
+                              </span>
                             </p>
                             <p className="text-xs text-gray-400 font-medium">
                               Phone: {addr.mobile}
@@ -317,9 +349,23 @@ export default function CheckoutPage() {
                   <h2 className="font-display text-xl mb-6">Payment Method</h2>
 
                   <div className="space-y-4">
-                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors justify-between", formData.paymentMethod === 'Cashfree' ? "border-foreground bg-secondary/20" : "border-border hover:border-foreground/50")}>
+                    <label
+                      className={cn(
+                        "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors justify-between",
+                        formData.paymentMethod === "Cashfree"
+                          ? "border-foreground bg-secondary/20"
+                          : "border-border hover:border-foreground/50",
+                      )}
+                    >
                       <div className="flex items-center gap-4">
-                        <input type="radio" name="paymentMethod" value="Cashfree" checked={formData.paymentMethod === 'Cashfree'} onChange={handleInputChange} className="w-4 h-4" />
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="Cashfree"
+                          checked={formData.paymentMethod === "Cashfree"}
+                          onChange={handleInputChange}
+                          className="w-4 h-4"
+                        />
                         <CreditCard className="h-5 w-5" />
                         <span>Pay Online (UPI, Cards, Netbanking)</span>
                       </div>
@@ -327,17 +373,33 @@ export default function CheckoutPage() {
                         5% OFF
                       </span>
                     </label>
-                    <label className={cn("flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors", formData.paymentMethod === 'COD' ? "border-foreground bg-secondary/20" : "border-border hover:border-foreground/50")}>
-                      <input type="radio" name="paymentMethod" value="COD" checked={formData.paymentMethod === 'COD'} onChange={handleInputChange} className="w-4 h-4" />
+                    <label
+                      className={cn(
+                        "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors",
+                        formData.paymentMethod === "COD"
+                          ? "border-foreground bg-secondary/20"
+                          : "border-border hover:border-foreground/50",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="COD"
+                        checked={formData.paymentMethod === "COD"}
+                        onChange={handleInputChange}
+                        className="w-4 h-4"
+                      />
                       <Truck className="h-5 w-5" />
                       <span>Cash on Delivery</span>
                     </label>
                   </div>
 
-
-
                   <div className="flex gap-4 mt-8">
-                    <Button variant="outline" size="lg" onClick={() => setCurrentStep(0)}>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => setCurrentStep(0)}
+                    >
                       Back
                     </Button>
                     <Button
@@ -359,11 +421,16 @@ export default function CheckoutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   className="space-y-6"
                 >
-                  <h2 className="font-display text-xl mb-6">Review Your Order</h2>
+                  <h2 className="font-display text-xl mb-6">
+                    Review Your Order
+                  </h2>
 
                   <div className="space-y-4">
                     {items.map((item) => (
-                      <div key={item.id} className="flex gap-4 p-4 bg-secondary/30 rounded-lg">
+                      <div
+                        key={item.id}
+                        className="flex gap-4 p-4 bg-secondary/30 rounded-lg"
+                      >
                         <img
                           src={item.image}
                           alt={item.name}
@@ -383,7 +450,11 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="flex gap-4 mt-8">
-                    <Button variant="outline" size="lg" onClick={() => setCurrentStep(1)}>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => setCurrentStep(1)}
+                    >
                       Back
                     </Button>
                     <Button
@@ -391,12 +462,18 @@ export default function CheckoutPage() {
                       size="lg"
                       className="flex-1"
                       onClick={handleComplete}
-                      disabled={createOrderMutation.isPending || verifyPaymentMutation.isPending}
+                      disabled={
+                        createOrderMutation.isPending ||
+                        verifyPaymentMutation.isPending
+                      }
                     >
-                      {createOrderMutation.isPending || verifyPaymentMutation.isPending ? (
+                      {createOrderMutation.isPending ||
+                      verifyPaymentMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {verifyPaymentMutation.isPending ? "Verifying Payment..." : "Placing Order..."}
+                          {verifyPaymentMutation.isPending
+                            ? "Verifying Payment..."
+                            : "Placing Order..."}
                         </>
                       ) : (
                         "Place Order"
@@ -419,7 +496,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+                    <span>{shipping === 0 ? "Free" : `₹${shipping}`}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-sm text-emerald-600 font-medium">

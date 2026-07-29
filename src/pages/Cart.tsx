@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Minus, Plus, X, ArrowRight, ShoppingBag, Loader2 } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
-import { useCart } from '@/context/CartContext';
-import { useState } from 'react';
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Minus, Plus, X, ArrowRight, ShoppingBag, Loader2 } from "lucide-react";
+import MainLayout from "@/components/layout/MainLayout";
+import { useCart } from "@/context/CartContext";
+import { useState } from "react";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal, itemCount } = useCart();
@@ -34,11 +34,13 @@ export default function CartPage() {
           {items.length === 0 ? (
             <div className="text-center py-16 bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
               <ShoppingBag className="h-16 w-16 mx-auto text-gray-300 mb-4 stroke-[1]" />
-              <h2 className="text-xl font-display text-black mb-2 tracking-wide">Your bag is empty</h2>
+              <h2 className="text-xl font-display text-black mb-2 tracking-wide">
+                Your bag is empty
+              </h2>
               <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-8">
                 Start shopping to add items to your bag
               </p>
-              <Link 
+              <Link
                 to="/products"
                 className="inline-flex items-center justify-center px-8 py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-colors"
               >
@@ -84,18 +86,28 @@ export default function CartPage() {
                       </div>
 
                       <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-4">
-                        {item.variant?.attributeValues && item.variant.attributeValues.length > 0
-                          ? item.variant.attributeValues.map((av: any) => `${av.attribute?.name || 'Option'}: ${av.value}`).join(' / ')
+                        {item.variant?.attributeValues &&
+                        item.variant.attributeValues.length > 0
+                          ? item.variant.attributeValues
+                              .map(
+                                (av: any) =>
+                                  `${av.attribute?.name || "Option"}: ${av.value}`,
+                              )
+                              .join(" / ")
                           : [
                               item.size && `Size: ${item.size}`,
-                              item.color && `Color: ${item.color}`
-                            ].filter(Boolean).join(' / ')}
+                              item.color && `Color: ${item.color}`,
+                            ]
+                              .filter(Boolean)
+                              .join(" / ")}
                       </p>
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center border border-gray-200 h-10 rounded bg-white">
                           <button
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                            onClick={() =>
+                              handleUpdateQuantity(item.id, item.quantity - 1)
+                            }
                             disabled={updatingItemId === item.id}
                             className="px-3 h-full flex items-center text-gray-400 hover:text-[#d4af37] disabled:opacity-50 transition-colors"
                           >
@@ -109,7 +121,9 @@ export default function CartPage() {
                             )}
                           </span>
                           <button
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                            onClick={() =>
+                              handleUpdateQuantity(item.id, item.quantity + 1)
+                            }
                             disabled={updatingItemId === item.id}
                             className="px-3 h-full flex items-center text-gray-400 hover:text-[#d4af37] disabled:opacity-50 transition-colors"
                           >
@@ -118,7 +132,8 @@ export default function CartPage() {
                         </div>
 
                         <span className="font-medium text-black">
-                          ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                          ₹
+                          {(item.price * item.quantity).toLocaleString("en-IN")}
                         </span>
                       </div>
                     </div>
@@ -129,16 +144,22 @@ export default function CartPage() {
               {/* Order Summary */}
               <div className="lg:sticky lg:top-32 self-start">
                 <div className="bg-white border border-gray-200 p-8 rounded-xl shadow-sm">
-                  <h2 className="font-display text-2xl text-black mb-6 tracking-wide">Order Summary</h2>
+                  <h2 className="font-display text-2xl text-black mb-6 tracking-wide">
+                    Order Summary
+                  </h2>
 
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-[10px] uppercase tracking-widest text-gray-600">
                       <span>Subtotal ({itemCount} items)</span>
-                      <span className="text-black">₹{subtotal.toLocaleString("en-IN")}</span>
+                      <span className="text-black">
+                        ₹{subtotal.toLocaleString("en-IN")}
+                      </span>
                     </div>
                     <div className="flex justify-between text-[10px] uppercase tracking-widest text-gray-600">
                       <span>Shipping</span>
-                      <span className="text-black">{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+                      <span className="text-black">
+                        {shipping === 0 ? "Free" : `₹${shipping}`}
+                      </span>
                     </div>
                     {shipping > 0 && (
                       <p className="text-[10px] text-gray-400">
@@ -166,7 +187,7 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  <Link 
+                  <Link
                     to="/checkout"
                     className="flex items-center justify-center w-full py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-colors group"
                   >
