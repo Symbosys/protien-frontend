@@ -38,14 +38,25 @@ export default function FeaturedProducts() {
   const featured: ProductCardItem[] =
     productsData?.products && productsData.products.length > 0
       ? productsData.products.slice(0, 8).map((p) => {
-          const priceNum = Number(p.price);
-          const discNum = p.discountPrice ? Number(p.discountPrice) : 0;
-          const hasDiscount = discNum > 0 && discNum < priceNum;
+          const pr = Number(p.price) || 0;
+          const dp = p.discountPrice ? Number(p.discountPrice) : 0;
+          let sellingPrice = pr;
+          let originalPrice: number | undefined = undefined;
+
+          if (pr > 0 && dp > 0 && pr !== dp) {
+            sellingPrice = Math.min(pr, dp);
+            originalPrice = Math.max(pr, dp);
+          } else if (pr > 0) {
+            sellingPrice = pr;
+          } else if (dp > 0) {
+            sellingPrice = dp;
+          }
+
           return {
             id: p.id,
             name: p.name,
-            price: hasDiscount ? discNum : priceNum,
-            originalPrice: hasDiscount ? priceNum : undefined,
+            price: sellingPrice,
+            originalPrice: originalPrice,
             images: [
               processImageUrl(p.image),
               ...(Array.isArray(p.images) ? p.images.map(processImageUrl) : []),

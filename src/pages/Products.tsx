@@ -95,14 +95,25 @@ export default function ProductsPage() {
     let list: any[] = [];
     if (productsData?.products && productsData.products.length > 0) {
       list = productsData.products.map((dbP: any) => {
-        const priceNum = Number(dbP.price);
-        const discNum = dbP.discountPrice ? Number(dbP.discountPrice) : 0;
-        const hasDiscount = discNum > 0 && discNum < priceNum;
+        const p = Number(dbP.price) || 0;
+        const dp = dbP.discountPrice ? Number(dbP.discountPrice) : 0;
+        let sellingPrice = p;
+        let originalPrice: number | undefined = undefined;
+
+        if (p > 0 && dp > 0 && p !== dp) {
+          sellingPrice = Math.min(p, dp);
+          originalPrice = Math.max(p, dp);
+        } else if (p > 0) {
+          sellingPrice = p;
+        } else if (dp > 0) {
+          sellingPrice = dp;
+        }
+
         return {
           id: dbP.id,
           name: dbP.name,
-          price: hasDiscount ? discNum : priceNum,
-          originalPrice: hasDiscount ? priceNum : undefined,
+          price: sellingPrice,
+          originalPrice: originalPrice,
           images: [
             processImageUrl(dbP.image),
             ...(Array.isArray(dbP.images)
