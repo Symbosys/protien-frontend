@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Award,
   ShoppingBag,
+  ChevronLeft,
   ChevronRight,
   Check,
   Sparkles,
@@ -30,7 +31,7 @@ import {
   PackageCheck,
   CheckCircle2,
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCreateReviewMutation } from "@/api/hooks/review.hooks";
 
@@ -148,6 +149,24 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [zoomScale, setZoomScale] = useState(false);
+
+  const thumbnailRef = useRef<HTMLDivElement>(null);
+
+  const scrollThumbnails = (direction: "left" | "right") => {
+    if (thumbnailRef.current) {
+      const scrollAmount = direction === "left" ? -200 : 200;
+      thumbnailRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  useEffect(() => {
+    if (thumbnailRef.current) {
+      const selectedElem = thumbnailRef.current.children[selectedImage] as HTMLElement;
+      if (selectedElem) {
+        selectedElem.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }
+  }, [selectedImage]);
 
   // Group all available attribute values by attribute name from all variants
   const attributesMap = useMemo(() => {
@@ -475,32 +494,10 @@ export default function ProductDetail() {
             
             {/* Left Column: Gallery */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex flex-col gap-4">
                 
-                {/* Thumbnails */}
-                <div className="flex md:flex-col gap-3 order-2 md:order-1 flex-shrink-0 overflow-x-auto scrollbar-hide py-1">
-                  {product.images.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={cn(
-                        "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 overflow-hidden transition-all bg-gray-50 flex-shrink-0 relative p-1.5",
-                        selectedImage === idx
-                          ? "border-[#8A1B28] ring-4 ring-[#8A1B28]/10 shadow-md scale-105"
-                          : "border-gray-200 hover:border-[#8A1B28]/50 opacity-80 hover:opacity-100",
-                      )}
-                    >
-                      <img
-                        src={img}
-                        alt=""
-                        className="w-full h-full object-contain rounded-xl"
-                      />
-                    </button>
-                  ))}
-                </div>
-
                 {/* Main Large Display Frame */}
-                <div className="flex-1 order-1 md:order-2 bg-gradient-to-b from-gray-50 to-amber-50/20 border border-gray-100 rounded-3xl overflow-hidden relative aspect-square max-h-[65vh] md:max-h-none shadow-inner flex items-center justify-center p-6 group">
+                <div className="w-full bg-gradient-to-b from-gray-50 to-amber-50/20 border border-gray-100 rounded-3xl overflow-hidden relative aspect-square shadow-inner flex items-center justify-center p-4 sm:p-6 group">
                   
                   {/* Top Badges overlay */}
                   <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
@@ -518,9 +515,10 @@ export default function ProductDetail() {
                   {/* Main Product Image */}
                   <img
                     src={
-                      selectedVariant && selectedVariant.image
+                      product.images[selectedImage] ||
+                      (selectedVariant && selectedVariant.image
                         ? processImageUrl(selectedVariant.image)
-                        : product.images[selectedImage]
+                        : product.images[0])
                     }
                     alt={product.name}
                     className={cn(
@@ -532,6 +530,7 @@ export default function ProductDetail() {
 
                   {/* Zoom Action Pill */}
                   <button
+                    type="button"
                     onClick={() => setZoomScale(!zoomScale)}
                     className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-900/80 hover:bg-black text-white text-[11px] font-bold tracking-wider rounded-full backdrop-blur-md shadow-lg transition-all"
                   >
@@ -539,6 +538,60 @@ export default function ProductDetail() {
                     {zoomScale ? "Reset Zoom" : "Tap to Zoom"}
                   </button>
                 </div>
+                {/* Horizontal Thumbnails Row with Navigation Arrows */}
+                {product.images && product.images.length > 0 && (
+                  <div className="relative group/thumbs px-2">
+                    {/* Left Scroll Arrow Button */}
+                    {product.images.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={() => scrollThumbnails("left")}
+                        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 border border-gray-200 shadow-md flex items-center justify-center text-gray-700 hover:text-[#8A1B28] hover:bg-white hover:scale-110 active:scale-95 transition-all opacity-90 hover:opacity-100"
+                        title="Scroll left"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                    )}
+
+                    {/* Horizontal Scrollable Thumbnails Container */}
+                    <div
+                      ref={thumbnailRef}
+                      className="flex flex-row gap-3 overflow-x-auto scroll-smooth py-2 px-1 max-w-full scrollbar-thin scrollbar-thumb-amber-800/30 scrollbar-track-transparent"
+                    >
+                      {product.images.map((img, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setSelectedImage(idx)}
+                          className={cn(
+                            "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 overflow-hidden transition-all bg-gray-50 flex-shrink-0 relative p-1.5 focus:outline-none focus:ring-2 focus:ring-[#8A1B28]",
+                            selectedImage === idx
+                              ? "border-[#8A1B28] ring-4 ring-[#8A1B28]/10 shadow-md scale-105"
+                              : "border-gray-200 hover:border-[#8A1B28]/50 opacity-80 hover:opacity-100",
+                          )}
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} thumbnail ${idx + 1}`}
+                            className="w-full h-full object-contain rounded-xl"
+                          />
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Right Scroll Arrow Button */}
+                    {product.images.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={() => scrollThumbnails("right")}
+                        className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 border border-gray-200 shadow-md flex items-center justify-center text-gray-700 hover:text-[#8A1B28] hover:bg-white hover:scale-110 active:scale-95 transition-all opacity-90 hover:opacity-100"
+                        title="Scroll right"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -698,7 +751,7 @@ export default function ProductDetail() {
 
               {/* 3 HealthXP Trust Badges Section */}
               <div className="py-4 my-2 border-y border-gray-100 bg-gray-50/60 rounded-2xl p-3">
-                <div className="grid grid-cols-2 gap-y-4 gap-x-4 items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                   {/* 1. Authenticity Guaranteed */}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#E0F5F6] flex items-center justify-center flex-shrink-0 shadow-xs">
