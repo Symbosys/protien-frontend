@@ -68,11 +68,7 @@ export default function ProductDetail() {
   const params = useParams();
   const rawId = (params as any)?.id;
   const productId =
-    typeof rawId === "string"
-      ? rawId
-      : Array.isArray(rawId)
-        ? rawId[0]
-        : "";
+    typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : "";
 
   const { data: dbProduct, isLoading } = useProductDetailQuery(
     productId,
@@ -91,7 +87,9 @@ export default function ProductDetail() {
 
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
-  const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">("desc");
+  const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">(
+    "desc",
+  );
 
   const isLoggedIn =
     typeof window !== "undefined" &&
@@ -161,9 +159,15 @@ export default function ProductDetail() {
 
   useEffect(() => {
     if (thumbnailRef.current) {
-      const selectedElem = thumbnailRef.current.children[selectedImage] as HTMLElement;
+      const selectedElem = thumbnailRef.current.children[
+        selectedImage
+      ] as HTMLElement;
       if (selectedElem) {
-        selectedElem.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        selectedElem.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
       }
     }
   }, [selectedImage]);
@@ -313,11 +317,13 @@ export default function ProductDetail() {
     : { sellingPrice: 0, originalPrice: undefined };
 
   const brandName = dbProduct
-    ? typeof dbProduct.brand === "object" && dbProduct.brand !== null && "name" in dbProduct.brand
+    ? typeof dbProduct.brand === "object" &&
+      dbProduct.brand !== null &&
+      "name" in dbProduct.brand
       ? (dbProduct.brand as any).name
       : typeof dbProduct.brand === "string" && dbProduct.brand.trim() !== ""
-      ? dbProduct.brand
-      : "Protein & Nutrients"
+        ? dbProduct.brand
+        : "Protein & Nutrients"
     : mockProduct?.brand || "Protein & Nutrients";
 
   const product = dbProduct
@@ -373,7 +379,9 @@ export default function ProductDetail() {
       <MainLayout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center pt-24 pb-16 px-4">
           <Loader2 className="h-10 w-10 text-[#8A1B28] animate-spin mb-4" />
-          <h2 className="font-display text-xl font-bold text-gray-800">Loading Product Details...</h2>
+          <h2 className="font-display text-xl font-bold text-gray-800">
+            Loading Product Details...
+          </h2>
           <p className="text-xs text-gray-500 mt-1">Please wait a moment</p>
         </div>
       </MainLayout>
@@ -391,7 +399,8 @@ export default function ProductDetail() {
             Product Not Found
           </h1>
           <p className="text-sm text-gray-600 mb-6 max-w-md">
-            The product you are looking for might have been moved or is no longer available.
+            The product you are looking for might have been moved or is no
+            longer available.
           </p>
           <Link
             to="/products"
@@ -465,40 +474,50 @@ export default function ProductDetail() {
           }))
       : [];
 
-  const discountPercentage = product.originalPrice && product.originalPrice > product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : null;
+  const discountPercentage =
+    product.originalPrice && product.originalPrice > product.price
+      ? Math.round(
+          ((product.originalPrice - product.price) / product.originalPrice) *
+            100,
+        )
+      : null;
 
   return (
     <MainLayout>
       <div className="pt-4 sm:pt-6 lg:pt-8 pb-24 lg:pb-20 bg-[#FDFBF7] text-gray-900 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
           {/* Breadcrumbs Header */}
           <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-6 font-medium overflow-x-auto whitespace-nowrap scrollbar-hide py-1">
-            <Link to="/" className="hover:text-[#8A1B28] transition-colors flex items-center gap-1">
+            <Link
+              to="/"
+              className="hover:text-[#8A1B28] transition-colors flex items-center gap-1"
+            >
               Home
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-            <Link to="/products" className="hover:text-[#8A1B28] transition-colors">
+            <Link
+              to="/products"
+              className="hover:text-[#8A1B28] transition-colors"
+            >
               Products
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-            <span className="text-gray-400 uppercase text-[10px] tracking-wider font-bold">{product.category}</span>
+            <span className="text-gray-400 uppercase text-[10px] tracking-wider font-bold">
+              {product.category}
+            </span>
             <ChevronRight className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-            <span className="text-gray-900 font-semibold truncate max-w-[180px] sm:max-w-none">{product.name}</span>
+            <span className="text-gray-900 font-semibold truncate max-w-[180px] sm:max-w-none">
+              {product.name}
+            </span>
           </nav>
 
           {/* Product Gallery & Info Grid */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start bg-white p-4 sm:p-6 lg:p-8 rounded-3xl border border-amber-900/10 shadow-xl shadow-amber-950/5">
-            
             {/* Left Column: Gallery */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex flex-col gap-4">
-                
                 {/* Main Large Display Frame */}
                 <div className="w-full bg-gradient-to-b from-gray-50 to-amber-50/20 border border-gray-100 rounded-3xl overflow-hidden relative aspect-square shadow-inner flex items-center justify-center p-4 sm:p-6 group">
-                  
                   {/* Top Badges overlay */}
                   <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                     {discountPercentage && (
@@ -523,7 +542,9 @@ export default function ProductDetail() {
                     alt={product.name}
                     className={cn(
                       "w-full h-full object-contain drop-shadow-xl transition-transform duration-500 ease-out",
-                      zoomScale ? "scale-150 cursor-zoom-out" : "scale-100 group-hover:scale-105 cursor-zoom-in",
+                      zoomScale
+                        ? "scale-150 cursor-zoom-out"
+                        : "scale-100 group-hover:scale-105 cursor-zoom-in",
                     )}
                     onClick={() => setZoomScale(!zoomScale)}
                   />
@@ -597,7 +618,6 @@ export default function ProductDetail() {
 
             {/* Right Column: Info & Buy Options */}
             <div className="lg:col-span-5 space-y-6">
-              
               {/* Brand & Stock Status Bar */}
               <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-3">
                 <span className="px-3 py-1 bg-[#8A1B28]/10 text-[#8A1B28] text-xs font-extrabold tracking-widest uppercase rounded-lg">
@@ -618,7 +638,9 @@ export default function ProductDetail() {
                       product.inStock ? "bg-emerald-500" : "bg-red-500",
                     )}
                   />
-                  {product.inStock ? "In Stock (Ready to Ship)" : "Out of Stock"}
+                  {product.inStock
+                    ? "In Stock (Ready to Ship)"
+                    : "Out of Stock"}
                 </span>
               </div>
 
@@ -684,14 +706,18 @@ export default function ProductDetail() {
                   <span className="text-3xl sm:text-4xl font-black text-[#8A1B28] tracking-tight">
                     ₹{product.price.toLocaleString("en-IN")}
                   </span>
-                  {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-base sm:text-lg line-through text-gray-400 font-medium">
-                      ₹{product.originalPrice.toLocaleString("en-IN")}
-                    </span>
-                  )}
+                  {product.originalPrice &&
+                    product.originalPrice > product.price && (
+                      <span className="text-base sm:text-lg line-through text-gray-400 font-medium">
+                        ₹{product.originalPrice.toLocaleString("en-IN")}
+                      </span>
+                    )}
                   {discountPercentage && (
                     <span className="px-2.5 py-1 bg-gradient-to-r from-red-600 to-amber-600 text-white text-xs font-extrabold rounded-lg shadow-sm">
-                      Save ₹{(product.originalPrice! - product.price).toLocaleString("en-IN")}
+                      Save ₹
+                      {(product.originalPrice! - product.price).toLocaleString(
+                        "en-IN",
+                      )}
                     </span>
                   )}
                 </div>
@@ -713,7 +739,8 @@ export default function ProductDetail() {
                       </div>
                       <div className="flex flex-wrap gap-2.5">
                         {vals.map((v) => {
-                          const isSelected = selectedAttributes[attrName] === v.value;
+                          const isSelected =
+                            selectedAttributes[attrName] === v.value;
                           return (
                             <button
                               key={v.id}
@@ -739,7 +766,9 @@ export default function ProductDetail() {
                                 />
                               )}
                               <span>{v.value}</span>
-                              {isSelected && <Check className="h-4 w-4 ml-0.5 text-amber-400 stroke-[3]" />}
+                              {isSelected && (
+                                <Check className="h-4 w-4 ml-0.5 text-amber-400 stroke-[3]" />
+                              )}
                             </button>
                           );
                         })}
@@ -755,39 +784,128 @@ export default function ProductDetail() {
                   {/* 1. Authenticity Guaranteed */}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#E0F5F6] flex items-center justify-center flex-shrink-0 shadow-xs">
-                      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 sm:w-9 sm:h-9">
+                      <svg
+                        viewBox="0 0 48 48"
+                        fill="none"
+                        className="w-8 h-8 sm:w-9 sm:h-9"
+                      >
                         <path
                           d="M24 5l2.6 3.6 4.3-1.2 1.2 4.3 4.3 1.2-1.2 4.3 3.6 2.6-2.6 3.6 2.6 3.6-4.3 1.2 1.2 4.3-4.3 1.2-1.2 4.3L24 43l-2.6 3.6-4.3-1.2-1.2-4.3-4.3-1.2 1.2-4.3-3.6-2.6 2.6-3.6-2.6-3.6 4.3-1.2-1.2-4.3 4.3-1.2L21.4 8.6 24 5z"
                           fill="#F5A623"
                           stroke="#D97706"
                           strokeWidth="1"
                         />
-                        <circle cx="24" cy="23" r="12" fill="#FBBF24" stroke="#B45309" strokeWidth="1" />
-                        <circle cx="24" cy="23" r="10" fill="#FFFBEB" stroke="#F5A623" strokeWidth="0.8" />
-                        <text x="24" y="21" textAnchor="middle" fill="#92400E" fontSize="5.5" fontWeight="900" fontFamily="sans-serif">100%</text>
-                        <text x="24" y="26.5" textAnchor="middle" fill="#92400E" fontSize="3.2" fontWeight="800" fontFamily="sans-serif" letterSpacing="0.3">GUARANTEE</text>
-                        <path d="M16 32l-3 5 4.5-1.5 3 2.5-1.5-6h-3z" fill="#D97706" />
-                        <path d="M32 32l3 5-4.5-1.5-3 2.5 1.5-6h3z" fill="#D97706" />
+                        <circle
+                          cx="24"
+                          cy="23"
+                          r="12"
+                          fill="#FBBF24"
+                          stroke="#B45309"
+                          strokeWidth="1"
+                        />
+                        <circle
+                          cx="24"
+                          cy="23"
+                          r="10"
+                          fill="#FFFBEB"
+                          stroke="#F5A623"
+                          strokeWidth="0.8"
+                        />
+                        <text
+                          x="24"
+                          y="21"
+                          textAnchor="middle"
+                          fill="#92400E"
+                          fontSize="5.5"
+                          fontWeight="900"
+                          fontFamily="sans-serif"
+                        >
+                          100%
+                        </text>
+                        <text
+                          x="24"
+                          y="26.5"
+                          textAnchor="middle"
+                          fill="#92400E"
+                          fontSize="3.2"
+                          fontWeight="800"
+                          fontFamily="sans-serif"
+                          letterSpacing="0.3"
+                        >
+                          GUARANTEE
+                        </text>
+                        <path
+                          d="M16 32l-3 5 4.5-1.5 3 2.5-1.5-6h-3z"
+                          fill="#D97706"
+                        />
+                        <path
+                          d="M32 32l3 5-4.5-1.5-3 2.5 1.5-6h3z"
+                          fill="#D97706"
+                        />
                       </svg>
                     </div>
                     <div className="text-xs sm:text-sm font-semibold text-gray-800 leading-snug">
-                      Authenticity<br />Guaranteed
+                      Authenticity
+                      <br />
+                      Guaranteed
                     </div>
                   </div>
 
                   {/* 2. Free Shipping */}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#E0F5F6] flex items-center justify-center flex-shrink-0 shadow-xs">
-                      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 sm:w-9 sm:h-9">
-                        <path d="M12 20l12-6 12 6v14l-12 6-12-6V20z" fill="#D97706" stroke="#78350F" strokeWidth="1" />
-                        <path d="M12 20l12-6 12 6-12 6-12-6z" fill="#F59E0B" stroke="#78350F" strokeWidth="0.8" />
+                      <svg
+                        viewBox="0 0 48 48"
+                        fill="none"
+                        className="w-8 h-8 sm:w-9 sm:h-9"
+                      >
+                        <path
+                          d="M12 20l12-6 12 6v14l-12 6-12-6V20z"
+                          fill="#D97706"
+                          stroke="#78350F"
+                          strokeWidth="1"
+                        />
+                        <path
+                          d="M12 20l12-6 12 6-12 6-12-6z"
+                          fill="#F59E0B"
+                          stroke="#78350F"
+                          strokeWidth="0.8"
+                        />
                         <path d="M12 20l12 6v14l-12-6V20z" fill="#B45309" />
-                        <path d="M21 15.5l6-3 6 3-6 3-6-3z" fill="#FEF08A" opacity="0.9" />
-                        <path d="M24 18.5v14" stroke="#FEF08A" strokeWidth="2" opacity="0.9" />
+                        <path
+                          d="M21 15.5l6-3 6 3-6 3-6-3z"
+                          fill="#FEF08A"
+                          opacity="0.9"
+                        />
+                        <path
+                          d="M24 18.5v14"
+                          stroke="#FEF08A"
+                          strokeWidth="2"
+                          opacity="0.9"
+                        />
                         <g transform="translate(23, 9)">
-                          <rect x="0" y="0" width="16" height="11" rx="2" fill="#EF4444" stroke="#991B1B" strokeWidth="0.8" />
+                          <rect
+                            x="0"
+                            y="0"
+                            width="16"
+                            height="11"
+                            rx="2"
+                            fill="#EF4444"
+                            stroke="#991B1B"
+                            strokeWidth="0.8"
+                          />
                           <path d="M-2 5.5l2-2v4l-2-2z" fill="#EF4444" />
-                          <text x="8" y="8" textAnchor="middle" fill="#FFFFFF" fontSize="4.8" fontWeight="900" fontFamily="sans-serif">FREE</text>
+                          <text
+                            x="8"
+                            y="8"
+                            textAnchor="middle"
+                            fill="#FFFFFF"
+                            fontSize="4.8"
+                            fontWeight="900"
+                            fontFamily="sans-serif"
+                          >
+                            FREE
+                          </text>
                         </g>
                       </svg>
                     </div>
@@ -799,19 +917,81 @@ export default function ProductDetail() {
                   {/* 3. Cash on Delivery */}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#E0F5F6] flex items-center justify-center flex-shrink-0 shadow-xs">
-                      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 sm:w-9 sm:h-9">
+                      <svg
+                        viewBox="0 0 48 48"
+                        fill="none"
+                        className="w-8 h-8 sm:w-9 sm:h-9"
+                      >
                         <g transform="rotate(-10 20 20)">
-                          <rect x="10" y="13" width="22" height="13" rx="1.5" fill="#34D399" stroke="#059669" strokeWidth="1" />
-                          <circle cx="21" cy="19.5" r="3" fill="#059669" opacity="0.3" />
-                          <text x="21" y="21.5" textAnchor="middle" fill="#047857" fontSize="5" fontWeight="900">₹</text>
+                          <rect
+                            x="10"
+                            y="13"
+                            width="22"
+                            height="13"
+                            rx="1.5"
+                            fill="#34D399"
+                            stroke="#059669"
+                            strokeWidth="1"
+                          />
+                          <circle
+                            cx="21"
+                            cy="19.5"
+                            r="3"
+                            fill="#059669"
+                            opacity="0.3"
+                          />
+                          <text
+                            x="21"
+                            y="21.5"
+                            textAnchor="middle"
+                            fill="#047857"
+                            fontSize="5"
+                            fontWeight="900"
+                          >
+                            ₹
+                          </text>
                         </g>
                         <g transform="rotate(6 22 18)">
-                          <rect x="13" y="11" width="22" height="13" rx="1.5" fill="#10B981" stroke="#047857" strokeWidth="1" />
-                          <circle cx="24" cy="17.5" r="3" fill="#047857" opacity="0.3" />
-                          <text x="24" y="19.5" textAnchor="middle" fill="#064E3B" fontSize="5" fontWeight="900">₹</text>
+                          <rect
+                            x="13"
+                            y="11"
+                            width="22"
+                            height="13"
+                            rx="1.5"
+                            fill="#10B981"
+                            stroke="#047857"
+                            strokeWidth="1"
+                          />
+                          <circle
+                            cx="24"
+                            cy="17.5"
+                            r="3"
+                            fill="#047857"
+                            opacity="0.3"
+                          />
+                          <text
+                            x="24"
+                            y="19.5"
+                            textAnchor="middle"
+                            fill="#064E3B"
+                            fontSize="5"
+                            fontWeight="900"
+                          >
+                            ₹
+                          </text>
                         </g>
-                        <path d="M10 36c1.5-4.5 4.5-7.5 9-8.25l4.5 1.5c1.5 0.75 3 0 3.75-1.5s0-3-1.5-3.75l-3-1.5c2.25-1.5 5.25-0.75 6.75 1.5l1.5 2.25c1.5 1.5 3.75 1.5 5.25 0l1.5-1.5" stroke="#EA580C" strokeWidth="1.8" strokeLinecap="round" />
-                        <path d="M16 37.5c3-6 7.5-9 13.5-9 3 0 6 2.25 6 5.25 0 3.75-3 6.75-6 8.25L16 37.5z" fill="#FDBA74" stroke="#EA580C" strokeWidth="1" />
+                        <path
+                          d="M10 36c1.5-4.5 4.5-7.5 9-8.25l4.5 1.5c1.5 0.75 3 0 3.75-1.5s0-3-1.5-3.75l-3-1.5c2.25-1.5 5.25-0.75 6.75 1.5l1.5 2.25c1.5 1.5 3.75 1.5 5.25 0l1.5-1.5"
+                          stroke="#EA580C"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M16 37.5c3-6 7.5-9 13.5-9 3 0 6 2.25 6 5.25 0 3.75-3 6.75-6 8.25L16 37.5z"
+                          fill="#FDBA74"
+                          stroke="#EA580C"
+                          strokeWidth="1"
+                        />
                       </svg>
                     </div>
                     <div className="text-xs sm:text-sm font-semibold text-gray-800 leading-snug">
@@ -932,7 +1112,8 @@ export default function ProductDetail() {
               <div className="flex items-center gap-3 p-3 bg-amber-50/50 border border-amber-900/10 rounded-xl text-xs text-amber-900/80">
                 <ShieldCheck className="h-5 w-5 text-[#8A1B28] flex-shrink-0" />
                 <span>
-                  100% Genuine product directly sourced from verified distributors. Guaranteed fresh stock.
+                  100% Genuine product directly sourced from verified
+                  distributors. Guaranteed fresh stock.
                 </span>
               </div>
             </div>
@@ -993,11 +1174,14 @@ export default function ProductDetail() {
               {/* Tab 1: Description */}
               {activeTab === "desc" && (
                 <div className="space-y-4">
-                  <h3 className="text-base font-bold text-gray-900">About {product.name}</h3>
+                  <h3 className="text-base font-bold text-gray-900">
+                    About {product.name}
+                  </h3>
                   <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                    {product.description || "High-quality protein supplement formulated for optimal nutrition and strength development."}
+                    {product.description ||
+                      "High-quality protein supplement formulated for optimal nutrition and strength development."}
                   </p>
-                  
+
                   {/* Highlights Grid */}
                   <div className="grid sm:grid-cols-3 gap-4 pt-4">
                     <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center gap-3">
@@ -1005,8 +1189,12 @@ export default function ProductDetail() {
                         <Award className="h-5 w-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-gray-900">Premium Quality</h4>
-                        <p className="text-[11px] text-gray-500">Tested for purity</p>
+                        <h4 className="text-xs font-bold text-gray-900">
+                          Premium Quality
+                        </h4>
+                        <p className="text-[11px] text-gray-500">
+                          Tested for purity
+                        </p>
                       </div>
                     </div>
 
@@ -1015,8 +1203,12 @@ export default function ProductDetail() {
                         <Truck className="h-5 w-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-gray-900">Fast Shipping</h4>
-                        <p className="text-[11px] text-gray-500">Dispatched in 24 hrs</p>
+                        <h4 className="text-xs font-bold text-gray-900">
+                          Fast Shipping
+                        </h4>
+                        <p className="text-[11px] text-gray-500">
+                          Dispatched in 24 hrs
+                        </p>
                       </div>
                     </div>
 
@@ -1025,8 +1217,12 @@ export default function ProductDetail() {
                         <RotateCcw className="h-5 w-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-gray-900">Easy Returns</h4>
-                        <p className="text-[11px] text-gray-500">Hassle-free exchange</p>
+                        <h4 className="text-xs font-bold text-gray-900">
+                          Easy Returns
+                        </h4>
+                        <p className="text-[11px] text-gray-500">
+                          Hassle-free exchange
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1037,26 +1233,49 @@ export default function ProductDetail() {
               {activeTab === "specs" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 text-xs sm:text-sm">
-                    <span className="font-semibold text-gray-600">Brand Name:</span>
-                    <span className="font-bold text-gray-900">{product.brand}</span>
+                    <span className="font-semibold text-gray-600">
+                      Brand Name:
+                    </span>
+                    <span className="font-bold text-gray-900">
+                      {product.brand}
+                    </span>
                   </div>
                   <div className="flex justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 text-xs sm:text-sm">
-                    <span className="font-semibold text-gray-600">Category:</span>
-                    <span className="font-bold text-gray-900">{product.category}</span>
+                    <span className="font-semibold text-gray-600">
+                      Category:
+                    </span>
+                    <span className="font-bold text-gray-900">
+                      {product.category}
+                    </span>
                   </div>
                   {product.subcategory && (
                     <div className="flex justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 text-xs sm:text-sm">
-                      <span className="font-semibold text-gray-600">Subcategory:</span>
-                      <span className="font-bold text-gray-900">{product.subcategory}</span>
+                      <span className="font-semibold text-gray-600">
+                        Subcategory:
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        {product.subcategory}
+                      </span>
                     </div>
                   )}
                   <div className="flex justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 text-xs sm:text-sm">
-                    <span className="font-semibold text-gray-600">SKU Code:</span>
-                    <span className="font-bold text-gray-900 font-mono">{selectedVariant?.sku || dbProduct?.sku || "N/A"}</span>
+                    <span className="font-semibold text-gray-600">
+                      SKU Code:
+                    </span>
+                    <span className="font-bold text-gray-900 font-mono">
+                      {selectedVariant?.sku || dbProduct?.sku || "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 text-xs sm:text-sm">
-                    <span className="font-semibold text-gray-600">Stock Status:</span>
-                    <span className={cn("font-bold", product.inStock ? "text-emerald-600" : "text-red-600")}>
+                    <span className="font-semibold text-gray-600">
+                      Stock Status:
+                    </span>
+                    <span
+                      className={cn(
+                        "font-bold",
+                        product.inStock ? "text-emerald-600" : "text-red-600",
+                      )}
+                    >
                       {product.inStock ? "Available in Stock" : "Out of Stock"}
                     </span>
                   </div>
@@ -1066,19 +1285,23 @@ export default function ProductDetail() {
               {/* Tab 3: Reviews */}
               {activeTab === "reviews" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                  
                   {/* Reviews List */}
                   <div className="lg:col-span-2 space-y-4">
                     {!dbProduct?.reviews || dbProduct.reviews.length === 0 ? (
                       <div className="text-center py-8 bg-gray-50 rounded-2xl border border-gray-100">
                         <Star className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 font-medium">No reviews yet for this product.</p>
-                        <p className="text-xs text-gray-400">Be the first customer to share your thoughts!</p>
+                        <p className="text-sm text-gray-600 font-medium">
+                          No reviews yet for this product.
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Be the first customer to share your thoughts!
+                        </p>
                       </div>
                     ) : (
                       dbProduct.reviews.map((rev) => {
                         const revName = rev.user
-                          ? `${rev.user.firstName || ""} ${rev.user.lastName || ""}`.trim() || "Verified Buyer"
+                          ? `${rev.user.firstName || ""} ${rev.user.lastName || ""}`.trim() ||
+                            "Verified Buyer"
                           : "Verified Buyer";
                         const initial = revName.charAt(0).toUpperCase();
 
@@ -1093,18 +1316,24 @@ export default function ProductDetail() {
                                   {initial}
                                 </div>
                                 <div>
-                                  <h4 className="font-bold text-sm text-gray-900">{revName}</h4>
+                                  <h4 className="font-bold text-sm text-gray-900">
+                                    {revName}
+                                  </h4>
                                   <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                                    <CheckCircle2 className="h-3 w-3" /> Verified Purchase
+                                    <CheckCircle2 className="h-3 w-3" />{" "}
+                                    Verified Purchase
                                   </span>
                                 </div>
                               </div>
                               <span className="text-xs text-gray-400">
-                                {new Date(rev.createdAt).toLocaleDateString("en-IN", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
+                                {new Date(rev.createdAt).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
                               </span>
                             </div>
 
@@ -1128,7 +1357,9 @@ export default function ProductDetail() {
 
                             {rev.reply && (
                               <div className="ml-4 bg-white border-l-4 border-[#8A1B28] p-3 rounded-r-xl space-y-1 text-xs">
-                                <p className="font-bold text-[#8A1B28]">Store Reply:</p>
+                                <p className="font-bold text-[#8A1B28]">
+                                  Store Reply:
+                                </p>
                                 <p className="text-gray-600">{rev.reply}</p>
                               </div>
                             )}
@@ -1201,13 +1432,16 @@ export default function ProductDetail() {
                           disabled={postReviewMutation.isPending}
                           className="w-full py-3 bg-[#8A1B28] hover:bg-[#721620] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all disabled:opacity-50"
                         >
-                          {postReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                          {postReviewMutation.isPending
+                            ? "Submitting..."
+                            : "Submit Review"}
                         </button>
                       </form>
                     ) : (
                       <div className="text-center py-6 space-y-3">
                         <p className="text-xs text-gray-600">
-                          Please log in to share your experience with this product.
+                          Please log in to share your experience with this
+                          product.
                         </p>
                         <Link
                           to="/login"
@@ -1231,7 +1465,9 @@ export default function ProductDetail() {
                   <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
                     Recommended for You
                   </h2>
-                  <p className="text-xs text-gray-500 mt-0.5">Explore similar products from the same category</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Explore similar products from the same category
+                  </p>
                 </div>
                 <Link
                   to="/products"
@@ -1254,7 +1490,9 @@ export default function ProductDetail() {
       {/* Mobile Bottom Floating Bar for Fast Checkout */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden p-3 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl flex items-center justify-between gap-3">
         <div>
-          <span className="text-[10px] text-gray-500 font-bold uppercase block">Total Price</span>
+          <span className="text-[10px] text-gray-500 font-bold uppercase block">
+            Total Price
+          </span>
           <span className="text-lg font-extrabold text-[#8A1B28]">
             ₹{(product.price * quantity).toLocaleString("en-IN")}
           </span>
@@ -1264,8 +1502,10 @@ export default function ProductDetail() {
           onClick={async () => {
             setIsAdding(true);
             try {
-              const firstSize = selectedAttributes["Size"] || selectedAttributes["size"];
-              const firstColor = selectedAttributes["Flavour"] || selectedAttributes["flavour"];
+              const firstSize =
+                selectedAttributes["Size"] || selectedAttributes["size"];
+              const firstColor =
+                selectedAttributes["Flavour"] || selectedAttributes["flavour"];
               await addItem({
                 id: product.id,
                 variantId: selectedVariant?.id,
@@ -1286,11 +1526,15 @@ export default function ProductDetail() {
             "px-6 py-3.5 text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-xl transition-all flex items-center gap-2 active:scale-95",
             product.inStock && !isAdding
               ? "bg-gradient-to-r from-gray-900 via-black to-gray-900 hover:from-black hover:to-black shadow-gray-950/30 cursor-pointer"
-              : "bg-gray-400 cursor-not-allowed"
+              : "bg-gray-400 cursor-not-allowed",
           )}
         >
           <ShoppingBag className="h-4.5 w-4.5 stroke-[2.2]" />
-          {isAdding ? "Adding..." : product.inStock ? "Add to Cart" : "Out of Stock"}
+          {isAdding
+            ? "Adding..."
+            : product.inStock
+              ? "Add to Cart"
+              : "Out of Stock"}
         </button>
       </div>
     </MainLayout>
