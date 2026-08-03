@@ -49,6 +49,11 @@ export default function ProductsPage() {
   const selectedPriceRange = searchParams.get("priceRange");
   const selectedStock = searchParams.get("stock");
   const selectedBrandId = searchParams.get("brandId");
+  const selectedSearch =
+    searchParams.get("search") ||
+    searchParams.get("q") ||
+    searchParams.get("query") ||
+    searchParams.get("searchQuery");
 
   // Fetch from backend
   const { data: categoriesData, isLoading: isCategoriesLoading } =
@@ -58,6 +63,7 @@ export default function ProductsPage() {
     {
       limit: 100,
       brandId: selectedBrandId || undefined,
+      search: selectedSearch || undefined,
     },
   );
 
@@ -140,6 +146,14 @@ export default function ProductsPage() {
     }
 
     // Apply front-end filters to display exactly what the user clicks
+    if (selectedSearch) {
+      const q = selectedSearch.toLowerCase().trim();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.category && p.category.toLowerCase().includes(q)),
+      );
+    }
     if (selectedCategory) {
       list = list.filter(
         (p) => p.category.toLowerCase() === selectedCategory.toLowerCase(),
@@ -195,10 +209,12 @@ export default function ProductsPage() {
   }, [
     productsData,
     selectedCategory,
+    selectedBrandId,
     selectedKarat,
     selectedWeight,
     selectedPriceRange,
     selectedStock,
+    selectedSearch,
     sort,
   ]);
 

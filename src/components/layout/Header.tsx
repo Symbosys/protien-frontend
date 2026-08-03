@@ -1,6 +1,8 @@
 "use client";
 
 import { useCategoriesQuery } from "@/api/hooks/category.hooks";
+import { useProductsQuery } from "@/api/hooks/product.hooks";
+import { apiClient } from "@/api/apiclient/apiClient";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { categories as mockCategories } from "@/data/products";
@@ -16,18 +18,36 @@ import {
   X,
   Gift,
 } from "lucide-react";
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchVal, setSearchVal] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isMobileSearchFocused, setIsMobileSearchFocused] = useState(false);
+
+  const searchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
   const { openCart, itemCount } = useCart();
   const { items } = useWishlist();
   const location = useLocation();
 
   const { data: categoriesData } = useCategoriesQuery({ limit: 1000 });
+
+  // Query dynamic products live from backend when search input >= 2 chars
+  const trimmedSearch = searchVal.trim();
+  const { data: searchResultsData, isLoading: isSearchLoading } =
+    useProductsQuery(
+      { search: trimmedSearch, limit: 6 },
+      trimmedSearch.length >= 2 && (isSearchFocused || isMobileSearchFocused),
+    );
+
+  const searchProducts = searchResultsData?.products || [];
+
   const categoriesList =
     categoriesData?.categories && categoriesData.categories.length > 0
       ? categoriesData.categories.map((cat) => ({
@@ -44,10 +64,52 @@ export default function Header() {
     { name: "General Wellness", slug: "Wellness" },
   ];
 
+  const processImageUrl = (url: string | null | undefined) => {
+    if (!url)
+      return "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?q=80&w=300&auto=format&fit=crop";
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:") ||
+      url.startsWith("blob:")
+    )
+      return url;
+
+    const clientBaseUrl = apiClient.defaults.baseURL || "";
+    const baseUrl =
+      clientBaseUrl.replace("/api", "") || "http://192.168.1.2:4000";
+
+    return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setIsSearchFocused(false);
+      }
+      if (
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileSearchFocused(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchVal.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(searchVal.trim())}`;
+      navigate(`/products?search=${encodeURIComponent(searchVal.trim())}`);
+      setIsSearchFocused(false);
+      setIsMobileSearchFocused(false);
     }
   };
 
@@ -217,25 +279,126 @@ export default function Header() {
 
             {/* Right: Search, Account, Wishlist, Cart */}
             <div className="flex items-center gap-1.5 lg:gap-3 text-black">
-              {/* Search Bar - Inline style exactly like image */}
-              <form
-                onSubmit={handleSearchSubmit}
-                className="hidden md:flex items-center bg-transparent border-0 py-1 max-w-[180px] xl:max-w-[240px]"
-              >
-                <input
-                  type="text"
-                  placeholder="Start your search here..."
-                  className="bg-transparent text-sm text-black placeholder-gray-400 outline-none w-full font-medium"
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="p-1 hover:text-[#8CFF64] transition-colors flex-shrink-0"
+              {/* Desktop Dynamic Live Search */}
+              <div ref={searchRef} className="relative hidden md:block">
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="flex items-center bg-gray-50 border border-gray-200 rounded-full px-3 py-1.5 max-w-[200px] xl:max-w-[260px] focus-within:border-[#8CFF64] focus-within:bg-white transition-all"
                 >
-                  <Search className="h-5 w-5 text-black" />
-                </button>
-              </form>
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    className="bg-transparent text-xs xl:text-sm text-black placeholder-gray-400 outline-none w-full font-medium"
+                    value={searchVal}
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                  />
+                  {searchVal ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchVal("");
+                        setIsSearchFocused(false);
+                      }}
+                      className="p-1 text-gray-400 hover:text-black transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="p-1 hover:text-[#8CFF64] transition-colors flex-shrink-0"
+                    >
+                      <Search className="h-4 w-4 text-black" />
+                    </button>
+                  )}
+                </form>
+
+                {/* Live Search Popup Dropdown */}
+                <AnimatePresence>
+                  {isSearchFocused && searchVal.trim().length >= 2 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-2 w-[320px] xl:w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 p-2"
+                    >
+                      {isSearchLoading ? (
+                        <div className="p-4 text-center text-xs font-semibold text-gray-400 flex items-center justify-center gap-2">
+                          <div className="w-4 h-4 border-2 border-gray-300 border-t-[#8CFF64] rounded-full animate-spin" />
+                          Searching products...
+                        </div>
+                      ) : searchProducts.length > 0 ? (
+                        <div>
+                          <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-50 flex justify-between items-center">
+                            <span>Products ({searchProducts.length})</span>
+                            <span className="text-[10px] text-[#5BBF3D] font-semibold">
+                              Live Results
+                            </span>
+                          </div>
+                          <div className="max-h-[320px] overflow-y-auto divide-y divide-gray-50 py-1">
+                            {searchProducts.map((product) => {
+                              const img = processImageUrl(product.image);
+                              const displayPrice =
+                                product.discountPrice || product.price;
+                              return (
+                                <Link
+                                  key={product.id}
+                                  to={`/product/${product.id}`}
+                                  onClick={() => {
+                                    setIsSearchFocused(false);
+                                    setSearchVal("");
+                                  }}
+                                  className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl transition-colors group"
+                                >
+                                  <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
+                                    <img
+                                      src={img}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-xs font-bold text-black truncate group-hover:text-[#5BBF3D] transition-colors">
+                                      {product.name}
+                                    </h4>
+                                    <p className="text-[11px] text-gray-500 font-semibold mt-0.5">
+                                      ₹
+                                      {Number(displayPrice).toLocaleString(
+                                        "en-IN",
+                                      )}
+                                      {product.discountPrice && (
+                                        <span className="line-through text-gray-400 ml-1.5 text-[10px]">
+                                          ₹
+                                          {Number(product.price).toLocaleString(
+                                            "en-IN",
+                                          )}
+                                        </span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </Link>
+                              );
+                            })}
+                          </div>
+                          <button
+                            onClick={handleSearchSubmit}
+                            className="w-full py-2 bg-gray-50 hover:bg-[#8CFF64] hover:text-black text-xs font-bold text-center text-gray-700 transition-colors rounded-xl mt-1 block"
+                          >
+                            View all results for "{searchVal}" →
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="p-4 text-center text-xs text-gray-500">
+                          No products found matching "
+                          <span className="font-semibold">{searchVal}</span>"
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Divider | */}
               <div className="hidden md:block h-6 w-px bg-gray-200 mx-1.5" />
@@ -371,22 +534,75 @@ export default function Header() {
                 </nav>
 
                 <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
-                  {/* Search for mobile */}
-                  <form onSubmit={handleSearchSubmit} className="relative mt-2">
-                    <input
-                      type="text"
-                      placeholder="Search Supplements..."
-                      value={searchVal}
-                      onChange={(e) => setSearchVal(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-4 pr-10 text-xs font-semibold outline-none focus:border-[#8CFF64]"
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      <Search className="h-4 w-4 text-gray-400" />
-                    </button>
-                  </form>
+                  {/* Dynamic Search for mobile */}
+                  <div className="relative mt-2" ref={mobileSearchRef}>
+                    <form onSubmit={handleSearchSubmit} className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search Supplements..."
+                        value={searchVal}
+                        onChange={(e) => setSearchVal(e.target.value)}
+                        onFocus={() => setIsMobileSearchFocused(true)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-4 pr-10 text-xs font-semibold outline-none focus:border-[#8CFF64]"
+                      />
+                      <button
+                        type="submit"
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                      >
+                        <Search className="h-4 w-4 text-gray-400" />
+                      </button>
+                    </form>
+
+                    {/* Mobile Live Results */}
+                    {isMobileSearchFocused && searchVal.trim().length >= 2 && (
+                      <div className="mt-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 max-h-[260px] overflow-y-auto">
+                        {isSearchLoading ? (
+                          <div className="p-3 text-center text-xs text-gray-400">
+                            Searching...
+                          </div>
+                        ) : searchProducts.length > 0 ? (
+                          <div className="space-y-1">
+                            {searchProducts.map((product) => {
+                              const img = processImageUrl(product.image);
+                              return (
+                                <Link
+                                  key={product.id}
+                                  to={`/product/${product.id}`}
+                                  onClick={() => {
+                                    setIsMenuOpen(false);
+                                    setIsMobileSearchFocused(false);
+                                    setSearchVal("");
+                                  }}
+                                  className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg"
+                                >
+                                  <img
+                                    src={img}
+                                    alt={product.name}
+                                    className="w-10 h-10 object-cover rounded-md border border-gray-100 shrink-0"
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-bold text-black truncate">
+                                      {product.name}
+                                    </p>
+                                    <p className="text-[10px] font-semibold text-gray-500">
+                                      ₹
+                                      {Number(
+                                        product.discountPrice || product.price,
+                                      ).toLocaleString("en-IN")}
+                                    </p>
+                                  </div>
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="p-3 text-center text-xs text-gray-500">
+                            No products found
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   <Link
                     to="/account"
