@@ -8,20 +8,22 @@ const banners = [
     id: 1,
     title: "PREMIUM\nPROTEIN SERIES",
     subtitle: "START FROM",
-    price: "₹1999",
+    price: "₹2099",
     cta: "Shop Now",
     link: "/products?category=Whey Protein",
-    bgImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&auto=format&fit=crop",
+    bgImage:
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&auto=format&fit=crop",
     dark: true,
   },
   {
     id: 2,
     title: "ULTRA CLEAN\nWHEY PROTEIN",
     subtitle: "NOW AVAILABLE",
-    price: "₹2499",
+    price: "₹5439",
     cta: "Shop Now",
     link: "/products?category=Whey Protein Isolate",
-    bgImage: "https://images.unsplash.com/photo-1594882645126-14020914d58d?w=1200&auto=format&fit=crop",
+    bgImage:
+      "https://images.unsplash.com/photo-1594882645126-14020914d58d?w=1200&auto=format&fit=crop",
     dark: true,
   },
 ];
