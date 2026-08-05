@@ -61,7 +61,7 @@ export default function ProductsPage() {
   const { data: brandsData } = useBrandsQuery({ limit: 100 });
   const { data: productsData, isLoading: isProductsLoading } = useProductsQuery(
     {
-      limit: 100,
+      limit: 20,
       brandId: selectedBrandId || undefined,
       search: selectedSearch || undefined,
     },
