@@ -187,13 +187,29 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  <Link
-                    to="/checkout"
-                    className="flex items-center justify-center w-full py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-colors group"
-                  >
-                    Checkout
-                    <ArrowRight className="h-4 w-4 ml-2 stroke-[1.5] transition-transform group-hover:translate-x-1" />
-                  </Link>
+                  {!(typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"))) && (
+                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-medium text-center">
+                      Please log in first to process your order and proceed to checkout.
+                    </div>
+                  )}
+
+                  {typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token")) ? (
+                    <Link
+                      to="/checkout"
+                      className="flex items-center justify-center w-full py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-colors group"
+                    >
+                      Checkout
+                      <ArrowRight className="h-4 w-4 ml-2 stroke-[1.5] transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/login?redirect=/cart"
+                      className="flex items-center justify-center w-full py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-colors group"
+                    >
+                      Login to Proceed
+                      <ArrowRight className="h-4 w-4 ml-2 stroke-[1.5] transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  )}
 
                   <p className="text-[10px] uppercase tracking-widest text-gray-400 text-center mt-6">
                     Taxes calculated at checkout

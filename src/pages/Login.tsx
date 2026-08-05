@@ -12,10 +12,12 @@ import {
   useRequestOtpMutation,
   useVerifyOtpMutation,
 } from "@/api/hooks/auth.hooks";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/account";
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -105,8 +107,8 @@ export default function Login() {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
 
-      // Redirect to account dashboard
-      navigate("/account");
+      // Redirect to target destination or account dashboard
+      navigate(redirectUrl);
     } catch (err: any) {
       console.error("OTP verification error:", err);
       setError(err.response?.data?.message || err.message || "Invalid OTP");

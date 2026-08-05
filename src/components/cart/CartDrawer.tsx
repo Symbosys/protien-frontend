@@ -163,12 +163,27 @@ export default function CartDrawer() {
                   <p className="text-xs text-gray-500">
                     Shipping and taxes calculated at checkout
                   </p>
+
+                  {!(typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"))) && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-medium text-center">
+                      Please log in first to process your order.
+                    </div>
+                  )}
+
                   <div className="space-y-3">
-                    <Button variant="hero" className="w-full bg-black hover:bg-black/90 text-white" size="lg" asChild>
-                      <Link to="/checkout" onClick={closeCart}>
-                        Checkout
-                      </Link>
-                    </Button>
+                    {typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token")) ? (
+                      <Button variant="hero" className="w-full bg-black hover:bg-black/90 text-white" size="lg" asChild>
+                        <Link to="/checkout" onClick={closeCart}>
+                          Checkout
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button variant="hero" className="w-full bg-black hover:bg-black/90 text-white" size="lg" asChild>
+                        <Link to="/login?redirect=/cart" onClick={closeCart}>
+                          Login to Proceed
+                        </Link>
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       className="w-full border-gray-200 hover:bg-gray-50 text-black bg-white"
