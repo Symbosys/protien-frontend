@@ -1,23 +1,23 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { 
-  Truck, 
-  Clock, 
-  MapPin, 
-  CreditCard, 
-  Search, 
-  AlertTriangle, 
-  ShieldAlert, 
-  Globe, 
-  Mail, 
-  Phone 
+import {
+  Truck,
+  Clock,
+  MapPin,
+  CreditCard,
+  Search,
+  AlertTriangle,
+  ShieldAlert,
+  Globe,
+  Mail,
+  Phone
 } from 'lucide-react';
 
 export default function ShippingDelivery() {
   return (
     <MainLayout>
       <div className="bg-white min-h-screen pb-16">
-        
+
         {/* Banner Section */}
         <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-6">
           <div className="relative w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100">
@@ -32,7 +32,7 @@ export default function ShippingDelivery() {
         {/* Content Section */}
         <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-12">
           <div className="max-w-4xl space-y-12 text-left">
-            
+
             {/* Overview */}
             <section id="overview" className="scroll-mt-28 space-y-4">
               <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
@@ -259,7 +259,7 @@ export default function ShippingDelivery() {
                       <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">akkigupta2411@gmail.com</p>
                     </div>
                   </a>
-                  
+
                   <a href="tel:+916200065378" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100 transition-colors group">
                     <Phone className="h-5 w-5 text-[#5BBF3D]" />
                     <div>
@@ -272,6 +272,15 @@ export default function ShippingDelivery() {
             </section>
 
           </div>
+        </div>
+
+        {/* Company / Legal Info for DLT template */}
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-8 text-sm text-gray-500">
+          <p className="font-semibold">M/S Protein and Nutrients</p>
+          <p>Registered Trade Name</p>
+          <p>
+            Official Website: <a href="https://fuelandnutrients.com" className="text-[#5BBF3D] hover:underline">https://fuelandnutrients.com</a>
+          </p>
         </div>
 
       </div>

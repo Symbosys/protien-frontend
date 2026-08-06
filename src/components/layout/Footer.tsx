@@ -168,22 +168,22 @@ export default function Footer() {
             <ul className="space-y-2.5 text-xs lg:text-sm text-white/60 font-medium">
               {categories.length > 0
                 ? categories.map((cat) => (
-                    <li key={cat.id}>
-                      <Link
-                        to={`/products?category=${encodeURIComponent(cat.name)}`}
-                        className="hover:text-[#8CFF64] transition-colors"
-                      >
-                        {cat.name}
-                      </Link>
-                    </li>
-                  ))
+                  <li key={cat.id}>
+                    <Link
+                      to={`/products?category=${encodeURIComponent(cat.name)}`}
+                      className="hover:text-[#8CFF64] transition-colors"
+                    >
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))
                 : /* Skeleton placeholders while loading */
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <li
-                      key={i}
-                      className="h-4 w-28 bg-white/10 rounded animate-pulse"
-                    />
-                  ))}
+                Array.from({ length: 4 }).map((_, i) => (
+                  <li
+                    key={i}
+                    className="h-4 w-28 bg-white/10 rounded animate-pulse"
+                  />
+                ))}
             </ul>
           </div>
 
@@ -272,17 +272,39 @@ export default function Footer() {
         </div>
 
         {/* Footer bottom */}
-        <div className="border-t border-white/10 mt-12 pt-6 text-center text-xs text-white/40">
-          <p>
-            © {new Date().getFullYear()} FUEL AND NUTRIENTS. All rights
-            reserved.
-          </p>
-          <p className="mt-2 font-semibold tracking-wide text-white/60 flex items-center justify-center gap-1.5">
-            Powered By{" "}
-            <span className="text-[#8CFF64] font-bold tracking-widest text-[10px] uppercase">
-              symbosys
-            </span>
-          </p>
+        <div className="border-t border-white/10 mt-12 pt-6 text-xs text-white/40">
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-start md:items-center md:justify-between gap-6">
+            <div className="w-full md:w-1/2 text-left">
+              <p>
+                © {new Date().getFullYear()} FUEL AND NUTRIENTS. All rights
+                reserved.
+              </p>
+
+              <div className="mt-3 text-sm text-white/60 space-y-1">
+                <p className="font-semibold">M/S Protein and Nutrients</p>
+                <p>Registered Trade Name</p>
+                <p>
+                  Official Website: <a href="https://fuelandnutrients.com" className="text-[#8CFF64] hover:underline">https://fuelandnutrients.com</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="w-full md:w-1/2 text-left md:text-right flex items-center md:justify-end">
+              <div>
+                <p className="font-semibold tracking-wide text-white/60 flex items-center gap-2 justify-end">
+                  Developed By
+                  <a
+                    href="https://www.symbosys.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#8CFF64] font-bold tracking-widest text-[10px] uppercase ml-2"
+                  >
+                    symbosys
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
