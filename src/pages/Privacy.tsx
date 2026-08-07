@@ -42,11 +42,7 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  At Fuel and Nutrients, we are passionate about helping people
-                  achieve their fitness, health, and performance goals through
-                  premium-quality nutrition supplements. Our mission is to
-                  provide trusted products that support strength, recovery,
-                  endurance, and overall wellness for every lifestyle.
+                  At Fuel  and Nutrients, we are passionate about helping people achieve their fitness, health, and performance goals through premium-quality nutrition supplements. Our mission is to provide trusted products that support strength, recovery, endurance, and overall wellness for every lifestyle.
                 </p>
                 <p>
                   We believe that great results start with great nutrition.
@@ -118,10 +114,7 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  All images, product descriptions, logos, graphics, and content
-                  displayed on this website are the property of Fuel and
-                  Nutrients and are used for informational and promotional
-                  purposes only.
+                  All images, product descriptions, logos, graphics, and content displayed on this website are the property of Fuel and Nutrients and are used for informational and promotional purposes only.
                 </p>
                 <p>
                   We strive to provide accurate product images and descriptions,

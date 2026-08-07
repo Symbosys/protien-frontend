@@ -306,6 +306,14 @@ export default function ExchangePolicy() {
             </section>
           </div>
         </div>
+        {/* Company / Legal Info for DLT template */}
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-8 text-sm text-gray-500">
+          <p className="font-semibold">M/S Protein and Nutrients</p>
+          <p>Registered Trade Name</p>
+          <p>
+            Official Website: <a href="https://fuelandnutrients.com" className="text-[#5BBF3D] hover:underline">https://fuelandnutrients.com</a>
+          </p>
+        </div>
       </div>
     </MainLayout>
   );

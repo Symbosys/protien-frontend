@@ -43,11 +43,7 @@ export default function ShippingDelivery() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  At Fuel and Nutrients, we aim to process and deliver all
-                  orders efficiently to ensure a smooth shopping experience.
-                  Orders are carefully packed and shipped using trusted delivery
-                  partners to maintain product quality and safety during
-                  transit.
+                  At Fuel and Nutrients, we aim to process and deliver all orders efficiently to ensure a smooth shopping experience. Orders are carefully packed and shipped using trusted delivery partners to maintain product quality and safety during transit.
                 </p>
                 <p>
                   Shipping timelines may vary depending on your location,
