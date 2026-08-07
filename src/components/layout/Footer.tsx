@@ -5,7 +5,6 @@ import {
   MapPin,
   MessageCircle,
   Phone,
-  Store,
   Youtube,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -172,17 +171,6 @@ export default function Footer() {
                     7759-957841
                   </a>
                 </div>
-              </div>
-
-              {/* Store Locator Link */}
-              <div className="flex items-center gap-2.5 pt-2">
-                <Store className="h-5 w-5 text-[#8CFF64] flex-shrink-0" />
-                <Link
-                  to="/stores"
-                  className="hover:text-[#8CFF64] font-semibold text-white underline"
-                >
-                  Store Locator
-                </Link>
               </div>
             </div>
           </div>
