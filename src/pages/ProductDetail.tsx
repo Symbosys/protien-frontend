@@ -436,7 +436,7 @@ export default function ProductDetail() {
   const whatsappMessage = `Hello Fuel & Nutrients! I am interested in purchasing "${product.name}"${
     selectedAttrString ? ` (${selectedAttrString})` : ""
   } - ₹${product.price.toLocaleString("en-IN")}. Could you please share ordering details?`;
-  const whatsappUrl = `https://wa.me/916200065378?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappUrl = `https://wa.me/917759957841?text=${encodeURIComponent(whatsappMessage)}`;
 
   const FALLBACK =
     "https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=800";

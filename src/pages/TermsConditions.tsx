@@ -391,13 +391,13 @@ export default function TermsConditions() {
                         Email Us
                       </p>
                       <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">
-                        akkigupta2411@gmail.com
+                        support@protein-and-nutrients.com
                       </p>
                     </div>
                   </a>
 
                   <a
-                    href="tel:+916200065378"
+                    href="tel:+91 7759957841"
                     className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100 transition-colors group"
                   >
                     <Phone className="h-5 w-5 text-[#5BBF3D]" />
@@ -406,7 +406,7 @@ export default function TermsConditions() {
                         Call Us
                       </p>
                       <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">
-                        +91 6200065378
+                        +91 7759957841
                       </p>
                     </div>
                   </a>

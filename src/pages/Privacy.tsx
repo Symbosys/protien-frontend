@@ -1,22 +1,21 @@
-import React from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { 
-  Users, 
-  UserCheck, 
-  FileText, 
-  Cookie, 
-  Lock, 
-  Share2, 
-  Scale, 
-  Mail, 
-  Phone
-} from 'lucide-react';
+import React from "react";
+import MainLayout from "@/components/layout/MainLayout";
+import {
+  Users,
+  UserCheck,
+  FileText,
+  Cookie,
+  Lock,
+  Share2,
+  Scale,
+  Mail,
+  Phone,
+} from "lucide-react";
 
 export default function Privacy() {
   return (
     <MainLayout>
       <div className="bg-white min-h-screen pb-16">
-        
         {/* Banner Section */}
         <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-6">
           <div className="relative w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100">
@@ -31,7 +30,6 @@ export default function Privacy() {
         {/* Content Section */}
         <div className="max-w-7xl mx-auto px-4 lg:px-8 mt-12">
           <div className="max-w-4xl space-y-12 text-left">
-            
             {/* Who we are */}
             <section id="who-we-are" className="scroll-mt-28 space-y-4">
               <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
@@ -44,13 +42,23 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  At Fuel  and Nutrients, we are passionate about helping people achieve their fitness, health, and performance goals through premium-quality nutrition supplements. Our mission is to provide trusted products that support strength, recovery, endurance, and overall wellness for every lifestyle.
+                  At Fuel and Nutrients, we are passionate about helping people
+                  achieve their fitness, health, and performance goals through
+                  premium-quality nutrition supplements. Our mission is to
+                  provide trusted products that support strength, recovery,
+                  endurance, and overall wellness for every lifestyle.
                 </p>
                 <p>
-                  We believe that great results start with great nutrition. That’s why every product is carefully formulated using high-quality ingredients, advanced research, and strict quality standards to ensure effectiveness, safety, and consistency.
+                  We believe that great results start with great nutrition.
+                  That’s why every product is carefully formulated using
+                  high-quality ingredients, advanced research, and strict
+                  quality standards to ensure effectiveness, safety, and
+                  consistency.
                 </p>
                 <p>
-                  Whether you are an athlete, gym enthusiast, or simply focused on living a healthier life, we are committed to supporting your journey with supplements you can rely on every day.
+                  Whether you are an athlete, gym enthusiast, or simply focused
+                  on living a healthier life, we are committed to supporting
+                  your journey with supplements you can rely on every day.
                 </p>
               </div>
             </section>
@@ -67,17 +75,22 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  When you place an order, create an account, subscribe to our newsletter, or contact us through our website, we may collect personal information such as your name, email address, phone number, billing address, and shipping details.
+                  When you place an order, create an account, subscribe to our
+                  newsletter, or contact us through our website, we may collect
+                  personal information such as your name, email address, phone
+                  number, billing address, and shipping details.
                 </p>
                 <div>
-                  <p className="font-semibold text-black mb-3">This information helps us:</p>
+                  <p className="font-semibold text-black mb-3">
+                    This information helps us:
+                  </p>
                   <ul className="space-y-2.5">
                     {[
                       "Process and deliver orders",
                       "Provide customer support",
                       "Improve your shopping experience",
                       "Send order updates and promotional offers",
-                      "Maintain website security and fraud prevention"
+                      "Maintain website security and fraud prevention",
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3 pl-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#5BBF3D] mt-2.5 flex-shrink-0" />
@@ -87,7 +100,8 @@ export default function Privacy() {
                   </ul>
                 </div>
                 <p className="font-medium text-black">
-                  We respect your privacy and never sell your personal information to third parties.
+                  We respect your privacy and never sell your personal
+                  information to third parties.
                 </p>
               </div>
             </section>
@@ -104,13 +118,19 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  All images, product descriptions, logos, graphics, and content displayed on this website are the property of Fuel and Nutrients and are used for informational and promotional purposes only.
+                  All images, product descriptions, logos, graphics, and content
+                  displayed on this website are the property of Fuel and
+                  Nutrients and are used for informational and promotional
+                  purposes only.
                 </p>
                 <p>
-                  We strive to provide accurate product images and descriptions, but actual packaging or appearance may vary slightly depending on manufacturing updates and screen settings.
+                  We strive to provide accurate product images and descriptions,
+                  but actual packaging or appearance may vary slightly depending
+                  on manufacturing updates and screen settings.
                 </p>
                 <p className="font-medium text-black">
-                  Unauthorized reproduction, distribution, or misuse of website content is prohibited.
+                  Unauthorized reproduction, distribution, or misuse of website
+                  content is prohibited.
                 </p>
               </div>
             </section>
@@ -127,16 +147,20 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  Our website uses cookies and similar technologies to improve functionality, analyze website traffic, and personalize your browsing experience.
+                  Our website uses cookies and similar technologies to improve
+                  functionality, analyze website traffic, and personalize your
+                  browsing experience.
                 </p>
                 <div>
-                  <p className="font-semibold text-black mb-3">Cookies help us:</p>
+                  <p className="font-semibold text-black mb-3">
+                    Cookies help us:
+                  </p>
                   <ul className="space-y-2.5">
                     {[
                       "Remember your preferences",
                       "Improve website performance",
                       "Provide relevant product recommendations",
-                      "Enhance security and user experience"
+                      "Enhance security and user experience",
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3 pl-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#5BBF3D] mt-2.5 flex-shrink-0" />
@@ -146,7 +170,9 @@ export default function Privacy() {
                   </ul>
                 </div>
                 <p>
-                  You can disable cookies through your browser settings at any time. However, some website features may not function properly if cookies are disabled.
+                  You can disable cookies through your browser settings at any
+                  time. However, some website features may not function properly
+                  if cookies are disabled.
                 </p>
               </div>
             </section>
@@ -163,7 +189,10 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
                 <p>
-                  We use secure payment gateways and encrypted technologies to protect your payment and personal information during transactions. Your complete payment details are never stored directly on our servers.
+                  We use secure payment gateways and encrypted technologies to
+                  protect your payment and personal information during
+                  transactions. Your complete payment details are never stored
+                  directly on our servers.
                 </p>
               </div>
             </section>
@@ -179,15 +208,13 @@ export default function Privacy() {
                 </h2>
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
-                <p>
-                  We may use trusted third-party services for:
-                </p>
+                <p>We may use trusted third-party services for:</p>
                 <ul className="space-y-2.5">
                   {[
                     "Payment processing",
                     "Shipping and delivery",
                     "Website analytics",
-                    "Marketing communication"
+                    "Marketing communication",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3 pl-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#5BBF3D] mt-2.5 flex-shrink-0" />
@@ -196,7 +223,8 @@ export default function Privacy() {
                   ))}
                 </ul>
                 <p>
-                  These service providers only access the information necessary to perform their services securely and responsibly.
+                  These service providers only access the information necessary
+                  to perform their services securely and responsibly.
                 </p>
               </div>
             </section>
@@ -212,15 +240,13 @@ export default function Privacy() {
                 </h2>
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-4 font-light text-left">
-                <p>
-                  You have the right to:
-                </p>
+                <p>You have the right to:</p>
                 <ul className="space-y-2.5">
                   {[
                     "Access your personal information",
                     "Request updates or corrections",
                     "Request account or data deletion",
-                    "Unsubscribe from marketing emails at any time"
+                    "Unsubscribe from marketing emails at any time",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3 pl-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#5BBF3D] mt-2.5 flex-shrink-0" />
@@ -246,31 +272,44 @@ export default function Privacy() {
               </div>
               <div className="text-gray-600 text-lg lg:text-xl leading-relaxed space-y-6 font-light text-left">
                 <p>
-                  If you have any questions regarding this Privacy Policy or how your information is handled, please contact us:
+                  If you have any questions regarding this Privacy Policy or how
+                  your information is handled, please contact us:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <a href="mailto:akkigupta2411@gmail.com" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100 transition-colors group">
+                  <a
+                    href="mailto:akkigupta2411@gmail.com"
+                    className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100 transition-colors group"
+                  >
                     <Mail className="h-5 w-5 text-[#5BBF3D]" />
                     <div>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Email Us</p>
-                      <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">akkigupta2411@gmail.com</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        Email Us
+                      </p>
+                      <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">
+                        support@protein-and-nutrients.com
+                      </p>
                     </div>
                   </a>
-                  
-                  <a href="tel:+916200065378" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100 transition-colors group">
+
+                  <a
+                    href="tel:+97759-957841"
+                    className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 border border-gray-100 transition-colors group"
+                  >
                     <Phone className="h-5 w-5 text-[#5BBF3D]" />
                     <div>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Call Us</p>
-                      <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">+91 6200065378</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        Call Us
+                      </p>
+                      <p className="text-sm font-semibold text-black group-hover:text-[#5BBF3D] transition-colors">
+                        +91 7759-957841
+                      </p>
                     </div>
                   </a>
                 </div>
               </div>
             </section>
-
           </div>
         </div>
-
       </div>
     </MainLayout>
   );
