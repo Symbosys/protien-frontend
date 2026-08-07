@@ -143,6 +143,8 @@ export default function ProductsPage() {
           variants: dbP.variants,
         };
       });
+    } else {
+      list = mockProducts;
     }
 
     // Apply front-end filters to display exactly what the user clicks
@@ -155,9 +157,26 @@ export default function ProductsPage() {
       );
     }
     if (selectedCategory) {
-      list = list.filter(
-        (p) => p.category.toLowerCase() === selectedCategory.toLowerCase(),
-      );
+      const selCat = selectedCategory.toLowerCase().trim();
+      let matched = list.filter((p) => {
+        const pCat = (p.category || "").toLowerCase().trim();
+        return (
+          pCat === selCat ||
+          pCat.includes(selCat) ||
+          selCat.includes(pCat)
+        );
+      });
+      if (matched.length === 0) {
+        matched = mockProducts.filter((p) => {
+          const pCat = (p.category || "").toLowerCase().trim();
+          return (
+            pCat === selCat ||
+            pCat.includes(selCat) ||
+            selCat.includes(pCat)
+          );
+        });
+      }
+      list = matched;
     }
     if (selectedBrandId) {
       list = list.filter((p) => p.brandId === selectedBrandId);

@@ -203,6 +203,30 @@ export const products: Product[] = [
     isNew: true,
     netWeight: '420g',
   },
+  {
+    id: '9',
+    name: 'High Protein Oats & Muesli',
+    price: 499,
+    originalPrice: 649,
+    description: 'Whole grain high protein oats enriched with nuts, seeds, and whey protein for a nutritious breakfast.',
+    images: [
+      'https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=800',
+    ],
+    category: 'High Protein Oats',
+    subcategory: 'Breakfast',
+    brand: 'Pintola',
+    rating: 4.8,
+    reviews: 142,
+    sizes: ['500g', '1kg'],
+    colors: [
+      { name: 'Dark Chocolate', hex: '#3B2F2F' },
+      { name: 'Fruit & Nut', hex: '#D4A84B' },
+    ],
+    tags: ['oats', 'protein', 'breakfast'],
+    inStock: true,
+    isNew: true,
+    netWeight: '1kg',
+  },
 ];
 
 export const categories = [

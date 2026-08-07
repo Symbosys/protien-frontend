@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   Facebook,
   Instagram,
@@ -11,8 +12,34 @@ import { Link } from "react-router-dom";
 import { useCategoriesQuery } from "@/api/hooks/category.hooks";
 
 export default function Footer() {
-  const { data: categoriesData } = useCategoriesQuery({ page: 1, limit: 6 });
-  const categories = categoriesData?.categories?.slice(0, 6) ?? [];
+  const { data: categoriesData } = useCategoriesQuery({ page: 1, limit: 10 });
+
+  const categories = useMemo(() => {
+    // Primary/Required categories requested
+    const requiredCategories = [
+      "High Protein Oats",
+      "Peanut Butter",
+      "Whey Protein",
+      "Pre Workout",
+    ];
+
+    const list: { id?: string; name: string }[] = requiredCategories.map((name) => ({
+      name,
+    }));
+
+    if (categoriesData?.categories) {
+      categoriesData.categories.forEach((cat) => {
+        const exists = list.some(
+          (item) => item.name.toLowerCase() === cat.name.toLowerCase(),
+        );
+        if (!exists && list.length < 8) {
+          list.push({ id: cat.id, name: cat.name });
+        }
+      });
+    }
+
+    return list;
+  }, [categoriesData]);
 
   return (
     <footer className="bg-black text-white pt-16 pb-8">
@@ -160,30 +187,22 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Categories — dynamic, max 6 */}
+          {/* Column 2: Categories */}
           <div className="space-y-6">
             <h4 className="font-display text-base font-bold text-[#8CFF64] border-b border-white/10 pb-2 uppercase">
               Categories
             </h4>
             <ul className="space-y-2.5 text-xs lg:text-sm text-white/60 font-medium">
-              {categories.length > 0
-                ? categories.map((cat) => (
-                  <li key={cat.id}>
-                    <Link
-                      to={`/products?category=${encodeURIComponent(cat.name)}`}
-                      className="hover:text-[#8CFF64] transition-colors"
-                    >
-                      {cat.name}
-                    </Link>
-                  </li>
-                ))
-                : /* Skeleton placeholders while loading */
-                Array.from({ length: 4 }).map((_, i) => (
-                  <li
-                    key={i}
-                    className="h-4 w-28 bg-white/10 rounded animate-pulse"
-                  />
-                ))}
+              {categories.map((cat, index) => (
+                <li key={cat.id || cat.name || index}>
+                  <Link
+                    to={`/products?category=${encodeURIComponent(cat.name)}`}
+                    className="hover:text-[#8CFF64] transition-colors"
+                  >
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
