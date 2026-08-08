@@ -198,13 +198,22 @@ export default function OrderDetails(): JSX.Element {
               </div>
             </div>
 
-            <button
-              onClick={() => window.print()}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-black hover:border-black transition-colors shadow-sm self-start sm:self-center"
-            >
-              <Printer className="w-4 h-4" />
-              Print Invoice
-            </button>
+            <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+              <Link
+                to={`/track-order?orderId=${order.id}`}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-black text-white rounded-lg text-xs font-bold hover:bg-gray-900 transition-colors shadow-sm"
+              >
+                <Truck className="w-4 h-4" />
+                Track Shipment
+              </Link>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-black hover:border-black transition-colors shadow-sm"
+              >
+                <Printer className="w-4 h-4" />
+                Print Invoice
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

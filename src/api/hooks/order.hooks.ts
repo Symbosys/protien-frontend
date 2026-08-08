@@ -175,3 +175,24 @@ export const useCancelOrderMutation = () => {
   });
 };
 
+export interface TrackOrderResponse {
+  order: DBOrder | null;
+  trackingData: any;
+  ithinkDetails: any;
+}
+
+export const useTrackOrderQuery = (orderNumber: string, enabled = false) => {
+  return useQuery<TrackOrderResponse>({
+    queryKey: [...orderKeys.all, "track", orderNumber],
+    queryFn: async () => {
+      const response = await apiClient.get<{ success: boolean; data: TrackOrderResponse }>(
+        `/order/track/${orderNumber}`
+      );
+      return response.data.data;
+    },
+    enabled: enabled && !!orderNumber.trim(),
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+};
+
