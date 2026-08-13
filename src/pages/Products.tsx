@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, ChevronDown, Plus, Minus, X } from "lucide-react";
@@ -15,6 +15,15 @@ import { cn } from "@/lib/utils";
 import { useCategoriesQuery } from "@/api/hooks/category.hooks";
 import { useProductsQuery } from "@/api/hooks/product.hooks";
 import { useBrandsQuery } from "@/api/hooks/brand.hooks";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const sortOptions = [
   { value: "newest", label: "Newest" },
@@ -26,7 +35,6 @@ const sortOptions = [
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sort, setSort] = useState("newest");
 
   // Accordion state inside the filter drawer
   const [openSection, setOpenSection] = useState<Record<string, boolean>>({
@@ -44,6 +52,7 @@ export default function ProductsPage() {
   };
 
   const selectedCategory = searchParams.get("category");
+  const selectedSubcategory = searchParams.get("subcategory") || searchParams.get("subCategory");
   const selectedKarat = searchParams.get("karat");
   const selectedWeight = searchParams.get("weight");
   const selectedPriceRange = searchParams.get("priceRange");
@@ -54,18 +63,26 @@ export default function ProductsPage() {
     searchParams.get("q") ||
     searchParams.get("query") ||
     searchParams.get("searchQuery");
+  const sort = searchParams.get("sort") || "newest";
+  const currentPage = Math.max(1, Number(searchParams.get("page") || "1"));
 
   // Fetch from backend
   const { data: categoriesData, isLoading: isCategoriesLoading } =
     useCategoriesQuery({ limit: 1000 });
   const { data: brandsData } = useBrandsQuery({ limit: 100 });
-  const { data: productsData, isLoading: isProductsLoading } = useProductsQuery(
-    {
-      limit: 20,
-      brandId: selectedBrandId || undefined,
-      search: selectedSearch || undefined,
-    },
-  );
+  const { data: productsData, isLoading: isProductsLoading } = useProductsQuery({
+    page: currentPage,
+    limit: 20,
+    category: selectedCategory || undefined,
+    subCategory: selectedSubcategory || undefined,
+    brandId: selectedBrandId || undefined,
+    karat: selectedKarat || undefined,
+    weight: selectedWeight || undefined,
+    priceRange: selectedPriceRange || undefined,
+    stock: selectedStock || undefined,
+    search: selectedSearch || undefined,
+    sort: sort as any,
+  });
 
   const processImageUrl = (url: any) => {
     if (!url) return "";
@@ -96,11 +113,10 @@ export default function ProductsPage() {
     return [];
   }, [categoriesData]);
 
-  // Resolve active products list
+  // Resolve active products list directly from server data
   const displayProducts = useMemo(() => {
-    let list: any[] = [];
     if (productsData?.products && productsData.products.length > 0) {
-      list = productsData.products.map((dbP: any) => {
+      return productsData.products.map((dbP: any) => {
         const p = Number(dbP.price) || 0;
         const dp = dbP.discountPrice ? Number(dbP.discountPrice) : 0;
         let sellingPrice = p;
@@ -133,7 +149,7 @@ export default function ProductsPage() {
               ? dbP.variants.some((v: any) => Number(v.quantity) > 0) ||
                 Number(dbP.quantity) > 0
               : Number(dbP.quantity) > 0,
-          netWeight: undefined,
+          netWeight: dbP.weight ? String(dbP.weight) : undefined,
           sizes: Array.isArray(dbP.sizes) ? dbP.sizes : [],
           colors: Array.isArray(dbP.colors)
             ? (dbP.colors as any[]).map((c: any) =>
@@ -143,99 +159,14 @@ export default function ProductsPage() {
           variants: dbP.variants,
         };
       });
-    } else {
-      list = mockProducts;
     }
+    // Fallback to mock products if backend returns empty initial mock state
+    return [];
+  }, [productsData]);
 
-    // Apply front-end filters to display exactly what the user clicks
-    if (selectedSearch) {
-      const q = selectedSearch.toLowerCase().trim();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.category && p.category.toLowerCase().includes(q)),
-      );
-    }
-    if (selectedCategory) {
-      const selCat = selectedCategory.toLowerCase().trim();
-      let matched = list.filter((p) => {
-        const pCat = (p.category || "").toLowerCase().trim();
-        return (
-          pCat === selCat ||
-          pCat.includes(selCat) ||
-          selCat.includes(pCat)
-        );
-      });
-      if (matched.length === 0) {
-        matched = mockProducts.filter((p) => {
-          const pCat = (p.category || "").toLowerCase().trim();
-          return (
-            pCat === selCat ||
-            pCat.includes(selCat) ||
-            selCat.includes(pCat)
-          );
-        });
-      }
-      list = matched;
-    }
-    if (selectedBrandId) {
-      list = list.filter((p) => p.brandId === selectedBrandId);
-    }
-    if (selectedKarat) {
-      list = list.filter((p) => p.karat?.includes(selectedKarat));
-    }
-    if (selectedWeight) {
-      if (selectedWeight === "light") {
-        list = list.filter((p) => {
-          const w = parseFloat(p.netWeight || "0");
-          return w <= 5;
-        });
-      } else if (selectedWeight === "medium") {
-        list = list.filter((p) => {
-          const w = parseFloat(p.netWeight || "0");
-          return w > 5 && w <= 12;
-        });
-      } else if (selectedWeight === "heavy") {
-        list = list.filter((p) => {
-          const w = parseFloat(p.netWeight || "0");
-          return w > 12;
-        });
-      }
-    }
-    if (selectedPriceRange) {
-      if (selectedPriceRange === "under-50k") {
-        list = list.filter((p) => p.price < 50000);
-      } else if (selectedPriceRange === "50k-100k") {
-        list = list.filter((p) => p.price >= 50000 && p.price <= 100000);
-      } else if (selectedPriceRange === "over-100k") {
-        list = list.filter((p) => p.price > 100000);
-      }
-    }
-    if (selectedStock === "in") {
-      list = list.filter((p) => p.inStock);
-    }
-
-    // Sort items
-    if (sort === "price-asc") {
-      list = [...list].sort((a, b) => a.price - b.price);
-    } else if (sort === "price-desc") {
-      list = [...list].sort((a, b) => b.price - a.price);
-    } else if (sort === "rating") {
-      list = [...list].sort((a, b) => b.rating - a.rating);
-    }
-
-    return list;
-  }, [
-    productsData,
-    selectedCategory,
-    selectedBrandId,
-    selectedKarat,
-    selectedWeight,
-    selectedPriceRange,
-    selectedStock,
-    selectedSearch,
-    sort,
-  ]);
+  const totalItems = productsData?.pagination?.total ?? displayProducts.length;
+  const totalPages = productsData?.pagination?.totalPages ?? 1;
+  const page = productsData?.pagination?.page ?? currentPage;
 
   const updateFilter = (key: string, value: string | null) => {
     const newParams = new URLSearchParams(searchParams);
@@ -244,11 +175,23 @@ export default function ProductsPage() {
     } else {
       newParams.delete(key);
     }
+    // Reset page to 1 on filter change
+    newParams.delete("page");
     setSearchParams(newParams);
   };
 
   const clearFilters = () => {
     setSearchParams({});
+  };
+
+  const goToPage = (p: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (p > 1) {
+      newParams.set("page", String(p));
+    } else {
+      newParams.delete("page");
+    }
+    setSearchParams(newParams);
   };
 
   return (
@@ -314,16 +257,39 @@ export default function ProductsPage() {
             )}
           </div>
 
+          {/* Search Query Active Notification Banner */}
+          {selectedSearch && (
+            <div className="mb-6 flex items-center justify-between bg-[#8A1B28]/10 border border-[#8A1B28]/30 rounded-xl p-4 text-xs text-[#8A1B28] font-semibold shadow-xs">
+              <div className="flex items-center gap-2">
+                <span>
+                  Search results for: <strong>"{selectedSearch}"</strong>
+                </span>
+                <span className="text-[10px] bg-[#8A1B28] text-white px-2 py-0.5 rounded-full font-bold">
+                  {totalItems} items
+                </span>
+              </div>
+              <button
+                onClick={() => updateFilter("search", null)}
+                className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-[#8A1B28] text-white px-3 py-1.5 rounded-lg hover:bg-[#721620] transition-colors shadow-xs"
+              >
+                <X className="h-3.5 w-3.5" />
+                Clear Search
+              </button>
+            </div>
+          )}
+
           {/* Title & Toolbar */}
           <div className="flex items-center justify-between border-b border-border pb-5 mb-8">
             <div>
               <h1 className="font-display text-2xl lg:text-3xl font-bold text-foreground uppercase">
-                {selectedCategory || "All Supplements"}
+                {selectedSearch
+                  ? `Search: "${selectedSearch}"`
+                  : selectedCategory || "All Supplements"}
               </h1>
               <p className="text-xs text-muted-foreground tracking-wide mt-1">
                 {isProductsLoading
                   ? "Loading products..."
-                  : `Showing ${displayProducts.length} unique products`}
+                  : `Showing ${displayProducts.length} of ${totalItems} unique products`}
               </p>
             </div>
 
@@ -374,6 +340,67 @@ export default function ProductsPage() {
               >
                 Clear all filters
               </button>
+            </div>
+          )}
+
+          {/* Server Pagination */}
+          {!isProductsLoading && totalPages > 1 && (
+            <div className="mt-12 flex justify-center items-center">
+              <Pagination>
+                <PaginationContent>
+                  {page > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(page - 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(
+                      (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2,
+                    )
+                    .map((p, index, array) => {
+                      const prevPage = array[index - 1];
+                      const hasGap = prevPage && p - prevPage > 1;
+                      return (
+                        <React.Fragment key={p}>
+                          {hasGap && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
+                          <PaginationItem>
+                            <PaginationLink
+                              href="#"
+                              isActive={p === page}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                goToPage(p);
+                              }}
+                            >
+                              {p}
+                            </PaginationLink>
+                          </PaginationItem>
+                        </React.Fragment>
+                      );
+                    })}
+                  {page < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(page + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </div>
@@ -440,7 +467,12 @@ export default function ProductsPage() {
                         {sortOptions.map((opt) => (
                           <button
                             key={opt.value}
-                            onClick={() => setSort(opt.value)}
+                            onClick={() =>
+                              updateFilter(
+                                "sort",
+                                opt.value === "newest" ? null : opt.value,
+                              )
+                            }
                             className={cn(
                               "block text-xs text-left py-1 w-full font-medium transition-colors",
                               sort === opt.value
