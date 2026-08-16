@@ -299,15 +299,20 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isAddingLocal}
-            className="flex-1 h-8 bg-black hover:bg-black/90 disabled:bg-black/60 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-all shadow-sm flex items-center justify-center gap-1.5"
+            aria-label="Add to Cart"
+            title="Add to Cart"
+            className="flex-1 h-8 bg-black hover:bg-black/90 disabled:bg-black/60 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-all shadow-sm flex items-center justify-center gap-1.5 px-2"
           >
             {isAddingLocal ? (
               <>
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Adding...
+                <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" />
+                <span className="hidden sm:inline">Adding...</span>
               </>
             ) : (
-              "Add to Cart"
+              <>
+                <ShoppingBag className="h-3.5 w-3.5 stroke-[2] flex-shrink-0" />
+                <span className="hidden sm:inline">Add to Cart</span>
+              </>
             )}
           </button>
         </div>
