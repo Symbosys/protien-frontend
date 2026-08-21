@@ -6,15 +6,22 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/hooks/useAuth';
 
 import { toast } from 'sonner';
 
 const SavedItems = () => {
     const { items, removeItem } = useWishlist();
     const { addItem } = useCart();
+    const { checkAuth } = useAuth();
 
-    const handleMoveToBag = (item: typeof items[0]) => {
-        addItem({
+    const handleMoveToBag = async (item: typeof items[0]) => {
+        if (!checkAuth()) {
+            toast.error("Please log in to add items to the cart");
+            return;
+        }
+
+        await addItem({
             id: item.id,
             name: item.name,
             price: item.price,
@@ -22,9 +29,6 @@ const SavedItems = () => {
         });
 
         removeItem(item.id);
-        toast.success("Moved to bag", {
-            description: `${item.name} has been moved to your shopping bag.`
-        });
     };
 
     const containerVariants = {

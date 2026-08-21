@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { useUserQuery, useUpdateUserMutation } from '@/api/hooks/user.hooks';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import {
     User,
@@ -24,6 +25,7 @@ interface CategoryItem {
 export default function PersonalInformation() {
     const navigate = useNavigate();
     const updateMutation = useUpdateUserMutation();
+    const { user: authUser, isAuthenticated, isLoaded } = useAuth();
 
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -34,20 +36,10 @@ export default function PersonalInformation() {
     const [emailInput, setEmailInput] = useState('');
     const [phoneInput, setPhoneInput] = useState('');
 
-    // Fetch user info from localStorage and API
-    const localUser = useMemo(() => {
-        try {
-            const userString = localStorage.getItem('user');
-            return userString ? JSON.parse(userString) : null;
-        } catch {
-            return null;
-        }
-    }, []);
-
-    const userId = localUser?.id || '';
+    const userId = authUser?.id || '';
 
     const { data: userProfileData, isLoading: isProfileLoading } = useUserQuery(userId, !!userId);
-    const user = userProfileData?.data || localUser;
+    const user = userProfileData?.data || authUser;
 
     // Form data state
     const [formData, setFormData] = useState({
@@ -61,10 +53,10 @@ export default function PersonalInformation() {
 
     // Check Authentication
     useEffect(() => {
-        if (typeof window !== 'undefined' && !localStorage.getItem('user_token')) {
+        if (isLoaded && !isAuthenticated) {
             navigate('/login');
         }
-    }, [navigate]);
+    }, [isLoaded, isAuthenticated, navigate]);
 
     // Sync state with fetched user data
     useEffect(() => {

@@ -12,10 +12,12 @@ import {
   useRequestOtpMutation,
   useVerifyOtpMutation,
 } from "@/api/hooks/auth.hooks";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get("redirect") || "/account";
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -98,13 +100,9 @@ export default function Login() {
 
       console.log("Login success:", data);
 
-      // Save token and user details to localStorage
+      // Save token and user details via useAuth
       if (data.token) {
-        localStorage.setItem("user_token", data.token);
-        localStorage.setItem("token", data.token);
-      }
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        authLogin(data.token, data.user);
       }
 
       // Redirect to target destination or account dashboard

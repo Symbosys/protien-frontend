@@ -7,6 +7,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import ProductCard from "@/components/product/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/hooks/useAuth";
 import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
 import {
@@ -91,14 +92,9 @@ export default function ProductDetail() {
     "desc",
   );
 
-  const isLoggedIn =
-    typeof window !== "undefined" &&
-    (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"));
+  const { isAuthenticated: isLoggedIn, user: currentUser } = useAuth();
 
   // Extract logged-in user's full name
-  const userStr =
-    typeof window !== "undefined" ? localStorage.getItem("user") : null;
-  const currentUser = userStr ? JSON.parse(userStr) : null;
   const userFullName = currentUser
     ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim()
     : "";

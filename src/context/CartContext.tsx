@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 import {
   useCartQuery,
   useAddToCartMutation,
@@ -38,22 +39,10 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [localItems, setLocalItems] = useState<CartItem[]>([]);
+  const { isAuthenticated, checkAuth } = useAuth();
 
-  // Initialize local cart from localStorage
-  React.useEffect(() => {
-    const stored = localStorage.getItem("local_cart");
-    if (stored) {
-      try {
-        setLocalItems(JSON.parse(stored));
-      } catch (e) {
-        console.error("Failed to parse local cart:", e);
-      }
-    }
-  }, []);
-
-  // Fetch the cart using TanStack Query
-  const { data: backendCart, isLoading } = useCartQuery();
+  // Fetch the cart using TanStack Query only when user is authenticated
+  const { data: backendCart, isLoading, isFetching } = useCartQuery(isAuthenticated);
 
   // Mutations
   const addToCartMutation = useAddToCartMutation();
@@ -61,53 +50,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeCartItemMutation = useRemoveCartItemMutation();
   const clearCartMutation = useClearCartMutation();
 
+  const isCartLoading =
+    (isAuthenticated && (isLoading || (isFetching && (!backendCart || backendCart.items?.length === 0)))) ||
+    addToCartMutation.isPending;
+
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  // Map backend cart items to the frontend CartItem format and merge with local cart
+  // Map backend cart items to the frontend CartItem format
   const items: CartItem[] = useMemo(() => {
-    const dbItems: CartItem[] =
-      backendCart && backendCart.items
-        ? backendCart.items.map((item) => ({
-            id: item.id, // Database CartItem ID
-            productId: item.productId,
-            name: item.product?.name || "Unknown Product",
-            price: item.variant
-              ? item.variant.discountPrice &&
-                Number(item.variant.discountPrice) > 0 &&
-                Number(item.variant.discountPrice) < Number(item.variant.price)
-                ? Number(item.variant.discountPrice)
-                : Number(item.variant.price)
-              : item.product?.discountPrice &&
-                  Number(item.product.discountPrice) > 0 &&
-                  Number(item.product.discountPrice) < Number(item.product.price)
-                ? Number(item.product.discountPrice)
-                : Number(item.product?.price || 0),
-            image: item.variant?.image || item.product?.image || "",
-            quantity: item.quantity,
-            size: item.size || undefined,
-            color: item.color || undefined,
-            variant: item.variant || undefined,
-          }))
-        : [];
+    if (!backendCart || !backendCart.items) return [];
 
-    const merged = [...dbItems];
-    localItems.forEach((localItem) => {
-      if (!merged.some((i) => i.id === localItem.id)) {
-        merged.push(localItem);
-      }
-    });
-    return merged;
-  }, [backendCart, localItems]);
-
-  const saveLocalCart = (updated: CartItem[]) => {
-    setLocalItems(updated);
-    try {
-      localStorage.setItem("local_cart", JSON.stringify(updated));
-    } catch (e) {
-      console.error("Failed to save local cart to localStorage", e);
-    }
-  };
+    return backendCart.items.map((item) => ({
+      id: item.id, // Database CartItem ID
+      productId: item.productId,
+      name: item.product?.name || "Unknown Product",
+      price: item.variant
+        ? item.variant.discountPrice &&
+          Number(item.variant.discountPrice) > 0 &&
+          Number(item.variant.discountPrice) < Number(item.variant.price)
+          ? Number(item.variant.discountPrice)
+          : Number(item.variant.price)
+        : item.product?.discountPrice &&
+            Number(item.product.discountPrice) > 0 &&
+            Number(item.product.discountPrice) < Number(item.product.price)
+          ? Number(item.product.discountPrice)
+          : Number(item.product?.price || 0),
+      image: item.variant?.image || item.product?.image || "",
+      quantity: item.quantity,
+      size: item.size || undefined,
+      color: item.color || undefined,
+      variant: item.variant || undefined,
+    }));
+  }, [backendCart]);
 
   const addItem = async (
     item: Omit<CartItem, "quantity" | "productId"> & {
@@ -116,6 +91,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       variantId?: string;
     },
   ) => {
+    if (!checkAuth()) {
+      toast.error("Please log in to add items to the cart");
+      return;
+    }
+
     const qtyToAdd = item.quantity ?? 1;
     try {
       await addToCartMutation.mutateAsync({
@@ -128,55 +108,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.success("Added to bag");
       openCart();
     } catch (err: any) {
-      // Fallback local cart storage if user is not logged in or request fails
-      const existingIdx = localItems.findIndex(
-        (i) =>
-          i.productId === item.id &&
-          i.size === item.size &&
-          i.color === item.color,
-      );
-      let updated: CartItem[];
-      if (existingIdx > -1) {
-        updated = [...localItems];
-        updated[existingIdx] = {
-          ...updated[existingIdx],
-          quantity: updated[existingIdx].quantity + qtyToAdd,
-        };
-      } else {
-        const newItem: CartItem = {
-          id: `local-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-          productId: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          quantity: qtyToAdd,
-          size: item.size,
-          color: item.color,
-        };
-        updated = [...localItems, newItem];
-      }
-      saveLocalCart(updated);
-      toast.success("Added to bag");
-      openCart();
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to add item to bag";
+      toast.error(errorMessage);
     }
   };
 
   // Remove item
   const removeItem = async (id: string) => {
-    if (id.startsWith("local-")) {
-      const updated = localItems.filter((i) => i.id !== id);
-      saveLocalCart(updated);
-      toast.success("Removed from bag");
-      return;
-    }
-
     try {
       await removeCartItemMutation.mutateAsync(id);
       toast.success("Removed from bag");
     } catch (err: any) {
-      const updated = localItems.filter((i) => i.id !== id);
-      saveLocalCart(updated);
-      toast.success("Removed from bag");
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to remove item from bag";
+      toast.error(errorMessage);
     }
   };
 
@@ -186,33 +136,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return removeItem(id);
     }
 
-    if (id.startsWith("local-")) {
-      const updated = localItems.map((i) =>
-        i.id === id ? { ...i, quantity } : i,
-      );
-      saveLocalCart(updated);
-      return;
-    }
-
     try {
       await updateCartItemMutation.mutateAsync({ itemId: id, quantity });
     } catch (err: any) {
-      const updated = localItems.map((i) =>
-        i.id === id ? { ...i, quantity } : i,
-      );
-      saveLocalCart(updated);
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to update quantity";
+      toast.error(errorMessage);
     }
   };
 
   // Clear cart
   const clearCart = () => {
-    saveLocalCart([]);
     clearCartMutation.mutate(undefined, {
       onSuccess: () => {
         toast.success("Bag cleared");
       },
-      onError: () => {
-        toast.success("Bag cleared");
+      onError: (err: any) => {
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to clear bag";
+        toast.error(errorMessage);
       },
     });
   };
@@ -238,7 +184,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         itemCount,
         subtotal,
-        isLoading,
+        isLoading: isCartLoading,
       }}
     >
       {children}

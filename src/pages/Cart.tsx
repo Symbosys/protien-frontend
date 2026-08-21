@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import { Minus, Plus, X, ArrowRight, ShoppingBag, Loader2 } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, subtotal, itemCount } = useCart();
+  const { items, removeItem, updateQuantity, subtotal, itemCount, isLoading } = useCart();
+  const { isAuthenticated } = useAuth();
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
 
   const shipping = subtotal > 1500 ? 0 : 100;
@@ -31,7 +33,12 @@ export default function CartPage() {
             Shopping Bag
           </h1>
 
-          {items.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-16 bg-white border border-gray-200 rounded-xl p-8 shadow-sm flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="h-8 w-8 text-black animate-spin mx-auto" />
+              <p className="text-sm text-gray-500 font-medium">Loading your bag...</p>
+            </div>
+          ) : items.length === 0 ? (
             <div className="text-center py-16 bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
               <ShoppingBag className="h-16 w-16 mx-auto text-gray-300 mb-4 stroke-[1]" />
               <h2 className="text-xl font-display text-black mb-2 tracking-wide">
@@ -187,13 +194,13 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  {!(typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"))) && (
+                  {!isAuthenticated && (
                     <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-medium text-center">
                       Please log in first to process your order and proceed to checkout.
                     </div>
                   )}
 
-                  {typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token")) ? (
+                  {isAuthenticated ? (
                     <Link
                       to="/checkout"
                       className="flex items-center justify-center w-full py-4 bg-black text-white text-[10px] uppercase tracking-[0.2em] hover:bg-[#d4af37] transition-colors group"

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, ShoppingBag, Loader2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -14,7 +15,9 @@ export default function CartDrawer() {
     updateQuantity,
     subtotal,
     itemCount,
+    isLoading,
   } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
 
@@ -68,7 +71,12 @@ export default function CartDrawer() {
             </div>
 
             {/* Content */}
-            {items.length === 0 ? (
+            {isLoading ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white space-y-3">
+                <Loader2 className="h-8 w-8 text-black animate-spin" />
+                <p className="text-sm text-gray-500 font-medium">Loading your bag...</p>
+              </div>
+            ) : items.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white">
                 <ShoppingBag className="h-16 w-16 text-gray-300 mb-4" />
                 <p className="text-lg font-medium mb-2 text-black">Your bag is empty</p>
@@ -164,14 +172,14 @@ export default function CartDrawer() {
                     Shipping and taxes calculated at checkout
                   </p>
 
-                  {!(typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token"))) && (
+                  {!isAuthenticated && (
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 font-medium text-center">
                       Please log in first to process your order.
                     </div>
                   )}
 
                   <div className="space-y-3">
-                    {typeof window !== "undefined" && (!!localStorage.getItem("user_token") || !!localStorage.getItem("token")) ? (
+                    {isAuthenticated ? (
                       <Button variant="hero" className="w-full bg-black hover:bg-black/90 text-white" size="lg" asChild>
                         <Link to="/checkout" onClick={closeCart}>
                           Checkout

@@ -1,10 +1,12 @@
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ShoppingBag, Plus, Minus, X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 /**
  * Unified product shape accepted by ProductCard.
@@ -54,6 +56,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
+  const { checkAuth } = useAuth();
 
   // Variant selector states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -66,6 +69,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+
+    if (!checkAuth()) {
+      toast.error("Please log in to add items to the cart");
+      return;
+    }
 
     if (product.variants && product.variants.length > 0) {
       setSelectedVariantId(product.variants[0].id);

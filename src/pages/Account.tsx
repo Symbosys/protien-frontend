@@ -20,6 +20,7 @@ import MainLayout from '@/components/layout/MainLayout';
 
 import { useUserQuery, useUpdateUserMutation } from '@/api/hooks/user.hooks';
 import { useLogoutMutation } from '@/api/hooks/auth.hooks';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const quickLinks = [
@@ -35,20 +36,12 @@ export default function AccountPage() {
   const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const updateUserMutation = useUpdateUserMutation();
+  const { user: authUser, logout: authLogout, isAuthenticated, isLoaded } = useAuth();
 
-  const localUser = useMemo(() => {
-    try {
-      const userString = localStorage.getItem('user');
-      return userString ? JSON.parse(userString) : null;
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const userId = localUser?.id || '';
+  const userId = authUser?.id || '';
 
   const { data: userProfileData, isLoading: isLoadingProfile } = useUserQuery(userId, !!userId);
-  const user = userProfileData?.data || localUser;
+  const user = userProfileData?.data || authUser;
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -56,10 +49,10 @@ export default function AccountPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
-    if (!localStorage.getItem('user_token')) {
+    if (isLoaded && !isAuthenticated) {
       navigate('/login');
     }
-  }, [navigate]);
+  }, [isLoaded, isAuthenticated, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -76,10 +69,7 @@ export default function AccountPage() {
     } catch (err) {
       console.error('Logout error on backend:', err);
     }
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('adminToken');
+    authLogout();
     navigate('/login');
   };
 
