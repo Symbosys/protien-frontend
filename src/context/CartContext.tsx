@@ -6,8 +6,9 @@ import {
   useAddToCartMutation,
   useUpdateCartItemMutation,
   useRemoveCartItemMutation,
-  useClearCartMutation
+  useClearCartMutation,
 } from '@/api/hooks/cart.hooks';
+import { showLoginRequiredToast } from '@/lib/loginToast';
 
 export interface CartItem {
   id: string; // CartItem UUID from DB
@@ -92,7 +93,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     },
   ) => {
     if (!checkAuth()) {
-      toast.error("Please log in to add items to the cart");
+      showLoginRequiredToast();
       return;
     }
 

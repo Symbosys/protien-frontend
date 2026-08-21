@@ -7,6 +7,7 @@ import { Heart, ShoppingBag, Plus, Minus, X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { showLoginRequiredToast } from "@/lib/loginToast";
 
 /**
  * Unified product shape accepted by ProductCard.
@@ -71,7 +72,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault();
 
     if (!checkAuth()) {
-      toast.error("Please log in to add items to the cart");
+      showLoginRequiredToast();
       return;
     }
 

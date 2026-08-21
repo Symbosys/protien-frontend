@@ -8,6 +8,7 @@ import ProductCard from "@/components/product/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/hooks/useAuth";
+import { showLoginRequiredToast } from "@/lib/loginToast";
 import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
 import {
@@ -368,6 +369,7 @@ export default function ProductDetail() {
 
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
+  const { checkAuth } = useAuth();
   const [isAdding, setIsAdding] = useState(false);
 
   if (isLoading) {
@@ -1025,6 +1027,10 @@ export default function ProductDetail() {
                   <button
                     disabled={isAdding || !product.inStock}
                     onClick={async () => {
+                      if (!checkAuth()) {
+                        showLoginRequiredToast();
+                        return;
+                      }
                       setIsAdding(true);
                       try {
                         const firstSize =
@@ -1496,6 +1502,10 @@ export default function ProductDetail() {
         <button
           disabled={isAdding || !product.inStock}
           onClick={async () => {
+            if (!checkAuth()) {
+              showLoginRequiredToast();
+              return;
+            }
             setIsAdding(true);
             try {
               const firstSize =

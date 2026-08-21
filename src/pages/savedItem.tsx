@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/hooks/useAuth';
-
-import { toast } from 'sonner';
+import { showLoginRequiredToast } from '@/lib/loginToast';
 
 const SavedItems = () => {
     const { items, removeItem } = useWishlist();
@@ -17,7 +16,7 @@ const SavedItems = () => {
 
     const handleMoveToBag = async (item: typeof items[0]) => {
         if (!checkAuth()) {
-            toast.error("Please log in to add items to the cart");
+            showLoginRequiredToast();
             return;
         }
 
