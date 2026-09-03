@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import { apiClient } from "../apiclient/apiClient";
 
 export interface DBAttributeValue {
@@ -184,12 +189,48 @@ export const productKeys = {
   all: ["products"] as const,
   list: (params?: GetProductsParams) =>
     [...productKeys.all, "list", params] as const,
+  infiniteList: (params?: Omit<GetProductsParams, "page">) =>
+    [...productKeys.all, "infinite-list", params] as const,
   detail: (id: string) => [...productKeys.all, "detail", id] as const,
 };
 
 // ---------------------------------------------------------------------------
 // Queries
 // ---------------------------------------------------------------------------
+
+/**
+ * GET /product (Infinite scroll)
+ * Fetch paginated products using TanStack Query useInfiniteQuery.
+ */
+export const useInfiniteProductsQuery = (
+  params?: Omit<GetProductsParams, "page">,
+  enabled = true,
+) => {
+  return useInfiniteQuery({
+    queryKey: productKeys.infiniteList(params),
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await apiClient.get<{
+        success: boolean;
+        data: ProductsResponse;
+      }>("/product", {
+        params: {
+          ...params,
+          page: pageParam,
+        },
+      });
+      return response.data.data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || !lastPage.pagination) return undefined;
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+};
 
 /**
  * GET /product

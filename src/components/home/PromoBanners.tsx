@@ -10,7 +10,7 @@ const banners = [
     subtitle: "START FROM",
     price: "₹2099",
     cta: "Shop Now",
-    link: "/products?category=Whey Protein",
+    link: "/products?category=Whey+protein",
     bgImage:
       "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1200&auto=format&fit=crop",
     dark: true,
@@ -21,7 +21,7 @@ const banners = [
     subtitle: "NOW AVAILABLE",
     price: "₹5439",
     cta: "Shop Now",
-    link: "/products?category=Whey Protein Isolate",
+    link: "/products?category=isolate-whey-protein",
     bgImage:
       "https://images.unsplash.com/photo-1594882645126-14020914d58d?w=1200&auto=format&fit=crop",
     dark: true,

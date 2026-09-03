@@ -1,29 +1,15 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { SlidersHorizontal, ChevronDown, Plus, Minus, X } from "lucide-react";
+import { useBrandsQuery } from "@/api/hooks/brand.hooks";
+import { useCategoriesQuery } from "@/api/hooks/category.hooks";
+import { useInfiniteProductsQuery } from "@/api/hooks/product.hooks";
 import MainLayout from "@/components/layout/MainLayout";
 import ProductCard from "@/components/product/ProductCard";
-import {
-  products as mockProducts,
-  categories as mockCategories,
-} from "@/data/products";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useCategoriesQuery } from "@/api/hooks/category.hooks";
-import { useProductsQuery } from "@/api/hooks/product.hooks";
-import { useBrandsQuery } from "@/api/hooks/brand.hooks";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { AnimatePresence, motion } from "framer-motion";
+import { Loader2, Minus, Plus, SlidersHorizontal, X } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const sortOptions = [
   { value: "newest", label: "Newest" },
@@ -64,14 +50,18 @@ export default function ProductsPage() {
     searchParams.get("query") ||
     searchParams.get("searchQuery");
   const sort = searchParams.get("sort") || "newest";
-  const currentPage = Math.max(1, Number(searchParams.get("page") || "1"));
 
   // Fetch from backend
   const { data: categoriesData, isLoading: isCategoriesLoading } =
     useCategoriesQuery({ limit: 1000 });
   const { data: brandsData } = useBrandsQuery({ limit: 100 });
-  const { data: productsData, isLoading: isProductsLoading } = useProductsQuery({
-    page: currentPage,
+  const {
+    data: productsData,
+    isLoading: isProductsLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteProductsQuery({
     limit: 20,
     category: selectedCategory || undefined,
     subCategory: selectedSubcategory || undefined,
@@ -113,10 +103,16 @@ export default function ProductsPage() {
     return [];
   }, [categoriesData]);
 
+  // Flatten products across all loaded pages
+  const allProducts = useMemo(() => {
+    if (!productsData?.pages) return [];
+    return productsData.pages.flatMap((page) => page?.products || []);
+  }, [productsData]);
+
   // Resolve active products list directly from server data
   const displayProducts = useMemo(() => {
-    if (productsData?.products && productsData.products.length > 0) {
-      return productsData.products.map((dbP: any) => {
+    if (allProducts.length > 0) {
+      return allProducts.map((dbP: any) => {
         const p = Number(dbP.price) || 0;
         const dp = dbP.discountPrice ? Number(dbP.discountPrice) : 0;
         let sellingPrice = p;
@@ -160,13 +156,12 @@ export default function ProductsPage() {
         };
       });
     }
-    // Fallback to mock products if backend returns empty initial mock state
+    // Fallback to empty array if no products found
     return [];
-  }, [productsData]);
+  }, [allProducts]);
 
-  const totalItems = productsData?.pagination?.total ?? displayProducts.length;
-  const totalPages = productsData?.pagination?.totalPages ?? 1;
-  const page = productsData?.pagination?.page ?? currentPage;
+  const totalItems =
+    productsData?.pages?.[0]?.pagination?.total ?? displayProducts.length;
 
   const updateFilter = (key: string, value: string | null) => {
     const newParams = new URLSearchParams(searchParams);
@@ -175,7 +170,7 @@ export default function ProductsPage() {
     } else {
       newParams.delete(key);
     }
-    // Reset page to 1 on filter change
+    // Reset page on filter change
     newParams.delete("page");
     setSearchParams(newParams);
   };
@@ -184,15 +179,32 @@ export default function ProductsPage() {
     setSearchParams({});
   };
 
-  const goToPage = (p: number) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (p > 1) {
-      newParams.set("page", String(p));
-    } else {
-      newParams.delete("page");
-    }
-    setSearchParams(newParams);
-  };
+  // Intersection Observer for infinite scrolling
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = observerTarget.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "350px", // Trigger earlier before user reaches the very bottom
+        threshold: 0,
+      },
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.unobserve(target);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <MainLayout>
@@ -321,10 +333,59 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : displayProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
-              {displayProducts.map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
+            <div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
+                {displayProducts.map((product, index) => (
+                  <ProductCard
+                    key={`${product.id}-${index}`}
+                    product={product}
+                    index={index}
+                  />
+                ))}
+              </div>
+
+              {/* Skeletons when fetching next page */}
+              {isFetchingNextPage && (
+                <div className="mt-6 md:mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={`skeleton-more-${i}`}
+                      className="bg-white border border-[#E5D5B5]/60 rounded overflow-hidden p-4 space-y-4 animate-pulse h-[340px] flex flex-col justify-between shadow-sm"
+                    >
+                      <div className="aspect-square bg-gray-200 rounded-lg w-full" />
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      </div>
+                      <div className="h-8 bg-gray-200 rounded w-full mt-2" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Sentinel target for Intersection Observer */}
+              <div
+                ref={observerTarget}
+                className="h-10 w-full"
+                aria-hidden="true"
+              />
+
+              {/* Loading spinner indicator */}
+              {isFetchingNextPage && (
+                <div className="mt-4 pb-4 flex justify-center items-center gap-2 text-xs uppercase tracking-widest text-[#8A1B28] font-bold">
+                  <Loader2 className="h-4 w-4 animate-spin text-[#8A1B28]" />
+                  <span>Loading more products...</span>
+                </div>
+              )}
+
+              {/* End of list indicator */}
+              {!hasNextPage && (
+                <div className="mt-12 py-8 border-t border-[#E5D5B5]/60 text-center">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                    You've viewed all {totalItems} products
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-20 bg-background border border-border rounded p-6">
@@ -340,67 +401,6 @@ export default function ProductsPage() {
               >
                 Clear all filters
               </button>
-            </div>
-          )}
-
-          {/* Server Pagination */}
-          {!isProductsLoading && totalPages > 1 && (
-            <div className="mt-12 flex justify-center items-center">
-              <Pagination>
-                <PaginationContent>
-                  {page > 1 && (
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          goToPage(page - 1);
-                        }}
-                      />
-                    </PaginationItem>
-                  )}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(
-                      (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2,
-                    )
-                    .map((p, index, array) => {
-                      const prevPage = array[index - 1];
-                      const hasGap = prevPage && p - prevPage > 1;
-                      return (
-                        <React.Fragment key={p}>
-                          {hasGap && (
-                            <PaginationItem>
-                              <PaginationEllipsis />
-                            </PaginationItem>
-                          )}
-                          <PaginationItem>
-                            <PaginationLink
-                              href="#"
-                              isActive={p === page}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                goToPage(p);
-                              }}
-                            >
-                              {p}
-                            </PaginationLink>
-                          </PaginationItem>
-                        </React.Fragment>
-                      );
-                    })}
-                  {page < totalPages && (
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          goToPage(page + 1);
-                        }}
-                      />
-                    </PaginationItem>
-                  )}
-                </PaginationContent>
-              </Pagination>
             </div>
           )}
         </div>
