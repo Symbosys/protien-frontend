@@ -6,6 +6,7 @@ import { apiClient } from "@/api/apiclient/apiClient";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { categories as mockCategories } from "@/data/products";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -38,12 +39,17 @@ export default function Header() {
 
   const { data: categoriesData } = useCategoriesQuery({ limit: 1000 });
 
-  // Query dynamic products live from backend when search input >= 2 chars
+  // Query dynamic products live from backend after the user stops typing.
   const trimmedSearch = searchVal.trim();
+  const debouncedSearch = useDebouncedValue(trimmedSearch);
+  const isSearchPending =
+    trimmedSearch.length >= 2 && trimmedSearch !== debouncedSearch;
   const { data: searchResultsData, isLoading: isSearchLoading } =
     useProductsQuery(
-      { search: trimmedSearch, limit: 6 },
-      trimmedSearch.length >= 2 && (isSearchFocused || isMobileSearchFocused),
+      { search: debouncedSearch, limit: 6 },
+      trimmedSearch.length >= 2 &&
+        debouncedSearch.length >= 2 &&
+        (isSearchFocused || isMobileSearchFocused),
     );
 
   const searchProducts = searchResultsData?.products || [];
@@ -324,7 +330,7 @@ export default function Header() {
                       transition={{ duration: 0.15 }}
                       className="absolute top-full right-0 mt-2 w-[320px] xl:w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 p-2"
                     >
-                      {isSearchLoading ? (
+                      {isSearchLoading || isSearchPending ? (
                         <div className="p-4 text-center text-xs font-semibold text-gray-400 flex items-center justify-center gap-2">
                           <div className="w-4 h-4 border-2 border-gray-300 border-t-[#8CFF64] rounded-full animate-spin" />
                           Searching products...
@@ -556,7 +562,7 @@ export default function Header() {
                     {/* Mobile Live Results */}
                     {isMobileSearchFocused && searchVal.trim().length >= 2 && (
                       <div className="mt-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 max-h-[260px] overflow-y-auto">
-                        {isSearchLoading ? (
+                        {isSearchLoading || isSearchPending ? (
                           <div className="p-3 text-center text-xs text-gray-400">
                             Searching...
                           </div>

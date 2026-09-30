@@ -6,6 +6,7 @@ import ProductCard from "@/components/product/ProductCard";
 import { useCategoriesQuery } from "@/api/hooks/category.hooks";
 import { useProductsQuery } from "@/api/hooks/product.hooks";
 import { apiClient } from "@/api/apiclient/apiClient";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,11 +14,15 @@ export default function SearchPage() {
   const initialQuery =
     searchParams.get("q") || searchParams.get("search") || "";
   const [query, setQuery] = useState(initialQuery);
+  const trimmedQuery = query.trim();
+  const debouncedQuery = useDebouncedValue(trimmedQuery);
+  const isSearchPending =
+    trimmedQuery.length > 0 && trimmedQuery !== debouncedQuery;
 
   const { data: categoriesData } = useCategoriesQuery({ limit: 50 });
   const { data: productsData, isLoading } = useProductsQuery(
-    { search: query.trim(), limit: 50 },
-    query.trim().length >= 2,
+    { search: debouncedQuery, limit: 50 },
+    trimmedQuery.length > 0 && debouncedQuery.length > 0,
   );
 
   const processImageUrl = (url: any) => {
@@ -135,7 +140,7 @@ export default function SearchPage() {
           </div>
 
           {/* Results or Suggestions */}
-          {query.trim().length < 2 ? (
+          {query.trim().length === 0 ? (
             <div className="max-w-2xl mx-auto">
               <div className="mb-8">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4">
@@ -186,7 +191,7 @@ export default function SearchPage() {
             <>
               <div className="mb-8 flex items-center justify-between">
                 <p className="text-muted-foreground">
-                  {isLoading
+                  {isLoading || isSearchPending
                     ? "Searching backend products..."
                     : `${searchResults.length} results for "${query}"`}
                 </p>
@@ -200,7 +205,7 @@ export default function SearchPage() {
                 )}
               </div>
 
-              {isLoading ? (
+              {isLoading || isSearchPending ? (
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-4 border-[#8CFF64] border-t-transparent rounded-full animate-spin" />
                 </div>
