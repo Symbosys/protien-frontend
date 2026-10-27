@@ -1,7 +1,10 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://protien-backend.vercel.app/api";
-// const API_BASE_URL = "http://localhost:4000/api";
+// In browser, use same-origin "/api" proxy to eliminate CORS errors across any domain (www / non-www).
+// Fallback to backend URL if running server-side.
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== "undefined" ? "/api" : "https://protien-backend.vercel.app/api");
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
