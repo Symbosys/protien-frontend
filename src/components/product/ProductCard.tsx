@@ -47,6 +47,7 @@ export interface ProductCardItem {
   }[];
 }
 
+
 interface ProductCardProps {
   product: ProductCardItem;
   index?: number;
@@ -54,6 +55,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
@@ -185,11 +187,24 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
-      className="bg-white border border-[#E5D5B5]/60 hover:border-[#8A1B28]/40 hover:shadow-medium transition-all duration-300 rounded overflow-hidden flex flex-col justify-between h-full"
+      className="bg-white border border-[#E5D5B5]/60 hover:border-[#8A1B28]/40 hover:shadow-medium transition-all duration-300 rounded overflow-hidden flex flex-col justify-between h-full relative"
     >
+      {/* Instant Feedback Loading Overlay when redirecting to product details */}
+      {isNavigating && (
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px] z-30 flex flex-col items-center justify-center gap-2.5 transition-all">
+          <div className="relative flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full border-3 border-gray-200 border-t-[#8CFF64] border-r-[#5BBF3D] animate-spin shadow-sm" />
+          </div>
+          <span className="text-[11px] font-bold text-gray-800 tracking-wider">
+            Opening Product...
+          </span>
+        </div>
+      )}
+
       <Link
         to={`/product/${product.id}`}
         className="group block flex-1"
+        onClick={() => setIsNavigating(true)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

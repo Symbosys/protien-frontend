@@ -372,15 +372,46 @@ export default function ProductDetail() {
   const { checkAuth } = useAuth();
   const [isAdding, setIsAdding] = useState(false);
 
-  if (isLoading) {
+  if (isLoading || !productId || (!dbProduct && !mockProduct)) {
+    // Show "Product Not Found" only after loading finishes and product is confirmed missing
+    if (!isLoading && productId && !dbProduct && !mockProduct) {
+      return (
+        <MainLayout>
+          <div className="min-h-[60vh] flex flex-col items-center justify-center pt-24 pb-16 px-4 text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-4 border border-red-100">
+              <AlertCircle className="h-8 w-8" />
+            </div>
+            <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">
+              Product Not Found
+            </h1>
+            <p className="text-sm text-gray-600 mb-6 max-w-md">
+              The product you are looking for might have been moved or is no
+              longer available.
+            </p>
+            <Link
+              to="/products"
+              className="px-6 py-2.5 bg-[#8CFF64] hover:bg-[#7be654] text-black text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all"
+            >
+              Back to Products
+            </Link>
+          </div>
+        </MainLayout>
+      );
+    }
+
     return (
       <MainLayout>
-        <div className="min-h-[60vh] flex flex-col items-center justify-center pt-24 pb-16 px-4">
-          <Loader2 className="h-10 w-10 text-[#8A1B28] animate-spin mb-4" />
-          <h2 className="font-display text-xl font-bold text-gray-800">
+        <div className="min-h-[75vh] flex flex-col items-center justify-center pt-28 pb-16 px-4 bg-[#FDFBF7]">
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="absolute w-20 h-20 rounded-full bg-[#8CFF64]/25 animate-ping" />
+            <div className="w-14 h-14 rounded-full border-4 border-gray-200 border-t-[#8CFF64] border-r-[#5BBF3D] animate-spin shadow-md" />
+          </div>
+          <h2 className="font-display text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
             Loading Product Details...
           </h2>
-          <p className="text-xs text-gray-500 mt-1">Please wait a moment</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-2 font-medium">
+            Please wait a moment while we fetch the latest details and prices.
+          </p>
         </div>
       </MainLayout>
     );
@@ -390,7 +421,7 @@ export default function ProductDetail() {
     return (
       <MainLayout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center pt-24 pb-16 px-4 text-center">
-          <div className="w-16 h-16 bg-red-50 text-[#8A1B28] rounded-full flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-4 border border-red-100">
             <AlertCircle className="h-8 w-8" />
           </div>
           <h1 className="font-display text-2xl font-bold text-gray-900 mb-2">
@@ -402,7 +433,7 @@ export default function ProductDetail() {
           </p>
           <Link
             to="/products"
-            className="px-6 py-2.5 bg-[#8A1B28] hover:bg-[#721620] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all"
+            className="px-6 py-2.5 bg-[#8CFF64] hover:bg-[#7be654] text-black text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all"
           >
             Back to Products
           </Link>
