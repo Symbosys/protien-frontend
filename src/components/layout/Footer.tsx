@@ -296,7 +296,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <div className="w-full md:w-1/2 text-left md:text-right flex items-center md:justify-end">
+            {/* <div className="w-full md:w-1/2 text-left md:text-right flex items-center md:justify-end">
               <div>
                 <p className="font-semibold tracking-wide text-white/60 flex items-center gap-2 justify-end">
                   Developed By
@@ -310,7 +310,7 @@ export default function Footer() {
                   </a>
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
