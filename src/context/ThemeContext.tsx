@@ -25,7 +25,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+
   
+
   // Only apply theme to DOM after hydration is complete
   useEffect(() => {
     if (!mounted) return;
