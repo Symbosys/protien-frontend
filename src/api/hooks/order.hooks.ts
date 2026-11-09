@@ -44,6 +44,10 @@ export interface DBOrder {
   cashfreePaymentId?: string | null;
   deliveredAt: string | null;
   cancelledAt: string | null;
+  ithinklogisticsOrderId?: string | null;
+  ithinklogisticsShipmentId?: string | null;
+  waybill?: string | null;
+  returnReason?: string | null;
   createdAt: string;
   updatedAt: string;
   items: DBOrderItem[];
@@ -169,8 +173,60 @@ export const useCancelOrderMutation = () => {
       );
       return response.data.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(data.id) });
+    },
+  });
+};
+
+export interface ReturnOrderInput {
+  orderId: string;
+  returnReason: string;
+}
+
+export const useReturnOrderMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DBOrder, Error, ReturnOrderInput>({
+    mutationFn: async ({ orderId, returnReason }) => {
+      const response = await apiClient.put<{ success: boolean; data: DBOrder }>(
+        `/order/${orderId}/return`,
+        { returnReason }
+      );
+      return response.data.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(data.id) });
+    },
+  });
+};
+
+export interface UpdateOrderAddressInput {
+  orderId: string;
+  shippingName?: string;
+  shippingPhone?: string;
+  shippingAddress?: string;
+  shippingCity?: string;
+  shippingState?: string;
+  shippingPincode?: string;
+}
+
+export const useUpdateOrderAddressMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DBOrder, Error, UpdateOrderAddressInput>({
+    mutationFn: async ({ orderId, ...addressData }) => {
+      const response = await apiClient.put<{ success: boolean; data: DBOrder }>(
+        `/order/${orderId}/address`,
+        addressData
+      );
+      return response.data.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      queryClient.invalidateQueries({ queryKey: orderKeys.detail(data.id) });
     },
   });
 };
