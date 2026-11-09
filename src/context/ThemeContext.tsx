@@ -8,7 +8,6 @@ interface ThemeContextType {
   setTheme: (theme: Theme) => void;
 }
 
-
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -26,6 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  
   // Only apply theme to DOM after hydration is complete
   useEffect(() => {
     if (!mounted) return;
