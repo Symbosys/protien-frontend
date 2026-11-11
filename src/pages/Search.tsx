@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Search, X, ArrowRight } from "lucide-react";

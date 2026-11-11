@@ -56,10 +56,17 @@ export const useNavigate = () => {
 
 export const useLocation = () => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [search, setSearch] = React.useState("");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSearch(window.location.search || "");
+    }
+  }, [pathname]);
+
   return {
     pathname: pathname || "/",
-    search: searchParams ? `?${searchParams.toString()}` : "",
+    search,
     hash: "",
     state: null,
   };

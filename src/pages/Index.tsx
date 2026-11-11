@@ -1,3 +1,5 @@
+"use client";
+
 import BrandPartners from '@/components/home/BrandPartners';
 import CategoryGrid from '@/components/home/CategoryGrid';
 import FeaturedProducts from '@/components/home/FeaturedProducts';

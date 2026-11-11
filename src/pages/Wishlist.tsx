@@ -1,3 +1,5 @@
+"use client";
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ShoppingBag, X, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';

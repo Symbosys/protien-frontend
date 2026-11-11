@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Minus, Plus, X, ArrowRight, ShoppingBag, Loader2 } from "lucide-react";

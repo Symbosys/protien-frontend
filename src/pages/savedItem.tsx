@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Trash2, ArrowRight, Heart, AlertCircle } from 'lucide-react';
